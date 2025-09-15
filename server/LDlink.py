@@ -51,7 +51,7 @@ import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command
 import zipfile
 import shutil
-from Cleanup import schedule_tmp_cleanup
+from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
 # from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
 
@@ -639,6 +639,10 @@ def send_temp_file(filename):
     else:
         return send_from_directory(tmp_dir, filename)
 
+@app.route("/LDlinkRestWeb/tmp/uploads/<reference>/<filename>", strict_slashes=False)
+@app.route("/tmp/uploads/<reference>/<filename>", strict_slashes=False)
+def send_temp_file_reference(reference, filename):
+    return send_from_directory(os.path.join(tmp_dir, "uploads", reference), filename)
 
 @app.route("/LDlinkRestWeb/zip", methods=["POST"])
 def zip_files():
@@ -647,14 +651,21 @@ def zip_files():
 
     try:
         filenames = request.json.get("files", [])
-        app.logger.debug(f"Creating zip with {len(filenames)} files")
+        reference = request.json.get("reference", None)
+        app.logger.debug(f"Creating zip with {len(filenames)} files, reference: {reference}")
 
         zip_filename = "files.zip"
-        zip_filepath = os.path.join(tmp_dir, zip_filename)
-        uploads_dir = os.path.join(tmp_dir, "uploads")
         ldscore_dir = os.path.join(param_list["data_dir"], "ldscore")
 
-        os.makedirs(uploads_dir, exist_ok=True)
+        # If reference is provided, use reference subfolder for both input files and zip
+        if reference:
+            uploads_dir = os.path.join(tmp_dir, "uploads", str(reference))
+            os.makedirs(uploads_dir, exist_ok=True)
+            zip_filepath = os.path.join(uploads_dir, zip_filename)
+        else:
+            uploads_dir = os.path.join(tmp_dir, "uploads")
+            os.makedirs(uploads_dir, exist_ok=True)
+            zip_filepath = os.path.join(tmp_dir, zip_filename)
 
         # List of known example files
         example_files = [
@@ -672,7 +683,7 @@ def zip_files():
                 if filename in example_files:
                     source_path = os.path.join(ldscore_dir, filename)
                     if os.path.exists(source_path):
-                        shutil.copy(source_path, upload_path)
+                        #shutil.copy(source_path, upload_path)
                         app.logger.info(f"Copied example file {source_path} to {upload_path}")
                     else:
                         app.logger.error(f"Example file {filename} not found in {ldscore_dir}")
@@ -693,7 +704,7 @@ def zip_files():
                 app.logger.debug(f"Added file to zip: {filename}")
 
         execution_time = round(time.time() - start_time, 2)
-        app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename}")
+        app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename} in {uploads_dir}")
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
     except Exception as e:
         app.logger.error(f"Zip file creation failed: {str(e)}")
@@ -1036,8 +1047,10 @@ def ldscore():
     )
 
     fileDir = f"/data/tmp/uploads/{reference}/"
+
+    
     # print(filename)
-    if filename and str(isExample).lower() != "true":
+    if filename:
         # Split by comma or semicolon (adjust as needed)
         filenames = [secure_filename(f.strip()) for f in filename.replace(";", ",").split(",")]
         for fname in filenames:
@@ -1051,9 +1064,15 @@ def ldscore():
                     file_chromo = part
                     break
 
+            app.logger.info(file_chromo)        
             if file_chromo:
                 # Find the file in the directory
                 pattern = os.path.join("/data/tmp/uploads/", f"*{file_chromo}.*")
+
+                if str(isExample).lower() == "true":
+                    pattern = os.path.join("/data/ldscore", f"*{file_chromo}.*")
+                    app.logger.info(pattern)
+
                 for file_path in glob.glob(pattern):
                     extension = file_path.split(".")[-1]
                     new_filename = f"{file_chromo}.{extension}"
@@ -1065,6 +1084,12 @@ def ldscore():
                     if os.path.abspath(file_path) != os.path.abspath(new_file_path):
                         shutil.copyfile(file_path, new_file_path)
                         app.logger.info(f"Copied {file_path} to {new_file_path}")
+                        try:
+                            if not str(isExample).lower() == "true":
+                                os.remove(file_path)
+                                app.logger.info(f"Deleted original file: {file_path}")
+                        except Exception as e:
+                            app.logger.error(f"Error deleting original file {file_path}: {e}")
                     else:
                         app.logger.debug(f"Skipped copying {file_path} to itself.")
                     # os.rename(file_path, new_file_path)
@@ -1108,6 +1133,7 @@ def ldscore():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger)
     return jsonify(out_json)
 
 
@@ -1228,15 +1254,41 @@ def ldherit():
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
-    fileDir = f"/data/tmp/uploads"
+    fileDir = f"/data/tmp/uploads/{reference}/"
     app.logger.debug(f"LDherit processing filename: {filename}")
+    # Copy file to reference subfolder and remove original
+    if filename:
+        filename = secure_filename(filename)
+        # Use /data/ldscore/ for example files
+        if str(isexample).lower() == "true":
+            src_path = os.path.join(param_list["data_dir"], "ldscore", filename)
+        else:
+            src_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+        dst_path = os.path.join(fileDir, filename)
+        os.makedirs(fileDir, exist_ok=True)
+        if os.path.abspath(src_path) != os.path.abspath(dst_path):
+            app.logger.info(f"Moving {src_path} to {dst_path}")
+            if not os.path.exists(src_path):
+                app.logger.error(f"Source file does not exist: {src_path}")
+            else:
+                try:
+                    shutil.copyfile(src_path, dst_path)
+                    app.logger.info(f"Copied {src_path} to {dst_path}")
+                    # Only remove if not example
+                    if str(isexample).lower() != "true":
+                        os.remove(src_path)
+                        app.logger.info(f"Deleted original file: {src_path}")
+                except Exception as e:
+                    app.logger.error(f"Error copying/removing file {src_path}: {e}")
+        else:
+            app.logger.debug(f"Skipped copying {src_path} to itself.")
     try:
         # Make an API call to the ldsc39_container
 
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(filename, pop, isexample)
+        result = run_herit_command( filename, fileDir, pop, isexample)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1267,6 +1319,7 @@ def ldherit():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger)
     return jsonify(out_json)
 
 
@@ -1368,11 +1421,37 @@ def ldcorrelation():
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
-    fileDir = f"/data/tmp/uploads"
+    fileDir = f"/data/tmp/uploads/{reference}/"
     app.logger.debug(f"LDcorrelation processing filename: {filename}")
+    # Copy both files to reference subfolder and remove originals
+    os.makedirs(fileDir, exist_ok=True)
+    for fname in [filename, filename2]:
+        if fname:
+            fname = secure_filename(fname)
+            # Use /data/ldscore/ for example files
+            if str(isexample).lower() == "true":
+                src_path = os.path.join(param_list["data_dir"], "ldscore", fname)
+            else:
+                src_path = os.path.join(app.config["UPLOAD_DIR"], fname)
+            dst_path = os.path.join(fileDir, fname)
+            if os.path.abspath(src_path) != os.path.abspath(dst_path):
+                if not os.path.exists(src_path):
+                    app.logger.error(f"Source file does not exist: {src_path}")
+                else:
+                    try:
+                        shutil.copyfile(src_path, dst_path)
+                        app.logger.info(f"Copied {src_path} to {dst_path}")
+                        # Only remove if not example
+                        if str(isexample).lower() != "true":
+                            os.remove(src_path)
+                            app.logger.info(f"Deleted original file: {src_path}")
+                    except Exception as e:
+                        app.logger.error(f"Error copying/removing file {src_path}: {e}")
+            else:
+                app.logger.debug(f"Skipped copying {src_path} to itself.")
     try:
         # Make an API call to the ldsc39_container
-        result = run_correlation_command(filename, filename2, pop, isexample)
+        result = run_correlation_command(filename, filename2, fileDir, pop, isexample)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1402,6 +1481,8 @@ def ldcorrelation():
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger)
     return jsonify(out_json)
 
 

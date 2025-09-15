@@ -218,11 +218,12 @@ export default function Heritability() {
                 />
                 {(exampleFilename || uploadedFilename) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                    <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
+                    <span style={{ fontWeight: 600 }}>Input file uploaded:{heritabilityResultRef}</span><br />
+
                     <a
                       href={exampleFilename
-                        ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
-                        : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
+                        ? `/LDlinkRestWeb/copy_and_download/${heritabilityResultRef}/${encodeURIComponent(exampleFilename)}`
+                        : `/LDlinkRestWeb/tmp/uploads/${heritabilityResultRef}/${encodeURIComponent(uploadedFilename)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       download

@@ -6,14 +6,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups,getOptionsFromKeys } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps } from "@/services/utils";
-import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
+import { parseSnps, getTissueOptionsFromKeys } from "@/services/utils";
+import { useRef } from "react";
+import { FormData, SubmitFormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
-export default function LDExpressForm() {
+export default function LDExpressForm({ params }: { params: SubmitFormData }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -45,7 +46,65 @@ export default function LDExpressForm() {
   const ldexpressFile = watch("ldexpressFile") as string | FileList;
   const r2_d = watch("r2_d");
 
+  const { data: tissues, isFetching } = useQuery({
+    queryKey: ["ldexpress_tissues"],
+    queryFn: () => ldexpressTissues(),
+  });
+//  console.log(tissues);
+
+  const autoSubmittedRef = useRef(false);
+
+  // Ensure tissues param is converted into an array of option objects
+  function makeTissuesArray(param: any) {
+    if (!param) return [];
+    if (Array.isArray(param)) {
+      return param.map((p) => (typeof p === "string" ? { value: p, label: p } : p));
+    }
+    if (typeof param === "string") {
+      if (param.toLowerCase() === "all") return [{ value: "all", label: "All Tissues" }];
+      // plus-separated ids
+      const codes = param.split("+");
+      if (tissues && Array.isArray((tissues as any).tissueInfo)) {
+        return getTissueOptionsFromKeys(param, tissues as any);
+      }
+      return codes.map((c) => ({ value: c, label: c }));
+    }
+    if (typeof param === "object") {
+      if ("value" in param) return [param];
+      if ("label" in param) return [{ value: (param as any).value || (param as any).label, label: (param as any).label }];
+    }
+    return [];
+  }
+
+    // Load form from URL params
   useEffect(() => {
+    // Wait until tissues API data is available so mapping works
+    if (params && Object.keys(params).length > 0 && params.pop && tissues && Array.isArray((tissues as any).tissueInfo)) {
+      const popArray = getOptionsFromKeys(params.pop);
+      // Normalize incoming params.tissues into a single string code or name
+      const rawTissueParam = Array.isArray(params.tissues)
+        ? (params.tissues[0] as any)?.value || (params.tissues[0] as any)?.label || params.tissues[0]
+        : (params.tissues as any);
+
+      const tissueOptions = getTissueOptionsFromKeys(rawTissueParam, tissues as any);
+      // Reset form with mapped options, then auto-submit once
+      const newForm = {
+        ...params,
+        pop: popArray,
+        tissues: tissueOptions,
+      } as FormData;
+    
+      reset(newForm);
+      // Ensure we only auto-submit once
+      if (!autoSubmittedRef.current) {
+        autoSubmittedRef.current = true;
+        // Small timeout to ensure reset has propagated to form state
+        setTimeout(() => onSubmit(newForm), 20);
+      }
+    }
+  }, [params, reset, tissues]);
+
+ useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
       const file = ldexpressFile[0];
       const reader = new FileReader();
@@ -58,12 +117,6 @@ export default function LDExpressForm() {
       reader.readAsText(file);
     }
   }, [ldexpressFile, setValue, reset]);
-
-  const { data: tissues, isFetching } = useQuery({
-    queryKey: ["ldexpress_tissues"],
-    queryFn: () => ldexpressTissues(),
-  });
-
   const tissueOptions = useMemo(() => {
     const options = tissues
       ? (tissues.tissueInfo as Tissue[]).map((e) => ({ value: e.tissueSiteDetailId, label: e.tissueSiteDetail }))
@@ -73,7 +126,6 @@ export default function LDExpressForm() {
     }
     return options;
   }, [tissues]);
-
   const submitForm = useMutation<Ldexpress, unknown, LdexpressFormData>({
     mutationFn: (params) => ldexpress(params),
     onSuccess: (_data, variables) => {
@@ -82,7 +134,6 @@ export default function LDExpressForm() {
       }
     },
   });
-
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const { ldexpressFile, ...data } = form;
@@ -97,12 +148,10 @@ export default function LDExpressForm() {
           ? (tissues.tissueInfo as Tissue[]).map((e) => e.tissueSiteDetailId).join("+")
           : data.tissues.map((e) => e.value).join("+"),
     };
-
     queryClient.setQueryData(["ldexpress-form-data", reference], formData);
     router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
-
   function onReset(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     router.push("/ldexpress");

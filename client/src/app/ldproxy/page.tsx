@@ -8,6 +8,7 @@ import { Container, Row, Col, Form } from "react-bootstrap";
 import LdProxyForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import { SubmitFormData } from "./types";
 
 const LdProxyResults = dynamic(() => import("./results"), {
   ssr: false,
@@ -16,6 +17,8 @@ const LdProxyResults = dynamic(() => import("./results"), {
 export default function LdProxy() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
+  const params = Object.fromEntries(searchParams.entries()) as unknown as SubmitFormData;
+     
 
   return (
     <>
@@ -27,7 +30,7 @@ export default function LdProxy() {
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
-            <LdProxyForm />
+            <LdProxyForm params={params}/>
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
               <Suspense fallback={<CalculateLoading />}>{ref && <LdProxyResults ref={ref} />}</Suspense>
             </ErrorBoundary>

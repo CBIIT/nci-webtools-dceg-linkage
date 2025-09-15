@@ -345,7 +345,7 @@ function formatSummarySection(section: string) {
   return [headerLine, ...rowLines].join('\n');
 }
 
-function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename, parsedTableText }: { result: string; filename?: string; inputFilename?: string; parsedTableText?: string }) {
+function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename, parsedTableText, reference }: { result: string; filename?: string; inputFilename?: string; parsedTableText?: string; reference?: string }) {
   const [zipping, setZipping] = useState(false);
   return (
     <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
@@ -369,7 +369,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
                 const res = await fetch('/LDlinkRestWeb/zip', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ files }),
+                  body: JSON.stringify({ files, reference }),
                 });
                 if (res.ok) {
                      const blob = await res.blob();
@@ -396,7 +396,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
             style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
             onClick={() => {
               const a = document.createElement('a');
-              a.href = `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(inputFilename)}`;
+              a.href = `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(inputFilename)}`;
               a.download = inputFilename;
               document.body.appendChild(a);
               a.click();
@@ -536,7 +536,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
       <Container style={{ maxWidth: 600 }}>
         <h5 style={{ fontWeight: 'bold' }}>Heritability Result</h5>
         <HeritabilityResultTable result={result} />
-        <DownloadOptionsPanel result={result} filename="heritability_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
+        <DownloadOptionsPanel result={result} filename="heritability_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} reference={reference} />
         <CollapsibleRawPanel result={result} title="Heritability Analysis Output" />
       </Container>
     );
@@ -557,7 +557,11 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         {renderKeyValueTable(parsed.gencorr || '')}
         <h5 style={{ fontWeight: 'bold' }} >Summary of Genetic Correlation Results</h5>
         {renderSummaryTable(parsed.summary || '')}
-        <DownloadOptionsPanel result={result} filename="genetic_correlation_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
+        <DownloadOptionsPanel result={result} 
+          filename="genetic_correlation_result.txt" 
+          inputFilename={inputFilename} 
+          parsedTableText={parsedTableText} 
+          reference={reference} />
         <CollapsibleRawPanel result={result} title="Genetic Correlation Output" />
       </Container>
     );
@@ -580,7 +584,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         {renderLdScoreTable(parsed.summary)}
         <h5 style={{ fontWeight: 'bold' }}>MAF/LD Score Correlation Matrix</h5>
         {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
-        <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
+        <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} reference={reference} />
         <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
       </Container>
     );
