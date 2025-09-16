@@ -66,7 +66,7 @@ export default function Home() {
                 <a href="https://cloud.nih.gov" target="_blank">
                   https://cloud.nih.gov
                 </a>
-                ) through the Other Transaction agreement [AWS&#123;*&#125;:&#123;*&#125; OT2OD027852]
+                ) through the Other Transaction agreement [AWS: OT2OD027852]
               </p>
               <p>
                 LDlink&apos;s{" "}
