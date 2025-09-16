@@ -74,7 +74,7 @@ export default function Home() {
                   source code
                 </a>{" "}
                 is available under the{" "}
-                <a href="license.txt" target="_blank">
+                <a href="/license.txt" target="_blank" rel="noopener noreferrer">
                   MIT license
                 </a>
                 , an{" "}
