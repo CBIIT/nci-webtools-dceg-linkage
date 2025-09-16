@@ -43,3 +43,18 @@
 	background: linear-gradient(145deg, #d4c9e5 , #c2b2da);
 	*/
 }
+
+/* Keep the two result columns on the same row and allow horizontal scroll on small viewports */
+.nowrap-scroll {
+  overflow-x: auto; /* allow horizontal scroll when columns don't fit */
+  -webkit-overflow-scrolling: touch; /* momentum scrolling for iOS */
+  display: flex; /* ensure child cols participate in flex layout */
+}
+
+.nowrap-scroll > .col,
+.nowrap-scroll > [class*="col-"] {
+  flex: 0 0 auto; /* prevent columns from shrinking or wrapping */
+}
+
+/* Slight spacing so the scroll isn't flush to the edges */
+.nowrap-scroll { padding-bottom: 0.5rem; }
