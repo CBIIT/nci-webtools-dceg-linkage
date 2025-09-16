@@ -10,8 +10,9 @@ const API_EXAMPLES = [
   {
     name: "LDexpress",
     link: "/help#LDexpress",
-    code: [`curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/ldexpress?token=faketoken123'`,
-           `curl -k -X GET '${BASE_URL}/LDlinkRest/ldexpressget?snps=rs3%0Ars4&pop=YRI&tissues=Adipose_Subcutaneous%2BAdipose_Visceral_Omentum&r2_d=r2&r2_d_threshold=0.1&p_threshold=0.1&window=500000&genome_build=grch37&token=faketoken123'`
+    code: [
+           `curl -k -X GET '${BASE_URL}/LDlinkRest/ldexpressget?snps=rs3%0Ars4&pop=YRI&tissues=Adipose_Subcutaneous%2BAdipose_Visceral_Omentum&r2_d=r2&r2_d_threshold=0.1&p_threshold=0.1&window=500000&genome_build=grch37&token=faketoken123'`,
+           `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/ldexpress?token=faketoken123'`
     ]
   },
   {
@@ -50,8 +51,8 @@ const API_EXAMPLES = [
   {
     name: "LDtrait",
     link: "/help#LDtrait",
-    code: [`curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/ldtrait?token=faketoken123'`,
-           `curl -k -X GET '${BASE_URL}/LDlinkRest/ldtraitget?snps=rs3&pop=YRI&r2_d=r2&r2_d_threshold=0.1&window=500000&genome_build=grch37&token=faketoken123'`
+    code: [`curl -k -X GET '${BASE_URL}/LDlinkRest/ldtraitget?snps=rs3&pop=YRI&r2_d=r2&r2_d_threshold=0.1&window=500000&genome_build=grch37&token=faketoken123'`,
+            `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/ldtrait?token=faketoken123'`
     ]
   },
   {
