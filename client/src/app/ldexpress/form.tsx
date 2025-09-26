@@ -230,7 +230,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
                 type="radio"
                 variant="outline-primary"
                 {...register("r2_d")}
-                title="Select pairwise value"
+                title="Select R-squared attribute"
                 value="r2"
                 checked={watch("r2_d") === "r2"}
                 onChange={() => {
@@ -243,7 +243,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
                 type="radio"
                 variant="outline-primary"
                 {...register("r2_d")}
-                title="Select pairwise value"
+                title="Select D-prime attribute"
                 value="d"
                 checked={watch("r2_d") === "d"}
                 onChange={() => {

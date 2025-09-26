@@ -153,9 +153,10 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
         for document in cursor:
             for z in range(0, len(document["data"])):
                 if((document["data"][z]["platform"] in platform_list or document["data"][z]["platform"].rstrip(' Array') in platform_list) and platform_query != ""):
-                    platforms.append(document["data"][z]["platform"])
+                    print("platform:", document["data"][z]["platform"])
+                    platforms.append(document["data"][z]["platform"].removesuffix(' Array'))
                 elif(platform_query == ""):
-                    platforms.append(document["data"][z]["platform"])
+                    platforms.append(document["data"][z]["platform"]).removesuffix(' Array')
         if(platforms == []):
             rs = snp_coords_sort[k][0]
             platform_NOT.append(rs)
