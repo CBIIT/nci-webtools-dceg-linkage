@@ -234,8 +234,9 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
                     message: "Value must be between 0 and 1",
                   },
                 })}
-                title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
+                title="Threshold must be a number between 0 and 1."
               />
+                <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
             </InputGroup>
             <Form.Label>Base pair window</Form.Label>
             <InputGroup>
@@ -258,7 +259,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
                 title="Value must be a number between 0 and 1,000,000"
               />
             </InputGroup>
-            <Form.Text className="text-danger">{errors?.r2_d_threshold?.message || errors?.window?.message}</Form.Text>
+            <Form.Text className="text-danger">{errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
         <Col s={12} sm={12} md={12} lg={3} xl={2} style={{ minWidth: "180px" }}>
