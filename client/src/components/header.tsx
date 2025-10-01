@@ -45,14 +45,15 @@ export function Header({ routes = [] }: HeaderProps) {
           <Row className="align-items-center">
             <Col xl="9" md="8" sm="12">
               <a rel="noopener noreferrer" href="https://cancercontrol.cancer.gov/">
-                <Image
+              <object data="/nci-logo/nci-jpsurv.svg" type="image/svg+xml" className="mw-100 ldlink-logo" style={{ width: "359.078px", height: "90px" }}></object>
+                {/* <Image
                   src="/images/NIH-LDlink-Logo.png"
                   alt="LDlink Logo"
                   className="mw-100 ldlink-logo"
                   width={359.078}
                   height={90}
                   unoptimized
-                />
+                /> */}
               </a>
             </Col>
 
