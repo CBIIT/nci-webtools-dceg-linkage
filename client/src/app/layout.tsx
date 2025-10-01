@@ -52,13 +52,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="keywords" content="ldlink" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <GoogleAnalytics id="G-JKSF0J7NH9" />
-        {/* <Script src="https://cbiit.github.io/nci-softwaresolutions-elements/components/include-html.js" /> */}
+        <Script src="https://cbiit.github.io/nci-softwaresolutions-elements/components/include-html.js" />
         <Script
           src="https://assets.adobedtm.com/6a4249cd0a2c/785de09de161/launch-70d67a6a40a8.min.js"
           async={true}></Script>
       </head>
       <body>
-        {/* <include-html src="https://cbiit.github.io/nci-softwaresolutions-elements/banners/government-shutdown.html"></include-html> */}
+        {/* @ts-expect-error - include-html is a custom element */}
+        <include-html src="https://cbiit.github.io/nci-softwaresolutions-elements/banners/government-shutdown.html"></include-html>
         <Header routes={routes} />
         <main
           className="position-relative d-flex flex-column flex-grow-1 align-items-stretch bg-light"
