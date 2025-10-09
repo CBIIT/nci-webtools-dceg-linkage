@@ -2,14 +2,22 @@
 import { Container, Row, Col } from "react-bootstrap";
 import GenomeSelect from "@/components/select/genome-select";
 
-export default function ToolBanner({ name, description, href, showGenomeSelect = true }: { name: string; description: string; href: string; showGenomeSelect?: boolean }) {
+export default function ToolBanner({
+  name,
+  description,
+  href,
+  showGenomeSelect = true,
+}: {
+  name: string;
+  description: string;
+  href: string;
+  showGenomeSelect?: boolean;
+}) {
   return (
     <Container fluid="md">
       <Row className="border rounded bg-white my-3 p-3 shadow-sm">
-        <Col sm="2">
-          {showGenomeSelect && <GenomeSelect />}
-        </Col>
-        <Col>
+        <Col sm="auto">{showGenomeSelect && <GenomeSelect />}</Col>
+        <Col sm="8">
           <h2 className="text-center ">
             {name}
             <sup>
@@ -24,7 +32,6 @@ export default function ToolBanner({ name, description, href, showGenomeSelect =
           </h2>
           <p className="text-center">{description}</p>
         </Col>
-        <Col sm="2" />
       </Row>
     </Container>
   );
