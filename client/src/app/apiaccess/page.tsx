@@ -71,8 +71,20 @@ const FORM_FIELDS = [
   { name: "firstname", label: "First name", type: "text", placeholder: "First name", validation: { required: "First name is required" } },
   { name: "lastname", label: "Last name", type: "text", placeholder: "Last name", validation: { required: "Last name is required" } },
   { name: "email", label: "Email", type: "email", placeholder: "Email", validation: { 
-    required: "Email is required", 
-    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Enter a valid email address" } 
+    required: "Email is required",
+    validate: (value: string) => {
+      if (!value.includes('@')) {
+        return `Please include an '@' in the email address. ${value} is missing an '@'.`;
+      }
+      const atIndex = value.indexOf('@');
+      if (atIndex === 0) {
+        return `Please enter a part followed by '@'. ${value} is incomplete.`;
+      }
+      if (atIndex === value.length - 1) {
+        return `Please enter a part following '@'. ${value} is incomplete.`;
+      }
+      return true;
+    }
   }},
   { name: "institution", label: "Institution", type: "text", placeholder: "Institution", validation: { required: "Institution is required" } }
 ];
