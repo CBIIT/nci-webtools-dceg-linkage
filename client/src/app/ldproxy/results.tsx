@@ -306,8 +306,9 @@ export default function LdProxyResults({ ref }: { ref: string }) {
           <Row>
             <Col>
               <a href={`/LDlinkRestWeb/tmp/proxy${ref}.txt`} download>
-                Download all proxy variants
+                Download all proxy variants 
               </a>
+              <p>Note: these results will be deleted after one hour.</p>
             </Col>
           </Row>
         </Container>

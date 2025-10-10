@@ -322,6 +322,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
               <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
                 Download GTEx QTL annotated variant list
               </a>
+              <p>Note: these results will be deleted after one hour.</p>
             </Col>
           </Row>
         </Container>

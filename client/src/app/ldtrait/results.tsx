@@ -320,6 +320,7 @@ export default function LdTraitResults({ reference, ...params }: { reference: st
             <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated${reference}.txt`} download>
               Download GWAS Catalog annotated variant list
             </a>
+            <p>Note: these results will be deleted after one hour.</p>
           </Col>
         </Row>
       </Container>

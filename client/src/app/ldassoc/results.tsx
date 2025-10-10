@@ -319,6 +319,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
               <a href={`/LDlinkRestWeb/tmp/assoc${ref}.txt`} download>
                 Download association data for all variants
               </a>
+              <p>Note: these results will be deleted after one hour.</p>
             </Col>
           </Row>
         </Container>

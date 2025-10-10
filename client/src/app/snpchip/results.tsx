@@ -103,6 +103,7 @@ export default function Results({ results, genome_build }: ResultsProps) {
               >
                 Download Chip Details
               </a>
+              <p>Note: these results will be deleted after one hour.</p>
             </div>
       </div>
   );

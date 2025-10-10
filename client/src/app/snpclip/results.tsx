@@ -194,6 +194,7 @@ export default function SNPClipResults({ ref }: { ref: string }) {
             </a>
           </Col>
         </Row>
+        <p>Note: these results will be deleted after one hour.</p>
       </Container>
     </>
   );

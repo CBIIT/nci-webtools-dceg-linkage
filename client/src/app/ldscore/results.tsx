@@ -350,7 +350,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
   return (
     <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
       <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
-        Download Options
+        Download Options <span style={{ fontSize: '0.85em', fontWeight: 400 }}> (these results will be deleted after one hour)</span>
       </div>
       <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
           {inputFilename && ((filename.includes('correlation') && inputFilename.split(',').length > 1) || (filename.includes('ldscore') && inputFilename.split(';').length > 1)) ? (

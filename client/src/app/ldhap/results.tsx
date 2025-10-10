@@ -139,6 +139,7 @@ export default function LdHapResults({ ref }: { ref: string }) {
               </a>
             </Col>
           </Row>
+          <p>Note: these results will be deleted after one hour.</p>
         </Container>
       ) : (
         <Alert variant="danger">{results?.error || "An error has occured"}</Alert>
