@@ -105,6 +105,11 @@ const FORM_FIELDS = [
         if (atIndex === value.length - 1) {
           return `Please enter a part following '@'. ${value} is incomplete.`;
         }
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$/;
+        if (!emailRegex.test(value)) {
+          return "Please enter a properly formatted email address (e.g., name@example.com).";
+        }
+
         return true;
       },
     },
