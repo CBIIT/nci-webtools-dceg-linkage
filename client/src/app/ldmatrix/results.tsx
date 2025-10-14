@@ -194,6 +194,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
               </a>
             </Col>
           </Row>
+          <p>Note: these results will be deleted after one hour.</p>
         </Container>
       ) : (
         <Alert variant="danger">{status?.error || "An error has occured"}</Alert>
