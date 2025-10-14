@@ -17,7 +17,7 @@ export default function ToolBanner({
     <Container fluid="md">
       <Row className="border rounded bg-white my-3 p-3 shadow-sm">
         <Col sm="auto">{showGenomeSelect && <GenomeSelect />}</Col>
-        <Col sm="8">
+        <Col sm={showGenomeSelect ? 8 : 12}>
           <h2 className="text-center ">
             {name}
             <sup>
