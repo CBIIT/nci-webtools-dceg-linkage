@@ -218,7 +218,7 @@ export default function Heritability() {
                 />
                 {(exampleFilename || uploadedFilename) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                    <span style={{ fontWeight: 600 }}>Input file uploaded:{heritabilityResultRef}</span><br />
+                    <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
 
                     <a
                       href={exampleFilename
