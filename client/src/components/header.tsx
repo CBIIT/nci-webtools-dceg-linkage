@@ -44,16 +44,19 @@ export function Header({ routes = [] }: HeaderProps) {
         <Container className="my-0">
           <Row className="align-items-center">
             <Col xl="9" md="8" sm="12">
-              <a rel="noopener noreferrer" href="https://cancercontrol.cancer.gov/">
-              <object data="/nci-logo/nci-jpsurv.svg" type="image/svg+xml" className="mw-100 ldlink-logo" style={{ width: "359.078px", height: "90px" }}></object>
-                {/* <Image
-                  src="/images/NIH-LDlink-Logo.png"
-                  alt="LDlink Logo"
-                  className="mw-100 ldlink-logo"
-                  width={359.078}
-                  height={90}
-                  unoptimized
-                /> */}
+              <a
+                href="https://dceg.cancer.gov/"
+                target="_blank"
+                aria-label="Go to NCI Division of Cancer Epidemiology and Genetics home page">
+                <object
+                  data="/nci-logo/logo.svg"
+                  type="image/svg+xml"
+                  className="mw-100"
+                  style={{ width: "359.078px", height: "90px" }}
+                  title="LDlink Logo"
+                  aria-label="LDlink Logo">
+                  NIH National Institutes of Health
+                </object>
               </a>
             </Col>
 
