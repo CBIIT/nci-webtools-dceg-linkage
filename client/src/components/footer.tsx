@@ -11,91 +11,95 @@ function parseVersion(versionString: string | undefined): string {
 
 export default function Footer() {
   return (
-    <footer className="footer text-left text-md-center pt-4 pb-4 text-light flex-none">
-      <div className="container">
-        <ul className="list-inline  text-light">
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://www.cancer.gov/">
-              Home
+    <>
+     <footer id="footer" className="flex-grow-0">
+      <div className="bg-primary text-light py-4">
+        <div className="container">
+          <div className="mb-4">
+            <a target="_blank" href="https://www.cancer.gov/" className="text-light h4 mb-1">
+              Division of Cancer Epidemiology and Genetics
             </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_top" href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink">
-              Support
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://www.cancer.gov/global/web/policies">
-              Policies
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a
-              className=" text-light m-1"
-              target="_blank"
-              href="https://www.cancer.gov/global/web/policies/accessibility">
-              Accessibility
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://cancer.gov/global/viewing-files">
-              Viewing Files
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://www.cancer.gov/global/web/policies/foia">
-              FOIA
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className="text-light m-1" target="_blank" href="https://github.com/CBIIT/nci-webtools-dceg-linkage">
-              Version {parseVersion(process.env.NEXT_PUBLIC_VERSION)}
-            </a>
-          </li>
-        </ul>
-        <ul className="list-inline">
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://www.hhs.gov/">
-              U.S. Department of Health and Human Services
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://www.nih.gov">
-              National Institutes of Health
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://www.cancer.gov/">
-              National Cancer Institute
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://www.hhs.gov/vulnerability-disclosure-policy/">
-              HHS Vulnerability Disclosure
-            </a>
-          </li>
-          <li className="pb-1 d-none d-md-inline">|</li>
-          <li className="pb-1 d-block d-md-inline">
-            <a className=" text-light m-1" target="_blank" href="https://usa.gov">
-              USA.gov
-            </a>
-          </li>
-        </ul>
-        <ul className="list-inline">
-          <li>
-            NIH ... Turning Discovery Into Health<sup>&reg;</sup>
-          </li>
-        </ul>
+            
+            <div className="h6">at the National Cancer Institute</div>
+          </div>
+          <div className="row">
+            <div className="col-lg-4 mb-4">
+              <div className="h5 mb-1 font-weight-light">CONTACT INFORMATION</div>
+              <ul className="list-unstyled mb-0">
+                <li>
+                   <a className=" text-light" target="_top" href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink">
+                    Contact Us
+                  </a>
+                </li>
+                 
+              </ul>
+              <ul className="list-unstyled mb-0 mt-3">
+                  <li>Version 6.0.0</li>
+              </ul>
+            </div>
+            <div className="col-lg-4 mb-4">
+              <div>
+                <a className=" h5 mb-1 font-weight-light" target="_blank" href="https://www.cancer.gov/global/web/policies">
+                    POLICIES
+                  </a>
+              </div>
+              <ul className="list-unstyled mb-0">
+                <li>
+                  <a className="text-light" target="_blank" href="https://www.cancer.gov/policies/accessibility">
+                    Accessibility
+                  </a>
+                </li>
+                <li>
+                  <a className="text-light" target="_blank" href="https://www.cancer.gov/policies/disclaimer">
+                    Disclaimer
+                  </a>
+                </li>
+                <li>
+                  <a className="text-light" target="_blank" href="https://www.cancer.gov/policies/foia">
+                    FOIA
+                  </a>
+                </li>
+                <li>
+                  <a
+                    className="text-light"
+                    target="_blank"
+                    href="https://www.hhs.gov/vulnerability-disclosure-policy/index.html">
+                    HHS Vulnerability Disclosure
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="col-lg-4 mb-4">
+              <div className="h5 mb-1 font-weight-light">MORE INFORMATION</div>
+              <ul className="list-unstyled mb-0">
+                <li>
+                  <a className="text-light" target="_blank" href="http://www.hhs.gov/">
+                    U.S. Department of Health and Human Services
+                  </a>
+                </li>
+                <li>
+                  <a className="text-light" target="_blank" href="http://www.nih.gov/">
+                    National Institutes of Health
+                  </a>
+                </li>
+                <li>
+                  <a className="text-light" target="_blank" href="https://www.cancer.gov/">
+                    National Cancer Institute
+                  </a>
+                </li>
+                <li>
+                  <a className="text-light" target="_blank" href="http://usa.gov/">
+                    USA.gov
+                  </a>
+                </li>
+             
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div className="text-center">NIH ... Turning Discovery Into Health ®</div>
       </div>
     </footer>
+    </>
   );
 }
