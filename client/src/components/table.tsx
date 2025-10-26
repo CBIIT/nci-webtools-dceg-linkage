@@ -99,6 +99,18 @@ export default function Table({ responsive = true, title = "", data, columns, ..
           entries
         </Col>
         <Col sm="auto">
+          {(() => {
+            const { pageIndex, pageSize } = table.getState().pagination;
+            const totalRows = table.getFilteredRowModel().rows.length;
+            const startRow = pageIndex * pageSize + 1;
+            const endRow = Math.min((pageIndex + 1) * pageSize, totalRows);
+            
+            return totalRows > 0 
+              ? `Showing ${startRow} to ${endRow} of ${totalRows} entries`
+              : 'No entries to show';
+          })()}
+        </Col>
+        <Col sm="auto">
           Page{" "}
           <strong>
             {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
