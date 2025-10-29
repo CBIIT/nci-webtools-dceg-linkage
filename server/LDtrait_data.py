@@ -29,6 +29,8 @@ def downloadGWASCatalog():
         print("Latest GWAS catalog already downloaded, deleting existing...")
         os.remove(tmp_dir + filename)
     r = requests.get(ldtrait_src, allow_redirects=True)
+    if r.status_code != 200:
+        raise RuntimeError(f"GWAS Catalog source unavailable (HTTP {r.status_code}); aborting update.")
     with open(tmp_dir + filename, 'wb') as f:
         f.write(r.content)
     return filename
