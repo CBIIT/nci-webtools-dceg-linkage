@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    proxyTimeout: 1000 * 60 * 15,
+  },
   async rewrites() {
     return [
       {
