@@ -62,7 +62,7 @@ export default function Table({ responsive = true, title = "", data, columns, ..
                         }}>
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
-                          asc: <i className="bi bi-chevron-down" />,
+                          asc: <i className="bi bi-chevron-up" />,
                           desc: <i className="bi bi-chevron-down" />,
                         }[header.column.getIsSorted() as string] ?? <i className="bi bi-chevron-expand" />}
                       </div>
