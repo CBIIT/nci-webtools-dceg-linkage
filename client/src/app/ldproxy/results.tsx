@@ -110,7 +110,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
   });
 
   const plotRef = useRef<HTMLDivElement>(null);
-    // Separate scroll container so we don't combine flex centering with horizontal scrolling (which clipped the left axis)
+  // Separate scroll container so we don't combine flex centering with horizontal scrolling (which clipped the left axis)
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -129,10 +129,10 @@ export default function LdProxyResults({ ref }: { ref: string }) {
       requestAnimationFrame(() => {
         if (scrollContainerRef.current) {
           const sc = scrollContainerRef.current;
-            const maxScroll = sc.scrollWidth - sc.clientWidth;
-            if (maxScroll > 0) {
-              sc.scrollLeft = maxScroll / 2;
-            }
+          const maxScroll = sc.scrollWidth - sc.clientWidth;
+          if (maxScroll > 0) {
+            sc.scrollLeft = maxScroll / 2;
+          }
         }
       });
     }
@@ -211,6 +211,11 @@ export default function LdProxyResults({ ref }: { ref: string }) {
       <hr />
       {results && !results?.error ? (
         <Container fluid="md" className="justify-content-center">
+          {results?.warning && (
+            <Alert variant="warning" dismissible>
+              {results?.warning}
+            </Alert>
+          )}
           <Row className="align-items-center">
             <Col sm={12} className="justify-content-end text-end">
               <Dropdown>
@@ -232,21 +237,11 @@ export default function LdProxyResults({ ref }: { ref: string }) {
               </Dropdown>
             </Col>
             <Col sm={12} className="text-center">
-              <div
-                ref={scrollContainerRef}
-                className="overflow-x-auto"
-                style={{ width: "100%" }}
-              >
-                {plotJson && (
-                  <div
-                    ref={plotRef}
-                    className="mt-4"
-                    style={{ display: "inline-block" }}
-                  />
-                )}
+              <div ref={scrollContainerRef} className="overflow-x-auto" style={{ width: "100%" }}>
+                {plotJson && <div ref={plotRef} className="mt-4" style={{ display: "inline-block" }} />}
               </div>
             </Col>
-          
+
             <Col sm={12} className="d-flex justify-content-center my-4">
               <Image
                 src="/images/LDproxy_legend.png"
@@ -261,7 +256,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
                 }}
               />
             </Col>
-          
+
             <Col sm={12} className="justify-content-center text-center">
               <a
                 id="ldproxy-genome"
@@ -299,14 +294,12 @@ export default function LdProxyResults({ ref }: { ref: string }) {
             </Col>
           </Row>
           <Row>
-            <Col>            
-                {results && <Table  title="Proxy Variants" data={results.aaData} columns={columns} />}
-            </Col>
+            <Col>{results && <Table title="Proxy Variants" data={results.aaData} columns={columns} />}</Col>
           </Row>
           <Row>
             <Col>
               <a href={`/LDlinkRestWeb/tmp/proxy${ref}.txt`} download>
-                Download all proxy variants 
+                Download all proxy variants
               </a>
               <p>Note: these results will be deleted after one hour.</p>
             </Col>
