@@ -48,7 +48,7 @@ export default function Table({ responsive = true, title = "", data, columns, ..
         </Col>
       </Row>
       <BsTable responsive={responsive} hover {...props}>
-        <thead>
+        <thead title="Shift-click column headers to sort by multiple levels">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
