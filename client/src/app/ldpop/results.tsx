@@ -172,6 +172,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
       <hr />
       {results && !results?.error ? (
         <Container fluid="md">
+          {results?.warning && <Alert variant="warning" dismissible>{results?.warning}</Alert>}
           <Row>
             <Col>
               <Tabs defaultActiveKey="1" className="mb-3">

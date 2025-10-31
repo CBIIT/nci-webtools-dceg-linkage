@@ -47,6 +47,7 @@ export interface ResultsData {
     ][];
   };
   error?: string;
+  warning?: string;
 }
 
 export interface submitFormData {
