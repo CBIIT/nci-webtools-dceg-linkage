@@ -923,6 +923,7 @@ def ldtrait_timestamp():
     except Exception as e:
         exc_obj = e
         app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+        results = json.dumps({"error": "An error occurred while retrieving the timestamp"}, sort_keys=True, indent=2)
     end_time = time.time()
     app.logger.debug("Retrieve LDtrait Timestamp (%ss)" % (round(end_time - start_time, 2)))
     return results

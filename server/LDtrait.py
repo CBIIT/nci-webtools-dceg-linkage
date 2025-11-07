@@ -30,8 +30,13 @@ def get_ldtrait_timestamp(web):
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
         return "Failed to connect to server."
 
+    object_id_datetime = None
     for document in db.gwas_catalog.find().sort("_id", -1).limit(1):
         object_id_datetime = document.get('_id').generation_time
+    
+    if object_id_datetime is None:
+        return json.dumps({"error": "No documents found in GWAS catalog"}, sort_keys=True, indent=2)
+    
     json_output = json.dumps(object_id_datetime, default=json_util.default, sort_keys=True, indent=2)
     return json_output
 
