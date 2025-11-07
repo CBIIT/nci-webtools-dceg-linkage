@@ -62,11 +62,11 @@ ENV DISPLAY=:99
 
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
-        GD_ARCH="linux64"; \
+    GD_ARCH="linux64"; \
     elif [ "$ARCH" = "aarch64" ]; then \
-        GD_ARCH="linux-aarch64"; \
+    GD_ARCH="linux-aarch64"; \
     else \
-        echo "Unsupported architecture: $ARCH"; exit 1; \
+    echo "Unsupported architecture: $ARCH"; exit 1; \
     fi && \
     cd /tmp && \
     curl -L "https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-$GD_ARCH.tar.gz" -o geckodriver.tar.gz && \
@@ -114,7 +114,7 @@ EXPOSE 80
 EXPOSE 8080
 
 CMD flask --app bokehExport run & \
-    ddtrace-run mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
+    mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --httpd-executable=/usr/sbin/httpd \
     --modules-directory /etc/httpd/modules/ \
     --include-file /etc/httpd/conf.d/wsgi.conf \
