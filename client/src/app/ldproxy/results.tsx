@@ -38,11 +38,15 @@ function ldproxy_position_link(data: any, row: any, genomeBuild: string) {
 }
 
 function ldproxy_FORGEdb_link(score: any, row: any) {
-  return (
-    <a href={`https://forgedb.cancer.gov/explore?rsid=${row[0]}`} target="_blank" rel="noopener noreferrer">
-      {score}
-    </a>
-  );
+  if (score) {
+    return (
+      <a href={`https://forgedb.cancer.gov/explore?rsid=${row[0]}`} target="_blank" rel="noopener noreferrer">
+        {score}
+      </a>
+    );
+  } else {
+    return "NA";
+  }
 }
 
 function ldproxy_regulome_link(data: any, row: any, genomeBuild: string) {

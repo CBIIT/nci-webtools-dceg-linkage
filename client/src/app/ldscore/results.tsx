@@ -145,7 +145,7 @@ function renderSummaryTable(section: string) {
   const rows = filteredLines.slice(headerIdx + 1).map(l => l.split(/\s+/).filter(Boolean));
   return (
     <TableContainer>
-      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }} tabIndex={0}>
         <thead >
           <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h.replace(/h2/g, 'h²')}</th>)}</tr>
         </thead>

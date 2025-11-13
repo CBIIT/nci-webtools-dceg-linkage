@@ -90,6 +90,7 @@ export default function Table({ responsive = true, title = "", data, columns, in
       <Row className="justify-content-between">
         <Col sm="auto">
           <select
+            title="Select page size"
             value={table.getState().pagination.pageSize}
             onChange={(e) => {
               table.setPageSize(Number(e.target.value));

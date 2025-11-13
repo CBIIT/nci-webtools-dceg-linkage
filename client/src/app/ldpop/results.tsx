@@ -89,7 +89,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
   }) {
     const href = `/ldpair?var1=${snp1}&var2=${snp2}&pop=${pops}&genome_build=${genomeBuild}`;
     return (
-      <a style={{ color: "#318fe2" }} href={href} target="_blank" rel="noopener noreferrer">
+      <a href={href} target="_blank" rel="noopener noreferrer">
         link
       </a>
     );

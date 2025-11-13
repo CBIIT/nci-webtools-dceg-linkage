@@ -195,7 +195,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs}`;
         return (
           <a href={url} target="_blank" rel="noopener noreferrer">
-            <i className="bi bi-box-arrow-up-right"></i>
+            <i title={`${rs} HaploReg Details`} className="bi bi-box-arrow-up-right"></i>
           </a>
         );
       },
@@ -232,18 +232,8 @@ export default function LdAssocResults({ ref }: { ref: string }) {
               </Dropdown>
             </Col>
             <Col sm={12} className="text-center">
-              <div
-                ref={scrollContainerRef}
-                className="overflow-x-auto"
-                style={{ width: "100%" }}
-              >
-                {plotJson && (
-                  <div
-                    ref={plotRef}
-                    className="mt-4"
-                    style={{ display: "inline-block" }}
-                  />
-                )}
+              <div ref={scrollContainerRef} className="overflow-x-auto" style={{ width: "100%" }}>
+                {plotJson && <div ref={plotRef} className="mt-4" style={{ display: "inline-block" }} />}
               </div>
             </Col>
             <Col sm={12} className="text-center my-3">
@@ -311,7 +301,17 @@ export default function LdAssocResults({ ref }: { ref: string }) {
           </Row>
           <Row>
             <Col>
-                {results && <Table title="Association Results" data={results.aaData} columns={columns} />}
+              {results && (
+                <Table
+                  title="Association Results"
+                  data={results.aaData}
+                  columns={columns}
+                  initialSort={[
+                    { id: "9", desc: false },
+                    { id: "5", desc: false },
+                  ]}
+                />
+              )}
             </Col>
           </Row>
           <Row>
