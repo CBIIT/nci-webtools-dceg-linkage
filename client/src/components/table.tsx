@@ -15,9 +15,10 @@ type TableProps = {
   data: any[];
   columns: any[];
   responsive?: boolean;
+  initialSort?: { id: string; desc: boolean }[];
 };
 
-export default function Table({ responsive = true, title = "", data, columns, ...props }: TableProps) {
+export default function Table({ responsive = true, title = "", data, columns, initialSort, ...props }: TableProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const table = useReactTable({
     data,
@@ -27,6 +28,9 @@ export default function Table({ responsive = true, title = "", data, columns, ..
     getSortedRowModel: getSortedRowModel(),
     onPaginationChange: setPagination,
     getFilteredRowModel: getFilteredRowModel(),
+    initialState: {
+      sorting: initialSort,
+    },
     state: {
       pagination,
     },
@@ -104,17 +108,9 @@ export default function Table({ responsive = true, title = "", data, columns, ..
             const totalRows = table.getFilteredRowModel().rows.length;
             const startRow = pageIndex * pageSize + 1;
             const endRow = Math.min((pageIndex + 1) * pageSize, totalRows);
-            
-            return totalRows > 0 
-              ? `Showing ${startRow} to ${endRow} of ${totalRows} entries`
-              : 'No entries to show';
+
+            return totalRows > 0 ? `Showing ${startRow} to ${endRow} of ${totalRows} entries` : "No entries to show";
           })()}
-        </Col>
-        <Col sm="auto">
-          Page{" "}
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-          </strong>
         </Col>
         <Col sm="auto">
           <button
@@ -129,6 +125,10 @@ export default function Table({ responsive = true, title = "", data, columns, ..
             disabled={!table.getCanPreviousPage()}>
             {"<"}
           </button>
+          Page{" "}
+          <strong>
+            {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </strong>
           <button
             className="border rounded p-1 mx-1"
             onClick={() => table.nextPage()}
