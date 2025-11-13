@@ -1,4 +1,4 @@
-var ldlink_version = "Version 5.7.0";
+var ldlink_version = "Version 5.8.0";
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nih.gov",port:9090,route : "LDlinkRestWeb"}
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
@@ -697,7 +697,7 @@ $(document).ready(function () {
     });
 
   // Load news text from news.html to news-container div
-  $.get("news.html?v=5.7.0", function (data) {
+  $.get("news.html?v=5.8.0", function (data) {
     let tmpData = data.split("<p>");
     let i = 0;
     var newsHTMLList = [];
@@ -940,6 +940,8 @@ $(document).ready(function () {
 
   $("#ldassoc").prop("disabled", true);
   $("#ldscore").prop("disabled", true);
+  $("#ldscore-herit").prop("disabled", true);
+  $("#ldscore-correlation").prop("disabled", true);
 
   // reset apiaccess form
   $(".apiaccess-done").click(function (e) {
@@ -1003,6 +1005,7 @@ $(document).ready(function () {
     $("#genome-build-label").show();
   }
   });
+
 
   setupLDexpressControls();
   setupLDtraitControls();
@@ -1516,7 +1519,7 @@ function setupLDheritExample() {
   document.getElementById("ldheritFile").innerHTML = "";
   var useEx = document.getElementById("example-ldherit");
   var btn = document.getElementById("ldscore-herit");
-
+  btn.classList.add("disabled");
   if (useEx.checked) {
     var url = restServerUrl + "/ldherit_example";
     var ajaxRequest = $.ajax({
@@ -1619,7 +1622,8 @@ function setupLDcorrelationExample() {
   document.getElementById("correlationFile").innerHTML = "";
   document.getElementById("correlationFile2").innerHTML = "";
   var btn = document.getElementById("ldscore-correlation");
-
+  //btn.disabled = true;
+  btn.classList.add("disabled");
   var useEx = document.getElementById("example-correlation");
   if (useEx.checked) {
     var url = restServerUrl + "/ldcorrelation_example";
@@ -1688,8 +1692,8 @@ function setupLDcorrelationExample() {
       var fileInput2 = document.getElementById("ldscore-file-correlation2");
       fileInput2.files = dataTransfer2.files;
 
-     // btn.disabled = false;
-     // btn.classList.remove("disabled");
+      btn.disabled = false;
+      btn.classList.remove("disabled");
     });
 
     // switch (genomeBuild) {
@@ -2038,6 +2042,7 @@ function uploadFileldcorrelation(fileid) {
   // console.log(filename);
   document.getElementById("ldscore-file-message").style.display = "none";
   // document.getElementById("ldscore-loading-herit").style.display = "none";
+  //document.getElementById("ldscore-correlation").classList.add("disabled");
 
   var fileInput = document.getElementById(fileid);
 
@@ -2163,47 +2168,54 @@ function progressHandlingFunction(e) {
   }
 }
 function beforeSendHandler() {
-  console.warn("beforeSendHandler");
+     var activeTabId = $(".tab-pane.active").attr("id") || "";
+  console.warn("beforeSendHandler",activeTabId);
   var percent = 0;
-  $("#progressbar").css("width", percent + "%");
+  $("#progressbar2, #progressbar3, #progressbar4").parent().hide();
+if(activeTabId ==="ldassoc-tab"){
+    $("#progressbar").css("width", percent + "%");
   $("#progressbar").html(percent + "% Completed");
-  $("#progressbar2").css("width", percent + "%");
-  $("#progressbar2").html(percent + "% Completed");
-  $("#progressbar3").css("width", percent + "%");
-  $("#progressbar3").html(percent + "% Completed");
-  $("#progressbar4").css("width", percent + "%");
-  $("#progressbar4").html(percent + "% Completed");
-  //$("#ldassoc-file-container").hide();
-  //$("#ldscore-file-container").hide();
-  //  $("#ldscore-file-container2").hide();
-  $("#progressbar").parent().show();
-  $("#progressbar2").parent().show();
-  $("#progressbar3").parent().show();
-  $("#progressbar4").parent().show();
+    $("#progressbar").parent().show();
+}  else {
+    // Find the active tab under ldscore
+    var activeTab = $("#ldscoreForm").closest(".tab-pane").find(".tab-pane.active").attr("id");
+      // Check for Heritability Analysis tab
+    if (activeTab === "ldscore-heritability-tab") {
+      $("#progressbar3").css("width", percent + "%").html(percent + "% Completed").parent().show();
+    } else if(activeTab === "ldscore-correlation-tab"){
+      // Assume correlation or other tab
+      $("#progressbar4").css("width", percent + "%").html(percent + "% Completed").parent().show();
+    } else{
+    $("#progressbar2").css("width", percent + "%").html(percent + "% Completed").parent().show();
+    }
+  }
+
 }
 function completeHandler() {
   console.warn("completeHandler");
-  $("#progressbar").parent().hide();
-  $("#progressbar2").parent().hide();
+  var activeTabId = $(".tab-pane.active").attr("id") || "";
+if(activeTabId ==="ldassoc-tab"){
+   $("#progressbar").parent().hide();
+     $("#ldassoc-file-container").fadeIn(1000);
+     $("#ldassoc").removeAttr("disabled");
+}
+else{
+ var activeTab = $("#ldscoreForm").closest(".tab-pane").find(".tab-pane.active").attr("id");
+ if (activeTab === "ldscore-heritability-tab") {
   $("#progressbar3").parent().hide();
-  $("#progressbar4").parent().hide();
-  $("#ldassoc-file-container").fadeIn(1000);
-  $("#ldscore-file-container").fadeIn(1000);
-  $("#ldscore-file-container2").fadeIn(1000);
-  $("#ldscore-file-container3").fadeIn(1000);
-  // enable calculate button only when file is successfully uploaded
-  $("#ldassoc").removeAttr("disabled");
-  $("#ldscore").removeAttr("disabled");
   $("#ldscore-herit").removeAttr("disabled");
-  $("#dscore-correlation").removeAttr("disabled");
-
-  $("#example-ldscore").prop("checked", false).trigger("change");
-  //if (document.getElementById("ldscore-bokeh-graph") !== null)
-  //  document.getElementById("ldscore-bokeh-graph").innerHTML = "";
-  //if (document.getElementById("ldscore-results-container") !== null)
-  //  document.getElementById("ldscore-results-container").innerHTML = "";
-
-
+  $("#ldscore-file-container2").fadeIn(1000);
+ }else if(activeTab === "ldscore-correlation-tab"){
+    $("#progressbar4").parent().hide();
+     $("#ldscore-correlation").removeAttr("disabled").removeClass("disabled");
+  $("#ldscore-file-container3").fadeIn(1000);
+ }else{
+    $("#ldscore-file-container").fadeIn(1000);
+    $("#progressbar2").parent().hide();
+   $("#ldscore").removeAttr("disabled");
+   $("#example-ldscore").prop("checked", false).trigger("change");
+ }
+}
 }
 function errorHandler(e) {
   showCommError(e);
@@ -2864,6 +2876,9 @@ function refreshPopulation(pop, id) {
   $("#" + id + "-population-codes").multiselect("refresh");
 }
 
+
+
+
 function autoCalculate() {
   // if valid parameters exist in the url then calcluate
   var url = {};
@@ -2884,6 +2899,7 @@ function autoCalculate() {
   } else {
     return;
   }
+  console.log(url)
   var id = url.tab.toLowerCase();
   switch (id) {
     case "ldpair":
@@ -2918,6 +2934,31 @@ function autoCalculate() {
         refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
         initCalculate(id);
         updateData(id);
+      }
+      break;
+     case "ldtraitget":
+      if (url.snps && url.pop ) {
+        $("#ldtrait-file-snp-numbers").prop("value", url.snps);
+        $("#trait_color_r2").toggleClass("active", url.r2_d == "r2");
+        $("#trait_color_r2")
+          .next()
+          .toggleClass("active", url.r2_d == "d");
+        refreshPopulation(decodeURIComponent(url.pop).split("+"), "ldtrait");
+        initCalculate("ldtrait");
+        updateData("ldtraitget");
+      }
+      break;
+    case "ldexpressget":
+      if (url.snps && url.pop ) {
+        $("#ldexpress-file-snp-numbers").prop("value", url.snps);
+        $("#express_color_r2").toggleClass("active", url.r2_d == "r2");
+        $("#express_color_r2")
+          .next()
+          .toggleClass("active", url.r2_d == "d");
+        refreshPopulation(decodeURIComponent(url.pop).split("+"), "ldexpress");
+        initCalculate("ldexpress");
+        
+        updateData("ldexpressget");
       }
       break;
   }
@@ -3038,7 +3079,13 @@ function setupLDexpressControls() {
     loadLDexpressQueryWarnings(ldExpressRaw);
     $("#ldexpress-initial-message").hide();
   });
-  initExpressTissues();
+    const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('tab') === 'ldexpressget') {
+   initExpressTissues(true);
+  } else {
+   initExpressTissues();
+  }
+  
 }
 
 function setupLDtraitControls() {
@@ -3615,7 +3662,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-  $("#help-tab").load("help.html?v=5.6.0");
+  $("#help-tab").load("help.html?v=5.8.0");
 }
 
 function calculate(e) {
@@ -3635,7 +3682,7 @@ function initCalculate(id) {
     var activeTab = $("#ldscoreForm .nav-tabs li.active a");
     if (activeTab.length) {
       var activateTab = activeTab.attr("href");
-      if (activateTab.includes("ldscore-heritability-tab")) {
+      if (activateTab.includes("ldscore-file-container-tab")) {
         console.log("ldscore");
         $("#" + id + "-results-container").hide();
         $("#" + id + "-message").hide();
@@ -3795,6 +3842,18 @@ function updateData(id) {
       if (isPopulationSet(id) && validateLDtraitBasePairWindow()) {
         $("#" + id + "-loading").show();
         updateLDtrait();
+      }
+      break;
+    case "ldtraitget":
+      if (isPopulationSet("ldtrait") && validateLDtraitBasePairWindow()) {
+        $("#" + "ldtrait" + "-loading").show();
+        updateLDtraitGWAS();
+      }
+      break;
+    case "ldexpressget":
+      if (isPopulationSet("ldexpress") && validateLDexpressBasePairWindow()) {
+        $("#" + "ldexpress" + "-loading").show();
+        updateLDexpressGWAS();
       }
       break;
     case "snpclip":
@@ -5539,6 +5598,87 @@ function updateLDexpress() {
   hideLoadingIcon(ajaxRequest, id);
 }
 
+
+function updateLDexpressGWAS() {
+  var id = "ldexpress";
+
+  var $btn = $("#" + id).button("loading");
+  var snps = DOMPurify.sanitize($("#" + id + "-file-snp-numbers").val());
+  var population = getPopulationCodes(id + "-population-codes");
+  var r2_d;
+  var window = $("#" + id + "-bp-window")
+    .val()
+    .replace(/\,/g, "");
+
+  if ($("#ldexpress_ld_r2").hasClass("active")) {
+    r2_d = "r2"; // i.e. R2
+  } else {
+    r2_d = "d"; // i.e. Dprime
+  }
+
+  var ldInputs = {
+    snps: snps,
+    pop: population.join("+"),
+  };
+
+  //Show inital message
+  $("#new-ldexpress_wrapper").hide();
+  $("#new-ldexpress-query-warnings_wrapper").hide();
+  $("#ldexpress-initial-message").show();
+
+  //Update href on
+  //Set file links
+  $("#ldexpress-variants-annotated-link").attr(
+    "href",
+    "/LDlinkRestWeb/tmp/express_variants_annotated" +
+      ldInputs.reference +
+      ".txt"
+  );
+  $("#ldexpress-variants-annotated-link").attr(
+    "target",
+    "express_variants_annotated" + ldInputs.reference
+  );
+  var url = restServerUrl + "/ldexpressget";
+  var ajaxRequest = $.ajax({
+    type: "GET",
+    url: url,
+    data: ldInputs,
+    contentType: "application/json", // JSON
+  });
+  ajaxRequest.success(function (data) {
+    //data is returned as a string representation of JSON instead of JSON obj
+    var jsonObj = data;
+    // console.log(data);
+    if (displayError(id, jsonObj) == false) {
+      switch (genomeBuild) {
+        case "grch37":
+          $("." + id + "-position-genome-build-header").text("GRCh37");
+          break;
+        case "grch38":
+          $("." + id + "-position-genome-build-header").text("GRCh38");
+          break;
+        case "grch38_high_coverage":
+          $("." + id + "-position-genome-build-header").text(
+            "GRCh38 High Coverage"
+          );
+          break;
+      }
+      $("#" + id + "-results-container").show();
+      $("#" + id + "-links-container").show();
+      $("#" + id + "-loading").hide();
+      initExpress(data, r2_d);
+    }
+  });
+  ajaxRequest.fail(function (jqXHR, textstatus) {
+    displayCommFail(id, jqXHR, textstatus);
+  });
+  ajaxRequest.always(function () {
+    $btn.button("reset");
+  });
+
+  hideLoadingIcon(ajaxRequest, id);
+}
+
 function updateLDtrait() {
   var id = "ldtrait";
 
@@ -5581,7 +5721,6 @@ function updateLDtrait() {
     genome_build: genomeBuild,
     ifContinue: ifContinue,
   };
-
   //Show inital message
   $("#new-ldtrait_wrapper").hide();
   $("#new-ldtrait-query-warnings_wrapper").hide();
@@ -5609,6 +5748,110 @@ function updateLDtrait() {
     type: "POST",
     url: url,
     data: JSON.stringify(ldInputs),
+    contentType: "application/json", // JSON
+  });
+  ajaxRequest.success(function (data) {
+    //data is returned as a string representation of JSON instead of JSON obj
+    var jsonObj = data;
+    if (displayError(id, jsonObj) == false) {
+      switch (genomeBuild) {
+        case "grch37":
+          $("." + id + "-position-genome-build-header").text("GRCh37");
+          break;
+        case "grch38":
+          $("." + id + "-position-genome-build-header").text("GRCh38");
+          break;
+        case "grch38_high_coverage":
+          $("." + id + "-position-genome-build-header").text(
+            "GRCh38 High Coverage"
+          );
+          break;
+      }
+      $("#" + id + "-results-container").show();
+      $("#" + id + "-links-container").show();
+      $("#" + id + "-loading").hide();
+      initTrait(data, r2_d);
+    }
+    if (data.warning != null) {
+      if (data.warning.includes("timeout")) {
+        $("#" + id + "-results-container").hide();
+        $("#" + id + "-links-container").hide();
+        $("#" + id + "-loading").hide();
+        $("#ldtrait-continue").attr("style", "display:block");
+        $("#ldtrait-cancel").attr("style", "display:block");
+      }
+    }
+  });
+  ajaxRequest.fail(function (jqXHR, textstatus) {
+    displayCommFail(id, jqXHR, textstatus);
+  });
+  ajaxRequest.always(function () {
+    $btn.button("reset");
+  });
+
+  hideLoadingIcon(ajaxRequest, id);
+  document.getElementById("ldtrait-continue").value = "Continue";
+}
+
+function updateLDtraitGWAS() {
+  var id = "ldtrait";
+
+  var $btn = $("#" + id).button("loading");
+  var snps = DOMPurify.sanitize($("#" + id + "-file-snp-numbers").val());
+  var population = getPopulationCodes(id + "-population-codes");
+  var r2_d;
+  var window = $("#" + id + "-bp-window")
+    .val()
+    .replace(/\,/g, "");
+  var ifContinue = document.getElementById("ldtrait-continue").value;
+
+  if ($("#ldtrait_ld_r2").hasClass("active")) {
+    r2_d = "r2"; // i.e. R2
+  } else {
+    r2_d = "d"; // i.e. Dprime
+  }
+
+  var estimateWindowSizeMultiplier = window / 500000.0;
+  var estimateSeconds = Math.round(
+    snps.split("\n").length * 5 * estimateWindowSizeMultiplier
+  );
+  // console.log("estimate seconds", estimateSeconds);
+  var estimateMinutes = estimateSeconds / 60;
+  if (estimateSeconds < 60) {
+    $("#ldtrait-estimate-loading").text(estimateSeconds + " seconds");
+  } else {
+    $("#ldtrait-estimate-loading").text(
+      estimateMinutes.toFixed(2) + " minute(s)"
+    );
+  }
+
+  var ldInputs = {
+    snps: snps,
+    pop: population.join("+"),
+  };
+  //updateHistoryURL(id, ldInputs);
+  //Show inital message
+  $("#new-ldtrait_wrapper").hide();
+  $("#new-ldtrait-query-warnings_wrapper").hide();
+  $("#ldtrait-initial-message").show();
+  $("#ldtrait-continue").attr("style", "display:none");
+  $("#ldtrait-cancel").attr("style", "display:none");
+  //Update href on
+  //Set file links
+  $("#ldtrait-variants-annotated-link").attr(
+    "href",
+    "/LDlinkRestWeb/tmp/trait_variants_annotated" + ldInputs.reference + ".txt"
+  );
+  $("#ldtrait-variants-annotated-link").attr(
+    "target",
+    "trait_variants_annotated" + ldInputs.reference
+  );
+  var url = restServerUrl + "/ldtraitget";
+  var ajaxRequest = $.ajax({
+    type: "GET",
+    url: url,
+   // data: JSON.stringify(ldInputs),
+    data: ldInputs,
     contentType: "application/json", // JSON
   });
   ajaxRequest.success(function (data) {
@@ -6621,7 +6864,7 @@ function initTrait(data, r2_d) {
   }
 }
 
-function initExpressTissues() {
+function initExpressTissues(all=false) {
   var id = "ldexpress";
   var url = restServerUrl + "/ldexpress_tissues";
   var ajaxRequest = $.ajax({
@@ -6630,11 +6873,19 @@ function initExpressTissues() {
     contentType: "application/json", // JSON
   });
   ajaxRequest.success(function (data) {
+   
     if (displayError(id, data) == false) {
       buildTissueDropdown(id + "-tissue-codes", data);
+      if (all){
+        const selectElement = $("#ldexpress-tissue-codes");
+        selectElement.find("option").prop("selected", true);
+        selectElement.multiselect("refresh");
+      }
     } else {
       buildTissueDropdown("ldexpress-tissue-codes", data);
     }
+
+   
   });
   ajaxRequest.fail(function (jqXHR, textstatus) {
     var errorObj = {
