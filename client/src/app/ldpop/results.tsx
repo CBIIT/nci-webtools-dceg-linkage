@@ -109,12 +109,12 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
     }),
     columnHelper.accessor((row: any) => row[2], {
       id: "rs1_allele_freq",
-      header: `${results.inputs.rs1} Allele Freq`,
+      header: `${params.var1} Allele Freq`,
       cell: (info: any) => info.getValue(),
     }),
     columnHelper.accessor((row: any) => row[3], {
       id: "rs2_allele_freq",
-      header: `${results.inputs.rs2} Allele Freq`,
+      header: `${params.var2} Allele Freq`,
       cell: (info: any) => info.getValue(),
     }),
     columnHelper.accessor((row: any) => row[4], {
@@ -134,7 +134,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
         const row = info.row.original;
         const pops = row[0]; // Population
         const genomeBuild = params?.genome_build || "grch38";
-        return <LdpairLink snp1={results.inputs.rs1} snp2={results.inputs.rs2} pops={pops} genomeBuild={genomeBuild} />;
+        return <LdpairLink snp1={params.var1} snp2={params.var2} pops={pops} genomeBuild={genomeBuild} />;
       },
     }),
   ];
@@ -172,7 +172,11 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
       <hr />
       {results && !results?.error ? (
         <Container fluid="md">
-          {results?.warning && <Alert variant="warning" dismissible>{results?.warning}</Alert>}
+          {results?.warning && (
+            <Alert variant="warning" dismissible>
+              {results?.warning}
+            </Alert>
+          )}
           <Row>
             <Col>
               <Tabs defaultActiveKey="1" className="mb-3">
