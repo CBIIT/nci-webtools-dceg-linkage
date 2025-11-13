@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { AxiosError } from "axios";
 import { ldproxy } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups, getOptionsFromKeys,PopOption } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups, getOptionsFromPop,PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import "./style.css";
@@ -46,7 +46,7 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
   // load form form url params
   useEffect(() => {
     if (params && Object.keys(params).length > 0 && params.pop) {
-      const popArray = getOptionsFromKeys(params.pop);
+      const popArray = getOptionsFromPop(params.pop);
       reset({ ...params, pop: popArray });
     }
   }, [params, reset]);

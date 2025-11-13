@@ -83,8 +83,11 @@ export const populations: Populations = {
  * @param pop - Population parameter, either a string (e.g. "YRI+LWK") or an array of objects.
  * @returns Array of objects: [{ value: string, label: string }]
  */
-export function getOptionsFromKeys(pop: string | any[]): any[] {
+export function getOptionsFromPop(pop: string | any[]): any[] {
   if (typeof pop === "string") {
+    if (pop === "ALL") {
+      return [{ value: "ALL", label: "(ALL) All Populations" }];
+    }
     const codes = pop.split("+");
     return codes.flatMap((code) => {
       // If code is a population group (e.g., AFR), return all its subPopulations
@@ -265,7 +268,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
 
   return (
     <>
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: "relative" }}>
         <Controller
           name={name}
           control={control}
@@ -293,28 +296,29 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
         {showWarning && (
           <div
             style={{
-              position: 'absolute',
-              top: '0',
-              left: '100%',
+              position: "absolute",
+              top: "0",
+              left: "100%",
               zIndex: 10000,
-              backgroundColor: '#ffffffff',
-              border: '1px solid #f6f4ecff',
-              borderRadius: '4px',
-              padding: '8px 12px',
-              fontSize: '0.875rem',
-              color: '#000000ff',
-              marginLeft: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              backgroundColor: "#ffffffff",
+              border: "1px solid #f6f4ecff",
+              borderRadius: "4px",
+              padding: "8px 12px",
+              fontSize: "0.875rem",
+              color: "#000000ff",
+              marginLeft: "8px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
               opacity: 1,
-              transform: 'translateY(0)',
-              transition: 'all 0.3s ease-in-out',
-              minWidth: '200px',
-              maxWidth: '250px'
-            }}
-          >
-            <div style={{ paddingRight: '1px' }}>
-              <strong>Warning:</strong><br />
-              Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources.
+              transform: "translateY(0)",
+              transition: "all 0.3s ease-in-out",
+              minWidth: "200px",
+              maxWidth: "250px",
+            }}>
+            <div style={{ paddingRight: "1px" }}>
+              <strong>Warning:</strong>
+              <br />
+              Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited
+              system resources.
             </div>
           </div>
         )}

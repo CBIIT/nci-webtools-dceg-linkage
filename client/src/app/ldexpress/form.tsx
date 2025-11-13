@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups,getOptionsFromKeys } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups,getOptionsFromPop } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps, getTissueOptionsFromKeys } from "@/services/utils";
@@ -80,7 +80,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
   useEffect(() => {
     // Wait until tissues API data is available so mapping works
     if (params && Object.keys(params).length > 0 && params.pop && tissues && Array.isArray((tissues as any).tissueInfo)) {
-      const popArray = getOptionsFromKeys(params.pop);
+      const popArray = getOptionsFromPop(params.pop);
       // Normalize incoming params.tissues into a single string code or name
       const rawTissueParam = Array.isArray(params.tissues)
         ? (params.tissues[0] as any)?.value || (params.tissues[0] as any)?.label || params.tissues[0]

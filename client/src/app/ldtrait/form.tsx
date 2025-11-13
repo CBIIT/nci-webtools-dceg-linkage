@@ -8,7 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { AxiosError } from "axios";
 import { ldtrait } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups, getOptionsFromKeys } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups, getOptionsFromPop } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps, parseRateLimitError } from "@/services/utils";
@@ -71,7 +71,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
   // Load form from URL params
   useEffect(() => {
     if (params && Object.keys(params).length > 0) {
-      const popArray = getOptionsFromKeys(params.pop);
+      const popArray = getOptionsFromPop(params.pop);
       reset({
         ...params,
         pop: popArray,

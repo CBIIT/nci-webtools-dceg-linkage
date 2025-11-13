@@ -5,7 +5,7 @@ import { Row, Col, Form, Button, Alert, ButtonGroup, ToggleButton } from "react-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldpop } from "@/services/queries";
-import PopSelect, { getOptionsFromKeys, getSelectedPopulationGroups } from "@/components/select/pop-select";
+import PopSelect, { getOptionsFromPop, getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPop } from "./types";
@@ -39,7 +39,7 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
   // load form form url params
   useEffect(() => {
     if (params && Object.keys(params).length > 0) {
-      const popArray = getOptionsFromKeys(params.pop);
+      const popArray = getOptionsFromPop(params.pop);
       reset({ ...params, pop: popArray });
     }
   }, [params, reset]);

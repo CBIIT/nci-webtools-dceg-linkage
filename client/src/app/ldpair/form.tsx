@@ -5,7 +5,7 @@ import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldpair } from "@/services/queries";
-import PopSelect, { getOptionsFromKeys, getSelectedPopulationGroups } from "@/components/select/pop-select";
+import PopSelect, { getOptionsFromPop, getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPair } from "./types";
@@ -35,7 +35,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
   // load form form url params
   useEffect(() => {
     if (params && Object.keys(params).length > 0) {
-      const popArray = getOptionsFromKeys(params.pop);
+      const popArray = getOptionsFromPop(params.pop);
       reset({ ...params, pop: popArray });
     }
   }, [params, reset]);
@@ -45,7 +45,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
     const hasAllParams = params && params.var1 && params.var2 && params.pop && params.genome_build && !params.reference;
     if (hasAllParams) {
       // Prepare form data for submission
-      const popArray = getOptionsFromKeys(params.pop);
+      const popArray = getOptionsFromPop(params.pop);
       onSubmit({
         var1: params.var1,
         var2: params.var2,
