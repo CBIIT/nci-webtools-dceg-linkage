@@ -5,7 +5,7 @@ export type NewsEntry = {
 
 export const versionHistory: NewsEntry[] = [
   {
-    title: "LDlink 6.0.0 Release (Date - TBD)",
+    title: "LDlink 6.0.0 Release (12/05/2025)",
     items: [
       "Modernized UI Technology with update from jQuery to Next.js and React's component-based architecture",
       "Improved site's UI responsiveness, layouts and error/warning messaging",
