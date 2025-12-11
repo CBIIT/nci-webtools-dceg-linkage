@@ -5,25 +5,48 @@ services:
       dockerfile: docker/backend.dockerfile
     platform: linux/amd64
     ports:
-      - "8000:80"
+      - "80:80"
       - "8080:8080"
     volumes:
       - ./data:/data
+      - ./logs:/logs
     env_file:
       - server/.env
     networks:
       - my_network
 
-  frontend:
-    build:
-      context: .
-      dockerfile: docker/frontend.dockerfile
-    ports:
-      - "9090:80"
-    environment:
-      API_HOST: "http://backend:80"
-    networks:
-      - my_network
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/frontend.dockerfile
+  #     args:
+  #       NEXT_PUBLIC_API_BASE_URL: http://backend:80
+  #       NEXT_PUBLIC_BASE_URL: localhost
+  #       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ""
+  #   ports:
+  #     - "3000:80"
+  #   networks:
+  #     - my_network
+
+  # frontend_old:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/frontend_old.dockerfile
+  #   ports:
+  #     - "9000:80"
+  #   environment:
+  #     API_HOST: "http://backend:80"
+  #   networks:
+  #     - my_network
+
+  # database:
+  #   image: mongo:latest
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - ./database:/data/db
+  #   networks:
+  #     - my_network
 
 #  ldsc:
 #    image: ldsc39
@@ -34,7 +57,6 @@ services:
 #      - "5000:5000"
 #    volumes:
 #      - ./data:/data
-      
 
 networks:
   my_network:

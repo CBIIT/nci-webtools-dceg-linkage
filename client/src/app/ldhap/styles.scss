@@ -1,0 +1,60 @@
+.table-body-border {
+  border: 1px solid #ccc;
+}
+
+.table-body-border tr {
+  border: none;
+}
+
+.table-body-border td {
+  border: none;
+}
+
+#ldhap-table-right {
+  min-width: 300px;
+  width: 65%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.haplotype {
+  color: black;
+  background: #c0c0c0; /* if a multiple grouped */
+}
+
+/* LDhap Heat Map - Version 4 */
+/* Pastel Colors light red, light orage, light blue, and light green */
+/* Color Code: http://paletton.com/palette.php?uid=7000u0klLMWnHN3kBNFgZMYgZMY */
+.haplotype_dash {
+  background: white !important;
+}
+.haplotype_a {
+  background: #ff7878 !important; /* Light red; */
+}
+.haplotype_t {
+  background: #ffb578 !important; /* Light Orange */
+}
+.haplotype_c {
+  background: #63d2d2 !important; /* Light Blue */
+}
+.haplotype_g {
+  background: #6de96d !important; /* Light Purple; c2b2da; Contrast Ratio: 7.17:1 */
+  /*
+	background: linear-gradient(145deg, #d4c9e5 , #c2b2da);
+	*/
+}
+
+/* Keep the two result columns on the same row and allow horizontal scroll on small viewports */
+.nowrap-scroll {
+  overflow-x: auto; /* allow horizontal scroll when columns don't fit */
+  -webkit-overflow-scrolling: touch; /* momentum scrolling for iOS */
+  display: flex; /* ensure child cols participate in flex layout */
+}
+
+.nowrap-scroll > .col,
+.nowrap-scroll > [class*="col-"] {
+  flex: 0 0 auto; /* prevent columns from shrinking or wrapping */
+}
+
+/* Slight spacing so the scroll isn't flush to the edges */
+.nowrap-scroll { padding-bottom: 0.5rem; }

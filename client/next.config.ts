@@ -1,0 +1,21 @@
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  experimental: {
+    proxyTimeout: 1000 * 60 * 15,
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/LDlinkRestWeb/:path*",
+        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:80"}/LDlinkRestWeb/:path*`,
+      },
+      {
+        source: "/api/:path*",
+        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/LDlinkRest/:path*`,
+      },
+    ];
+  },
+};
+
+export default nextConfig;

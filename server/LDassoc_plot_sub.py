@@ -1,34 +1,80 @@
 import json
+import logging
 import sys
 import operator
 import os
 import subprocess
+import time
+from datetime import datetime
 from multiprocessing.dummy import Pool
 from math import log10
 from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
 from LDutilites import get_config, array_split
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+
+# Configure module logger
+param_list = get_config()
+log_level = getattr(logging, param_list["log_level"].upper(), logging.DEBUG)
+logger = logging.getLogger("ldassoc_plot_sub")
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("[ldassoc_plot_sub] [%(asctime)s] [%(levelname)s] - %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(log_level)
+
+options = Options()
+options.add_argument("--headless")
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
-
-    # Set data directories using config.yml
+    """
+    Calculate and generate association plots in SVG format
+    
+    Args:
+        file (str): Input file path
+        region (str): Region type ('variant', 'gene', or 'region')
+        pop (str): Population identifier
+        request (str): Request identifier
+        genome_build (str): Genome build version
+        myargs (dict): Arguments dictionary
+        myargsName (str): Name argument
+        myargsOrigin (str): Origin argument
+    
+    Returns:
+        None
+    """
+    # Log function entry and parameters
+    logger.info(f'ldassoc_plot_sub params {{"file": "{file}", "region": "{region}", "pop": "{pop}", "request": "{request}", "genome_build": "{genome_build}", "myargsName": "{myargsName}", "myargsOrigin": "{myargsOrigin}"}}')
+    logger.debug("Starting LDassoc SVG generation subprocess")
+    
+    start_time = time.time()
+    
+    logger.debug(f"Starting LDassoc SVG generation - file: {file}, region: {region}, pop: {pop}, request: {request}, genome_build: {genome_build}")
+    
+    # Set data directories using config.yml 
     param_list = get_config()
     data_dir = param_list['data_dir']
     tmp_dir = param_list['tmp_dir']
     genotypes_dir = param_list['genotypes_dir']
-    aws_info = param_list['aws_info']
+    aws_info = param_list['aws_info'] 
     num_subprocesses = param_list['num_subprocesses']
+
+    logger.debug(f"Loaded configuration - data_dir: {data_dir}, tmp_dir: {tmp_dir}")
 
     export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
+        logger.debug(f"Created temporary directory: {tmp_dir}")
 
     chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 
     # Define parameters for --variant option
     if region=="variant":
+        logger.debug("Processing SVG generation for variant region mode")
         if myargsOrigin=="None":
             return None
             
@@ -39,12 +85,19 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             snp=myargsOrigin
 
             # Connect to Mongo snp database
-            db = connectMongoDBReadOnly(True)
+            logger.debug("Connecting to MongoDB for SNP coordinate lookup")
+            try:
+                db = connectMongoDBReadOnly(True)
+                logger.debug("Successfully connected to MongoDB")
+            except Exception as e:
+                logger.error(f"Failed to connect to MongoDB: {str(e)}")
+                return None
 
             # Find RS number in snp database
             var_coord=get_coords(db, snp)
 
             if var_coord==None:
+                logger.warning(f"SNP coordinate not found for: {snp}")
                 return None
                 
 
@@ -67,11 +120,21 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     header_list.append(myargs['pval'])
 
     # Load input file
-    with open(file) as fp:
-        header = fp.readline().strip().split()
-        first = fp.readline().strip().split()
+    logger.debug(f"Loading association data file: {file}")
+    try:
+        with open(file) as fp:
+            header = fp.readline().strip().split()
+            first = fp.readline().strip().split()
+        logger.debug(f"Successfully loaded file header with {len(header)} columns")
+    except FileNotFoundError as e:
+        logger.error(f"Association file not found: {file} - {str(e)}")
+        return None
+    except Exception as e:
+        logger.error(f"Error reading association file: {str(e)}")
+        return None
 
     if len(header)!=len(first):
+        logger.error(f"Header has {len(header)} elements and first line has {len(first)} elements")
         return None
         
 
@@ -107,13 +170,21 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
     elif region=="gene":
         if myargsName=="None":
+            logger.warning("Gene name not provided for gene region mode")
             return None
 
         # Find RS number in snp database
-        db = connectMongoDBReadOnly(True)
-        gene_coord = get_coords_gene(myargsName, db,genome_build)
+        logger.debug(f"Connecting to MongoDB for gene coordinate lookup: {myargsName}")
+        try:
+            db = connectMongoDBReadOnly(True)
+            gene_coord = get_coords_gene(myargsName, db,genome_build)
+            logger.debug("Successfully retrieved gene coordinates")
+        except Exception as e:
+            logger.error(f"Failed to connect to MongoDB or retrieve gene coordinates: {str(e)}")
+            return None
 
         if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
+            logger.warning(f"Gene coordinates not found for: {myargsName}")
             return None
             
         # Define search coordinates
@@ -215,19 +286,30 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
                                 assoc_dict[coord_i]=[col[p_index]]
                                 assoc_list.append([coord_i,float(col[p_index])])
 
+    logger.debug(f"Found {len(assoc_coords)} variants in the specified region from association file")
 
     # Coordinate list checks
     if len(assoc_coords)==0:
+        logger.warning("No variants found in the association file with genomic coordinates inside the plotting window")
         return None
 
 
     # Get population ids from population output file from LDassoc.py
-    pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-    ids=[]
-    for i in range(len(pop_list)):
-        ids.append(pop_list[i].strip())
-
-    pop_ids=list(set(ids))
+    logger.debug(f"Loading population IDs from file: {tmp_dir}pops_{request}.txt")
+    try:
+        pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
+        ids=[]
+        for i in range(len(pop_list)):
+            ids.append(pop_list[i].strip())
+        
+        pop_ids=list(set(ids))
+        logger.debug(f"Successfully loaded {len(pop_ids)} population IDs")
+    except FileNotFoundError as e:
+        logger.error(f"Population file not found: {tmp_dir}pops_{request}.txt - {str(e)}")
+        return None
+    except Exception as e:
+        logger.error(f"Error loading population IDs: {str(e)}")
+        return None
 
 
     # Define LD origin coordinate
@@ -266,7 +348,10 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     for subprocess_id in range(num_subprocesses):
         subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
         commands.append("python3 LDassoc_sub.py " + subprocessArgs)
-     
+    
+    logger.debug(f"Starting {num_subprocesses} LDassoc_sub subprocesses for LD calculations")
+    subprocess_start_time = time.time()
+    
     processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
     pool = Pool(len(processes))
@@ -274,8 +359,11 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     pool.close()
     pool.join()
 
+    subprocess_duration = round(time.time() - subprocess_start_time, 2)
+    logger.debug(f"LDassoc_sub subprocesses completed in {subprocess_duration} seconds")
 
     # Aggregate output
+    logger.debug("Aggregating subprocess output")
     out_prox=[]
     for i in range(len(out_raw)):
         for j in range(len(out_raw[i])):
@@ -290,6 +378,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
                 col.append(float(assoc_dict[coord_i_j][0]))
                 out_prox.append(col)
 
+    logger.debug(f"Processed {len(out_prox)} variants with LD calculations")
 
     out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
     out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=False)
@@ -391,6 +480,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
 
     # Begin Bokeh Plotting
+    logger.debug("Starting Bokeh visualization generation")
     from collections import OrderedDict
     from bokeh.embed import components,file_html
     from bokeh.layouts import gridplot
@@ -419,11 +509,11 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
     assoc_plot=figure(
                 title="P-values and Regional LD for "+snp+" in "+pop,
-                min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-                plot_width=900,
-                plot_height=600,
+                min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+                width=900,
+                height=600,
                 x_range=xr, y_range=yr,
-                tools="tap,pan,box_zoom,wheel_zoom,box_select,undo,redo,reset,previewsave", logo=None,
+                tools="tap,pan,box_zoom,wheel_zoom,box_select,undo,redo,reset,save", 
                 toolbar_location="above")
 
     assoc_plot.title.align="center"
@@ -447,11 +537,11 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     b = [-log10(0.00000005),-log10(0.00000005)]
     assoc_plot.line(a, b, color="blue", alpha=0.5)
 
-    assoc_points_not1000G=assoc_plot.circle(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
-    assoc_points=assoc_plot.circle(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
-    assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
+    assoc_points_not1000G=assoc_plot.scatter(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
+    assoc_points=assoc_plot.scatter(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
+    assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")]), toggleable=False))
 
-    hover=HoverTool(renderers=[assoc_points])
+    hover=HoverTool(renderers=[assoc_points], toggleable=False)
     hover.tooltips=OrderedDict([
         ("Variant", "@prs @p_alle"),
         ("P-value", "@p_val"),
@@ -489,12 +579,11 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
     rug=figure(
             x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
-            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-            plot_width=900, plot_height=50, tools="xpan,tap,wheel_zoom", logo=None)
+            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+            width=900, height=50, tools="xpan,tap,wheel_zoom")
 
     rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug, color='color', alpha='alpha', line_width=1)
     rug.toolbar_location=None
-
 
     # Gene Plot (All Transcripts)
     if myargs['transcript']==True:
@@ -594,8 +683,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2, border_fill_color='white',
-                            title="", h_symmetry=False, v_symmetry=False, logo=None,
-                            plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                            title="",  
+                            width=900, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -610,6 +699,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             ("Transcript ID", "@exons_plot_id"),
             ("Exon", "@exons_plot_exon"),
         ])
+        hover.toggleable = False
 
         # else:
         #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
@@ -633,14 +723,14 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
         export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
-        # 1 pixel = 0.0264583333 cm
+        # # 1 pixel = 0.0264583333 cm
         svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
         svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
         
-        # Concatenate svgs
+        # # Concatenate svgs
         sg.Figure("24.59cm", svg_height,
-            sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
-            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
+             sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+             sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
             ).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
         sg.Figure("122.95cm", svg_height_scaled,
@@ -648,13 +738,13 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
             ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
 
-        # Export to PDF
+        # # Export to PDF
         subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
-        # Export to PNG
+        # # Export to PNG
         subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
-        # Export to JPEG
+        # # Export to JPEG
         subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
-        # Remove individual SVG files after they are combined
+        # # Remove individual SVG files after they are combined
         subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
         subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
         # Remove scaled SVG file after it is converted to png and jpeg
@@ -745,8 +835,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
         gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2_c, border_fill_color='white',
-                            title="", h_symmetry=False, v_symmetry=False, logo=None,
-                            plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                            title="",  
+                            width=900, height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
@@ -760,6 +850,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             ("Gene", "@exons_c_plot_name"),
             ("Transcript IDs", "@exons_c_plot_id"),
         ])
+        hover.toggleable = False
 
         # else:
         #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
@@ -780,9 +871,13 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         assoc_plot.output_backend = "svg"
         rug.output_backend = "svg"
         gene_c_plot.output_backend = "svg"
-        export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
-        export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
-        
+        driver = webdriver.Firefox(options=options)
+        # export_png(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".png", webdriver=driver)
+        # export_png(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".png", webdriver=driver)
+        export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg", webdriver=driver)
+        export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg", webdriver=driver)
+        driver.quit()
+
         # 1 pixel = 0.0264583333 cm
         svg_height = str(20.00 + (0.0264583333 * plot_c_h_pix)) + "cm"
         svg_height_scaled = str(100.00 + (0.1322916665 * plot_c_h_pix)) + "cm"
@@ -813,21 +908,24 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     reset_output()
 
     # Remove temporary files
+    logger.debug("Cleaning up temporary files")
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
     subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.json", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".json", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
-    print("Bokeh high quality image export complete!")
+    duration = round(time.time() - start_time, 2)
+    logger.debug(f"Executed LDassoc_plot_sub ({duration}s)")
+    logger.debug("Bokeh high quality image export complete!")
 
     # Return plot output
     return None
 
 def main():
-
     # Import LDassoc options
     if len(sys.argv) == 9:
+        # Command line usage
         filename = sys.argv[1]
         file = sys.argv[2]
         region = sys.argv[3]
@@ -836,15 +934,28 @@ def main():
         genome_build = sys.argv[6]
         myargsName = sys.argv[7]
         myargsOrigin = sys.argv[8]
+
+        # Load args parameters passed from LDassoc.py
+        logger.debug(f"Loading arguments from file: {filename}")
+        try:
+            with open(filename) as f:
+                args = json.load(f)
+            logger.debug("Successfully loaded arguments file")
+        except FileNotFoundError as e:
+            logger.error(f"Arguments file not found: {filename} - {str(e)}")
+            return
+        except json.JSONDecodeError as e:
+            logger.error(f"Error parsing JSON from arguments file: {str(e)}")
+            return
+        except Exception as e:
+            logger.error(f"Error loading arguments file: {str(e)}")
+            return
+
+        # Run function
+        calculate_assoc_svg(file, region, pop, request, genome_build, args, myargsName, myargsOrigin)
     else:
-        sys.exit()
-    # Load args parameters passed from LDassoc.py
-    with open(filename) as f:
-        args = json.load(f)
-
-    # Run function
-    calculate_assoc_svg(file, region, pop, request, genome_build, args, myargsName, myargsOrigin)
-
+        # Called as imported module
+        pass
 
 if __name__ == "__main__":
     main()

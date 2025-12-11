@@ -1,0 +1,204 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { Row, Col, Container, Dropdown, Alert } from "react-bootstrap";
+import Spinner from "react-bootstrap/Spinner";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { fetchOutput, fetchOutputStatus } from "@/services/queries";
+
+export default function LdAMatrixResults({ ref }: { ref: string }) {
+  const [bokehLoaded, setBokehLoaded] = useState(false);
+
+  // Function to load Bokeh script dynamically
+  const loadBokehScript = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // Check if Bokeh is already loaded
+      if ((window as any).Bokeh) {
+        setBokehLoaded(true);
+        resolve();
+        return;
+      }
+
+      // Check if script is already in the document
+      const existingScript = document.querySelector('script[src*="bokeh"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', () => {
+          setBokehLoaded(true);
+          resolve();
+        });
+        existingScript.addEventListener('error', reject);
+        return;
+      }
+
+      // Create and load new script
+      const script = document.createElement('script');
+      script.src = 'https://cdn.bokeh.org/bokeh/release/bokeh-3.4.3.min.js';
+      script.crossOrigin = 'anonymous';
+      script.async = true;
+      
+      script.onload = () => {
+        setBokehLoaded(true);
+        resolve();
+      };
+      
+      script.onerror = () => {
+        reject(new Error('Failed to load Bokeh script'));
+      };
+
+      document.head.appendChild(script);
+    });
+  };
+
+  // Load Bokeh script on component mount
+  useEffect(() => {
+    loadBokehScript().catch(console.error);
+  }, []);
+
+  const handleDownload = async (format: string) => {
+    const url = `/LDlinkRestWeb/tmp/matrix_plot_${ref}.${format}`;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `matrix_plot_${ref}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  };
+
+  const { data: status } = useSuspenseQuery({
+    queryKey: ["ldmatrix_status", ref],
+    queryFn: async () => (ref ? fetchOutput(`matrix${ref}.json`) : null),
+  });
+  const { data: enableExport } = useQuery<boolean>({
+    queryKey: ["ldmatrix-export", ref],
+    queryFn: async () => (ref ? fetchOutputStatus(`matrix_plot_${ref}.jpeg`) : false),
+    enabled: !!ref && !status?.error,
+    refetchInterval: (query) => (query.state.data ? false : 5000),
+    retry: 60,
+  });
+
+  const { data: plotJson } = useSuspenseQuery({
+    queryKey: ["ldmatrix_plot", ref],
+    queryFn: async () => (ref && !status?.error ? fetchOutput(`ldmatrix_plot_${ref}.json`) : null),
+  });
+
+  const plotRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (plotJson && plotRef.current && bokehLoaded && (window as any).Bokeh) {
+      // Remove any existing Bokeh plots
+      const docs = (window as any).Bokeh?.documents || [];
+      docs.forEach((doc: any) => doc.clear());
+
+      // Clear the container
+      plotRef.current.innerHTML = "";
+
+      // Create new plot using global Bokeh
+      (window as any).Bokeh.embed.embed_item(plotJson, plotRef.current);
+
+      // Center horizontally once without preventing full left scroll
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          const sc = scrollContainerRef.current;
+          const maxScroll = sc.scrollWidth - sc.clientWidth;
+          if (maxScroll > 0) sc.scrollLeft = maxScroll / 2;
+        }
+      });
+    }
+
+    // Cleanup on unmount
+    return () => {
+      const docs = (window as any).Bokeh?.documents || [];
+      docs.forEach((doc: any) => doc.clear());
+    };
+  }, [plotJson, bokehLoaded]);
+
+  return (
+    <>
+      <hr />
+      {status?.warning && <Alert variant="warning">{status.warning}</Alert>}
+      {status && !status?.error ? (
+        <Container fluid="md" className="justify-content-center">
+          <Row className="align-items-center">
+            <Col sm={12} className="justify-content-end text-end">
+              <Dropdown>
+                <Dropdown.Toggle variant="outline-primary" disabled={!enableExport}>
+                  {enableExport ? (
+                    "Export Plot"
+                  ) : (
+                    <>
+                      <Spinner size="sm" animation="border" /> Export Plot
+                    </>
+                  )}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => handleDownload("svg")}>SVG</Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleDownload("pdf")}>PDF</Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleDownload("png")}>PNG</Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleDownload("jpeg")}>JPEG</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Col>
+            <Col sm={12} className="text-center">
+              <div
+                ref={scrollContainerRef}
+                className="overflow-x-auto"
+                style={{ width: "100%" }}
+              >
+                {plotJson && (
+                  <div
+                    ref={plotRef}
+                    className="mt-4"
+                    style={{ display: "inline-block" }}
+                  />
+                )}
+              </div>
+            </Col>
+            <Col sm={12} className="d-flex justify-content-center my-3">
+              <Image
+                src="/images/LDmatrix_legend.png"
+                title="LDmatrix Legend"
+                alt="LDmatrix legend"
+                width={700}
+                height={0}
+                style={{
+                  height: "auto",
+                  width: "100%",
+                  maxWidth: "400px",
+                }}
+              />
+            </Col>
+            <Col sm={12} className="justify-content-center text-center">
+              <a
+                href="https://forgedb.cancer.gov/about/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="FORGEdb scoring scheme">
+                View scoring scheme for FORGEdb scores
+              </a>
+            </Col>
+          </Row>
+          <Row>
+            <Col sm="auto">
+              <a href={`/LDlinkRestWeb/tmp/d_prime_${ref}.txt`} download>
+                Download D&#39; File
+              </a>
+            </Col>
+            <Col>
+              <a href={`/LDlinkRestWeb/tmp/r2_${ref}.txt`} download>
+                Download R<sup>2</sup>
+              </a>
+            </Col>
+          </Row>
+          <p>Note: these results will be deleted after one hour.</p>
+        </Container>
+      ) : (
+        <Alert variant="danger">{status?.error || "An error has occured"}</Alert>
+      )}
+    </>
+  );
+}

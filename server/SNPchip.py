@@ -131,6 +131,9 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
     count = 0
     platform_NOT = []
     if platform_query != "":  # <--If user did not enter platforms as a request
+        #platform_list = convert_codeToPlatforms(platform_query, web)
+        if isinstance(platform_query, list):
+            platform_query = '+'.join(platform_query)
         platform_list = convert_codeToPlatforms(platform_query, web)
     # Quering MongoDB to get platforms for position/chromsome pairs
     else:
@@ -150,9 +153,10 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
         for document in cursor:
             for z in range(0, len(document["data"])):
                 if((document["data"][z]["platform"] in platform_list or document["data"][z]["platform"].rstrip(' Array') in platform_list) and platform_query != ""):
-                    platforms.append(document["data"][z]["platform"])
+                    print("platform:", document["data"][z]["platform"])
+                    platforms.append(document["data"][z]["platform"].removesuffix(' Array'))
                 elif(platform_query == ""):
-                    platforms.append(document["data"][z]["platform"])
+                    platforms.append(document["data"][z]["platform"]).removesuffix(' Array')
         if(platforms == []):
             rs = snp_coords_sort[k][0]
             platform_NOT.append(rs)

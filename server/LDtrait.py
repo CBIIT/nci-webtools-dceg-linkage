@@ -30,8 +30,13 @@ def get_ldtrait_timestamp(web):
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
         return "Failed to connect to server."
 
+    object_id_datetime = None
     for document in db.gwas_catalog.find().sort("_id", -1).limit(1):
         object_id_datetime = document.get('_id').generation_time
+    
+    if object_id_datetime is None:
+        return json.dumps({"error": "No documents found in GWAS catalog"}, sort_keys=True, indent=2)
+    
     json_output = json.dumps(object_id_datetime, default=json_util.default, sort_keys=True, indent=2)
     return json_output
 
@@ -103,7 +108,21 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     matched_snps = []
     window_problematic_snps = []
     for record in found:
-        ld = ldInfo.get(query_snp).get("rs" + record["SNP_ID_CURRENT"])
+        # Check if ldInfo has the query_snp and the specific RS number
+        query_snp_ld = ldInfo.get(query_snp)
+        if query_snp_ld is None:
+            # If no LD info for query SNP, skip this record
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "No LD information available for query SNP."]
+            window_problematic_snps.append(problematic_record)
+            continue
+            
+        ld = query_snp_ld.get("rs" + record["SNP_ID_CURRENT"])
+        if ld is None:
+            # If no LD info for this specific SNP pair, skip this record
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "No LD information available for SNP pair."]
+            window_problematic_snps.append(problematic_record)
+            continue
+            
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
             if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
                 matched_record = []
@@ -147,7 +166,11 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                     problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
                     window_problematic_snps.append(problematic_record)
         else:
-            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
+            # Handle case where LD values are "NA"
+            if ld and "output" in ld and "error" in ld["output"]:
+                problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
+            else:
+                problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "LD calculation failed."]
             window_problematic_snps.append(problematic_record)
     return (matched_snps, window_problematic_snps)
 
@@ -271,6 +294,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     thinned_list = []
 
     print("##### FIND GWAS VARIANTS IN WINDOW #####")	
+    
     # establish low/high window for each query snp
     # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     found = {}	
@@ -281,7 +305,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     for snp_coord in snp_coords:
         # print(snp_coord)
         found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window, genome_build)
-        # print("found", snp_coord[0], len(found[snp_coord[0]]))
         if found[snp_coord[0]] is not None:
             thinned_list.append(snp_coord[0])
             snp_coords_gwas.append(snp_coord)
@@ -301,6 +324,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         output["warning"] = 'Too many snp pairs found within the specified base pair window which might cause server timeout.'+\
             ' You might want to split the input in multiple runs to avoid timeout. ' +\
             ' If you still want to proceed with the current list, click "Continue".' + \
+            ' If you want to start over, click "Reset".' + \
                               str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
@@ -394,10 +418,22 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         out_json.close()
         return("", "", "")
 
-    # Return output
-    json_output = json.dumps(output, sort_keys=True, indent=2)
+    # Prepare return data
+    return_data = {
+        "query_snps": sanitized_query_snps,
+        "thinned_snps": thinned_list,
+        "details": details
+    }
+    if "warning" in output:
+        return_data["warning"] = output["warning"]
+    if "error" in output:
+        return_data["error"] = output["error"]
+        
+    # Write the return data to file
+    json_output = json.dumps(return_data, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
+
     end = timer()	
     print("TIME ELAPSED:", str(end - start) + "(s)")	
     print("##### LDTRAIT COMPLETE #####")

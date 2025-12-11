@@ -23,6 +23,8 @@ RUN dnf -y update \
     tar \
     xz-devel \
     zlib-devel \
+    firefox \
+    xorg-x11-server-Xvfb \
     && dnf clean all
 
 # install htslib
@@ -52,6 +54,27 @@ RUN cd /tmp \
     && tar -xjf phantomjs.tar.bz2 \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
     && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64 phantomjs.tar.bz2
+
+# install geckodriver
+ENV GECKODRIVER_VERSION=0.36.0
+ENV MOZ_HEADLESS=1
+ENV DISPLAY=:99
+
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+    GD_ARCH="linux64"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+    GD_ARCH="linux-aarch64"; \
+    else \
+    echo "Unsupported architecture: $ARCH"; exit 1; \
+    fi && \
+    cd /tmp && \
+    curl -L "https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-$GD_ARCH.tar.gz" -o geckodriver.tar.gz && \
+    tar -xzf geckodriver.tar.gz && \
+    mv geckodriver /usr/local/bin/ && \
+    chmod +x /usr/local/bin/geckodriver && \
+    ln -s /usr/local/bin/geckodriver /usr/bin/geckodriver && \
+    rm geckodriver.tar.gz
 
 ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
 
@@ -83,11 +106,15 @@ COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
 
+# RUN mkdir -p /usr/share/httpd/.cache/selenium \
+#     && chown -R apache:apache /usr/share/httpd/.cache
+
 EXPOSE 80
 
 EXPOSE 8080
 
-CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
+CMD flask --app bokehExport run & \
+    mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --httpd-executable=/usr/sbin/httpd \
     --modules-directory /etc/httpd/modules/ \
     --include-file /etc/httpd/conf.d/wsgi.conf \
@@ -96,8 +123,9 @@ CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --compress-responses \
     --trust-proxy-header X-Forwarded-For \
     --log-to-terminal \
+    # --log-level info \
     --access-log \
-    --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %T \"%{Referer}i\" \"%{User-Agent}i\"" \
+    --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined \
     --port 80 \
     --working-directory ${LDLINK_HOME} \
     --header-buffer-size 50000000 \
@@ -111,5 +139,7 @@ CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --graceful-timeout 9000 \
     --connect-timeout 9000 \
     --request-timeout 9000 \
+    --send-buffer-size 50000000 \
+    --receive-buffer-size 50000000 \
     --processes $(((1 + `nproc`) / 2)) \
     --threads 1

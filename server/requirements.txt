@@ -1,16 +1,19 @@
-
-bokeh==0.13.0
-boto3
-Flask==1.1.4
-jinja2==2.11.3
-MarkupSafe==1.1.1
-mod_wsgi
+bokeh==3.4.3
+boto3==1.40.8
+Flask==3.1.1
+jinja2==3.1.6
+MarkupSafe==3.0.2
+mod_wsgi==5.0.2
 numpy==1.23.3
-pymongo
-python-dateutil
-python-dotenv
-requests
-selenium==3.3.0
-svgutils==0.3.0
+pymongo==4.14.0
+python-dateutil==2.8.2
+python-dotenv==1.1.1
+requests==2.32.4
+selenium==4.32.0
+httpx==0.28.1
+svgutils==0.3.1
+cairosvg==2.8.2
+Pillow==11.3.0
 pybedtools==0.9.1  # Specify a known working version
-ldsc @ git+https://github.com/CBIIT/ldsc.git@1e991f5544601a3d7ee8c5507e2559557b237974
+ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
+Flask-Limiter[mongodb]==3.11.0

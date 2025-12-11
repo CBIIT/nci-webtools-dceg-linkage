@@ -21,9 +21,20 @@
   },
   "homepage": "https://github.com/CBIIT/nci-webtools-dceg-linkage#readme",
   "devDependencies": {
+    "@anthropic-ai/claude-code": "^1.0.83",
     "chai": "^4.2.0",
+    "lint-staged": "^13.0.2",
     "mocha": "^5.2.0",
+    "prettier": "^2.7.1",
     "request": "^2.88.0",
     "selenium-webdriver": "^4.0.0-alpha.1"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "quoteProps": "consistent",
+    "bracketSameLine": true
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }

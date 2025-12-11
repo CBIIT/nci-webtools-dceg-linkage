@@ -774,11 +774,11 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
 
     proxy_plot = figure(
         title="Proxies for " + snp + " in " + pop,
-        min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-        plot_width=900,
-        plot_height=600,
+        min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+        width=900,
+        height=600,
         x_range=xr, y_range=yr,
-        tools="hover,tap,pan,box_zoom,box_select,undo,redo,reset,previewsave", logo=None,
+        tools="hover,tap,pan,box_zoom,box_select,undo,redo,reset,save", 
         toolbar_location="above")
 
     proxy_plot.title.align = "center"
@@ -816,23 +816,30 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
     source = ColumnDataSource(data)
 
     proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
+ # Add scatter plot with specific hover tool
+    scatter_renderer = proxy_plot.scatter(x='x', y='y', size='size',
+                                        color='color', alpha=0.5, source=source)
 
-    proxy_plot.circle(x='x', y='y', size='size',
-                    color='color', alpha=0.5, source=source)
-
-    hover = proxy_plot.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("Query Variant", "@qrs @q_alle"),
-        ("Proxy Variant", "@prs @p_alle"),
-        ("Distance (Mb)", "@dist"),
-        ("MAF (Query,Proxy)", "@q_maf,@p_maf"),
-        ("R" + sup_2, "@r"),
-        ("D\'", "@d"),
-        ("Correlated Alleles", "@alleles"),
-        ("FORGEdb Score", "@forgedb"),
-        ("RegulomeDB Rank", "@regdb"),
-        ("Functional Class", "@funct"),
-    ])
+    # Create specific hover tool for scatter points only
+    hover_tool = HoverTool(
+        renderers=[scatter_renderer],
+        tooltips=OrderedDict([
+            ("Query Variant", "@qrs @q_alle"),
+            ("Proxy Variant", "@prs @p_alle"),
+            ("Distance (Mb)", "@dist"),
+            ("MAF (Query,Proxy)", "@q_maf,@p_maf"),
+            ("R" + sup_2, "@r"),
+            ("D\'", "@d"),
+            ("Correlated Alleles", "@alleles"),
+            ("FORGEdb Score", "@forgedb"),
+            ("RegulomeDB Rank", "@regdb"),
+            ("Functional Class", "@funct"),
+        ])
+    )
+    
+    # Remove the default hover tool and add our specific one
+    proxy_plot.tools = [tool for tool in proxy_plot.tools if not isinstance(tool, HoverTool)]
+    proxy_plot.add_tools(hover_tool)
 
     if annotate == "regulome":
         proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
@@ -880,15 +887,15 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
 
     rug = figure(
         x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
-        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-        plot_width=900, plot_height=50, tools="xpan,tap", logo=None)
+        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+        width=900, height=50, tools="xpan,tap")
 
     rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug,
                 color='color', alpha=0.5, line_width=1)
     rug.toolbar_location = None
-
     if collapseTranscript == "false":
         # Gene Plot (All Transcripts)
+        print("Making request to export service for high quality images for all transcripts")
         genes_file = tmp_dir + "genes_" + request + ".json"
         genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
         #genes_json = open(genes_file).readlines()
@@ -988,8 +995,8 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
 
         gene_plot = figure(
             x_range=xr, y_range=yr2, border_fill_color='white',
-            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-            plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
+            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+            width=900, height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,save")
 
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                         genes_plot_yn, color="black", alpha=1, line_width=2)
@@ -1017,8 +1024,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         gene_plot.toolbar_location = "below"
 
         # Combine plots into a grid
-        out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
-                            toolbar_options=dict(logo=None))
+        out_grid = gridplot([proxy_plot, rug, gene_plot], ncols=1, toolbar_options=dict(logo=None))
         return (out_grid,proxy_plot,gene_plot,rug,plot_h_pix)
     # Gene Plot (Collapsed)                        
     else:
@@ -1102,8 +1108,8 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
 
         gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                         x_range=xr, y_range=yr2_c, border_fill_color='white',
-                        title="", h_symmetry=False, v_symmetry=False, logo=None,
-                        plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                        title="",  
+                        width=900, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
@@ -1133,6 +1139,5 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
 
         gene_c_plot.toolbar_location = "below"
         
-        out_grid = gridplot(proxy_plot, rug, gene_c_plot,
-                    ncols=1, toolbar_options=dict(logo=None))
+        out_grid = gridplot([proxy_plot, rug, gene_c_plot], ncols=1, toolbar_options=dict(logo=None))
         return (out_grid,proxy_plot,gene_c_plot,rug,plot_h_pix)
