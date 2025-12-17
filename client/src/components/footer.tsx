@@ -42,8 +42,8 @@ export default function Footer() {
                   </li>
                 </ul>
                 <ul className="list-unstyled mb-0 mt-3">
-                  <li>Version: {version}</li>
-                  <li>Last Updated: {date}</li>
+                  <li>Version: 6.0.0</li>
+                  {/* <li>Last Updated: {date}</li> */}
                 </ul>
               </div>
               <div className="col-lg-4 mb-4">
