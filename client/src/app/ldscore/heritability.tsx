@@ -153,7 +153,10 @@ export default function Heritability() {
                   disabled={heritabilityLoading}
                    {...heritabilityForm.register("file", { 
                     required: "File is required",
-                    validate: (file: File | File[] | FileList | undefined) => {
+                    validate: (file: File | FileList | undefined) => {
+                      // If we already have an uploaded filename or example filename, validation passes
+                      if (uploadedFilename || exampleFilename) return true;
+                      
                       if (!file) return 'File is required';
                       // Handle FileList, File[], or single File
                       const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
