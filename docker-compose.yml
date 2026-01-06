@@ -15,18 +15,18 @@ services:
     networks:
       - my_network
 
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: docker/frontend.dockerfile
-  #     args:
-  #       NEXT_PUBLIC_API_BASE_URL: http://backend:80
-  #       NEXT_PUBLIC_BASE_URL: localhost
-  #       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ""
-  #   ports:
-  #     - "3000:80"
-  #   networks:
-  #     - my_network
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://backend:80
+        NEXT_PUBLIC_BASE_URL: localhost
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ""
+    ports:
+      - "3000:80"
+    networks:
+      - my_network
 
   # frontend_old:
   #   build:
@@ -48,15 +48,15 @@ services:
   #   networks:
   #     - my_network
 
-#  ldsc:
-#    image: ldsc39
-#    container_name: ldsc_container
-#    networks:
-#      - my_network
-#    ports:
-#      - "5000:5000"
-#    volumes:
-#      - ./data:/data
+  ldsc:
+   image: ldsc39
+   container_name: ldsc_container
+   networks:
+     - my_network
+   ports:
+     - "5000:5000"
+   volumes:
+     - ./data:/data
 
 networks:
   my_network:

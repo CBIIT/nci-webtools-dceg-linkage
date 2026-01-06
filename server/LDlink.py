@@ -727,10 +727,10 @@ def upload():
         if len(request.files) == 0:
             app.logger.warning("Upload request received with no files")
             return "No file part..."
-
+    
         reference = request.form.get("reference", None)
         uploaded_files = []
-
+        app.logger.debug(f"Upload reference: {reference}")
         for file_key in request.files:
             file = request.files[file_key]
             if file.filename == "":
@@ -1051,50 +1051,51 @@ def ldscore():
     )
 
     fileDir = f"/data/tmp/uploads/{reference}/"
-
+    inputfilename = "22"
     # print(filename)
     if filename:
         # Split by comma or semicolon (adjust as needed)
         filenames = [secure_filename(f.strip()) for f in filename.replace(";", ",").split(",")]
+        # Set inputfilename from the first file (all files should have the same base name)
+        if filenames:
+            first_fileroot, _ = os.path.splitext(filenames[0])
+            inputfilename = first_fileroot
         for fname in filenames:
             fileroot, ext = os.path.splitext(fname)
-
+            
+            # Validate that all files have the same base name
+            if fileroot != inputfilename:
+                error_msg = f"All uploaded files must have the same base name. Expected '{inputfilename}' but got '{fileroot}' for file '{fname}'"
+                app.logger.error(error_msg)
+                #return  {"result": error_msg}
+            
             # Find the chromosome number in the filename
-            file_parts = fname.split(".")
-            file_chromo = None
-            for part in file_parts:
-                if part.isdigit() and 1 <= int(part) <= 22:
-                    file_chromo = part
-                    break
+            # file_parts = fname.split(".")
+            # file_chromo = None
+            # for part in file_parts:
+            #     if part.isdigit() and 1 <= int(part) <= 22:
+            #         file_chromo = part
+            #         break
 
-            app.logger.info(file_chromo)
-            if file_chromo:
-                # Find the file in the directory
-                pattern = os.path.join("/data/tmp/uploads/", f"*{file_chromo}.*")
-
+            #app.logger.info(file_chromo)
+            if fname:
+                # Create the reference subfolder if it doesn't exist
+                os.makedirs(fileDir, exist_ok=True)
+                new_file_path = os.path.join(fileDir, fname)
+                
                 if str(isExample).lower() == "true":
-                    pattern = os.path.join("/data/ldscore", f"*{file_chromo}.*")
-                    app.logger.info(pattern)
-
-                for file_path in glob.glob(pattern):
-                    extension = file_path.split(".")[-1]
-                    new_filename = f"{file_chromo}.{extension}"
-                    new_file_path = os.path.join(fileDir, new_filename)
-                    # Create the reference subfolder if it doesn't exist
-                    reference_folder = os.path.join(fileDir, str(reference))
-                    os.makedirs(reference_folder, exist_ok=True)
-                    new_file_path = os.path.join(fileDir, new_filename)
-                    if os.path.abspath(file_path) != os.path.abspath(new_file_path):
-                        shutil.copyfile(file_path, new_file_path)
-                        app.logger.info(f"Copied {file_path} to {new_file_path}")
-                        try:
-                            if not str(isExample).lower() == "true":
-                                os.remove(file_path)
-                                app.logger.info(f"Deleted original file: {file_path}")
-                        except Exception as e:
-                            app.logger.error(f"Error deleting original file {file_path}: {e}")
+                    # For example files, copy from /data/ldscore/ to reference folder
+                    pattern = os.path.join("/data/ldscore/", f"{fname}")
+                    app.logger.info(f"Copying example file from {pattern} to {new_file_path}")
+                    shutil.copyfile(pattern, new_file_path)
+                    app.logger.info(f"Copied example file {fname} to {new_file_path}")
+                else:
+                    # For uploaded files, they are already in the reference folder from upload endpoint
+                    # Just verify the file exists
+                    if os.path.exists(new_file_path):
+                        app.logger.info(f"Using uploaded file at {new_file_path}")
                     else:
-                        app.logger.debug(f"Skipped copying {file_path} to itself.")
+                        app.logger.error(f"Uploaded file not found at {new_file_path}")
                     # os.rename(file_path, new_file_path)
                     # print(f"Copied {file_path} to {new_file_path}")
     try:
@@ -1102,13 +1103,15 @@ def ldscore():
 
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
-
-        result = run_ldsc_command(pop, genome_build, filename, ldwindow, windUnit, isExample, reference)
+ 
+        result = run_ldsc_command(pop, genome_build, inputfilename, ldwindow, windUnit, isExample, reference)
         app.logger.debug("LDscore calculation completed, processing result")
         # print(result)
+   
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
+
             # Write result to file for frontend to fetch, like ldpop
             if reference:
                 result_filename = os.path.join(tmp_dir, f"ldscore_{reference}.txt")
@@ -1259,32 +1262,26 @@ def ldherit():
 
     fileDir = f"/data/tmp/uploads/{reference}/"
     app.logger.debug(f"LDherit processing filename: {filename}")
-    # Copy file to reference subfolder and remove original
+    # Handle file copying based on example vs uploaded
     if filename:
         filename = secure_filename(filename)
-        # Use /data/ldscore/ for example files
-        if str(isexample).lower() == "true":
-            src_path = os.path.join(param_list["data_dir"], "ldscore", filename)
-        else:
-            src_path = os.path.join(app.config["UPLOAD_DIR"], filename)
-        dst_path = os.path.join(fileDir, filename)
+        # Create the reference subfolder if it doesn't exist
         os.makedirs(fileDir, exist_ok=True)
-        if os.path.abspath(src_path) != os.path.abspath(dst_path):
-            app.logger.info(f"Moving {src_path} to {dst_path}")
-            if not os.path.exists(src_path):
-                app.logger.error(f"Source file does not exist: {src_path}")
-            else:
-                try:
-                    shutil.copyfile(src_path, dst_path)
-                    app.logger.info(f"Copied {src_path} to {dst_path}")
-                    # Only remove if not example
-                    if str(isexample).lower() != "true":
-                        os.remove(src_path)
-                        app.logger.info(f"Deleted original file: {src_path}")
-                except Exception as e:
-                    app.logger.error(f"Error copying/removing file {src_path}: {e}")
+        new_file_path = os.path.join(fileDir, filename)
+        
+        if str(isexample).lower() == "true":
+            # For example files, copy from /data/ldscore/ to reference folder
+            pattern = os.path.join("/data/ldscore/", f"{filename}")
+            app.logger.info(f"Copying example file from {pattern} to {new_file_path}")
+            shutil.copyfile(pattern, new_file_path)
+            app.logger.info(f"Copied example file {filename} to {new_file_path}")
         else:
-            app.logger.debug(f"Skipped copying {src_path} to itself.")
+            # For uploaded files, they are already in the reference folder from upload endpoint
+            # Just verify the file exists
+            if os.path.exists(new_file_path):
+                app.logger.info(f"Using uploaded file at {new_file_path}")
+            else:
+                app.logger.error(f"Uploaded file not found at {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
 
@@ -1418,40 +1415,35 @@ def ldcorrelation():
     isexample = request.args.get("isExample", False)
     reference = request.args.get("reference", False)
     app.logger.debug(
-        f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+        f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}"
     )
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
     fileDir = f"/data/tmp/uploads/{reference}/"
-    app.logger.debug(f"LDcorrelation processing filename: {filename}")
-    # Copy both files to reference subfolder and remove originals
-    os.makedirs(fileDir, exist_ok=True)
+    
+    # Handle file copying based on example vs uploaded
     for fname in [filename, filename2]:
         if fname:
             fname = secure_filename(fname)
-            # Use /data/ldscore/ for example files
+            # Create the reference subfolder if it doesn't exist
+            os.makedirs(fileDir, exist_ok=True)
+            new_file_path = os.path.join(fileDir, fname)
+            
             if str(isexample).lower() == "true":
-                src_path = os.path.join(param_list["data_dir"], "ldscore", fname)
+                # For example files, copy from /data/ldscore/ to reference folder
+                pattern = os.path.join("/data/ldscore/", f"{fname}")
+                app.logger.info(f"Copying example file from {pattern} to {new_file_path}")
+                shutil.copyfile(pattern, new_file_path)
+                app.logger.info(f"Copied example file {fname} to {new_file_path}")
             else:
-                src_path = os.path.join(app.config["UPLOAD_DIR"], fname)
-            dst_path = os.path.join(fileDir, fname)
-            if os.path.abspath(src_path) != os.path.abspath(dst_path):
-                if not os.path.exists(src_path):
-                    app.logger.error(f"Source file does not exist: {src_path}")
+                # For uploaded files, they are already in the reference folder from upload endpoint
+                # Just verify the file exists
+                if os.path.exists(new_file_path):
+                    app.logger.info(f"Using uploaded file at {new_file_path}")
                 else:
-                    try:
-                        shutil.copyfile(src_path, dst_path)
-                        app.logger.info(f"Copied {src_path} to {dst_path}")
-                        # Only remove if not example
-                        if str(isexample).lower() != "true":
-                            os.remove(src_path)
-                            app.logger.info(f"Deleted original file: {src_path}")
-                    except Exception as e:
-                        app.logger.error(f"Error copying/removing file {src_path}: {e}")
-            else:
-                app.logger.debug(f"Skipped copying {src_path} to itself.")
+                    app.logger.error(f"Uploaded file not found at {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
         result = run_correlation_command(filename, filename2, fileDir, pop, isexample)

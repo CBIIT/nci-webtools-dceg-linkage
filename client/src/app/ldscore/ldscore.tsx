@@ -37,6 +37,7 @@ export default function LDScore() {
   const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [fileError, setFileError] = useState<string>("");
+  const [reference, setReference] = useState<string>("");
 
   // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
   const handleLdFilesUpload = async (files: FileList) => {
@@ -46,6 +47,26 @@ export default function LDScore() {
     setUploadedFam("");
     setAllUploadedFiles([]);
     form.clearErrors("ldfiles");
+    setError(""); // Clear any previous errors
+    
+    // Generate a new reference for this upload session
+    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    setReference(newReference);
+    
+    // Validate that all files have the same base name (excluding extension)
+    const baseNames = new Set<string>();
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const lastDotIndex = file.name.lastIndexOf('.');
+      const baseName = lastDotIndex > 0 ? file.name.substring(0, lastDotIndex) : file.name;
+      baseNames.add(baseName);
+    }
+    
+    if (baseNames.size > 1) {
+      setFileError(`All files must have the same base filename. Found: ${Array.from(baseNames).join(', ')}`);
+      setUploading(false);
+      return;
+    }
     
     const uploadedFileNames: string[] = [];
     
@@ -54,6 +75,7 @@ export default function LDScore() {
       const ext = file.name.split('.').pop()?.toLowerCase();
       const formData = new FormData();
       formData.append("ldscoreFile", file);
+      formData.append("reference", newReference);
       
       try {
         const response = await fetch("/LDlinkRestWeb/upload", {
@@ -83,11 +105,21 @@ export default function LDScore() {
     const bed = exampleBed || uploadedBed;
     const bim = exampleBim || uploadedBim;
     const fam = exampleFam || uploadedFam;
+    
+    // Validate that all three files are present
+    if (!bed || !bim || !fam) {
+      form.setError("ldfiles", {
+        type: "manual",
+        message: "Upload must include 3 files, one of each type: .bed, .bim, and .fam"
+      });
+      return;
+    }
+    
     const window = form.getValues("window");
     const windowUnit = form.getValues("windowUnit");
     const isExample = !!exampleBed;
     const filename = `${bed};${bim};${fam}`;
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+  
     
     const params = new URLSearchParams({
       filename,
@@ -123,6 +155,7 @@ export default function LDScore() {
     setUploadedFam("");
     setAllUploadedFiles([]);
     setUseExampleLdscore(false);
+    setReference("");
     setError("");
     setFileError("");
   };
@@ -245,6 +278,9 @@ export default function LDScore() {
                     setUseExampleLdscore(e.target.checked);
                         setLdscoreResultRef(null);
                     if (e.target.checked) {
+                      // Generate a new reference for example data
+                      const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                      setReference(newReference);
                       setExampleBed("22.bed");
                       setExampleBim("22.bim");
                       setExampleFam("22.fam");
@@ -253,10 +289,13 @@ export default function LDScore() {
                       setUploadedFam("");
                       setAllUploadedFiles([]);
                       form.clearErrors("ldfiles");
+                      setError(""); // Clear any previous errors
                     } else {
                       setExampleBed("");
                       setExampleBim("");
                       setExampleFam("");
+                      setReference("");
+                      setError(""); // Clear any previous errors
                     }
                   }}
                 />

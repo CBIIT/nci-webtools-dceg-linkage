@@ -23,6 +23,7 @@ export default function Correlation() {
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
   
+  const [reference, setReference] = useState<string>("");
   const [exampleFile1, setExampleFile1] = useState<string>("");
   const [exampleFile2, setExampleFile2] = useState<string>("");
   const [uploadedFile1, setUploadedFile1] = useState<string>("");
@@ -36,8 +37,16 @@ export default function Correlation() {
   const handleFileUpload = async (file: File) => {
     setFileError(""); // Clear any previous errors
     setUploading(true);
+    
+    // Generate new reference if not already set
+    const newReference = reference || Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    if (!reference) {
+      setReference(newReference);
+    }
+    
     const formData = new FormData();
     formData.append("ldscoreFile", file);
+    formData.append("reference", newReference);
    
     try {
       const response = await fetch("/LDlinkRestWeb/upload", {
@@ -86,7 +95,6 @@ export default function Correlation() {
     setGeneticLoading(true);
     const pop = data.pop?.value || '';
     const genomeBuild = genome_build || "grch37";
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const isExample = !!exampleFile1;
     const filename = exampleFile1 || uploadedFile1;
     const filename2 = exampleFile2 || uploadedFile2;
@@ -111,6 +119,7 @@ export default function Correlation() {
   const onGeneticReset = () => {
     geneticForm.reset();
     setGeneticCorrelationResultRef(null);
+    setReference("");
     setExampleFile1("");
     setExampleFile2("");
     setUploadedFile1("");
@@ -241,6 +250,9 @@ export default function Correlation() {
                   setUseExampleCorrelation(e.target.checked);
                    setGeneticCorrelationResultRef(null);
                   if (e.target.checked) {
+                    // Generate new reference for example data
+                    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                    setReference(newReference);
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
                     setUploadedFile1("");
@@ -248,6 +260,7 @@ export default function Correlation() {
                     geneticForm.clearErrors("file");
                     geneticForm.clearErrors("file2");
                   } else {
+                    setReference("");
                     setExampleFile1("");
                     setExampleFile2("");
                     //geneticForm.setValue("pop", null);

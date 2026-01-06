@@ -29,11 +29,18 @@ export default function Heritability() {
   const [useExample, setUseExample] = useState(false);
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
+  const [reference, setReference] = useState<string>("");
 
   const handleFileUpload = async (file: File) => {
     setUploading(true);
+    
+    // Generate a new reference for this upload session
+    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    setReference(newReference);
+    
     const formData = new FormData();
     formData.append("ldscoreFile", file);
+    formData.append("reference", newReference);
    
     try {
       const response = await fetch("/LDlinkRestWeb/upload", {
@@ -79,7 +86,6 @@ export default function Heritability() {
     setHeritabilityLoading(true);
     const pop = data.pop?.value || '';
     const genomeBuild = genome_build || "grch37";
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const isExample = !!exampleFilename;
     const filename = exampleFilename || uploadedFilename;
     const params = new URLSearchParams({
@@ -106,6 +112,7 @@ export default function Heritability() {
     setExampleFilepath("");
     setUploadedFilename("");
     setUseExample(false);
+    setReference("");
   };
 
   return (
@@ -188,6 +195,9 @@ export default function Heritability() {
                     setUseExample(e.target.checked);
                     setHeritabilityResultRef(null);
                     if (e.target.checked) {
+                      // Generate a new reference for example data
+                      const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                      setReference(newReference);
                       setExampleFilename("");
                       setExampleFilepath("");
                       setUploadedFilename("");
@@ -212,6 +222,7 @@ export default function Heritability() {
                       setExampleFilename("");
                       setExampleFilepath("");
                       setUploadedFilename("");
+                      setReference("");
                       //heritabilityForm.setValue("pop", null);
                     }
                   }}
