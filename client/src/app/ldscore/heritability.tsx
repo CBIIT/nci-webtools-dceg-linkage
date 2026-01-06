@@ -150,6 +150,7 @@ export default function Heritability() {
               ) : (
                 <Form.Control 
                   type="file" 
+                  disabled={heritabilityLoading}
                    {...heritabilityForm.register("file", { 
                     required: "File is required",
                     validate: (file: File | File[] | FileList | undefined) => {
@@ -191,6 +192,7 @@ export default function Heritability() {
                   id="use-example-heritability"
                   label="Use example data"
                   checked={useExample}
+                  disabled={heritabilityLoading}
                   onChange={async (e) => {
                     setUseExample(e.target.checked);
                     setHeritabilityResultRef(null);
@@ -233,7 +235,7 @@ export default function Heritability() {
 
                     <a
                       href={exampleFilename
-                        ? `/LDlinkRestWeb/copy_and_download/${heritabilityResultRef}/${encodeURIComponent(exampleFilename)}`
+                        ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
                         : `/LDlinkRestWeb/tmp/uploads/${heritabilityResultRef}/${encodeURIComponent(uploadedFilename)}`}
                       target="_blank"
                       rel="noopener noreferrer"

@@ -247,6 +247,7 @@ export default function LDScore() {
                   })}
                   accept=".bed,.bim,.fam"
                   multiple
+                  disabled={ldscoreLoading}
                   title="Upload *.bed, *.bim, *.fam files"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
@@ -274,6 +275,7 @@ export default function LDScore() {
                   id="use-example-ld"
                   label="Use example data"
                   checked={useExampleLdscore}
+                  disabled={ldscoreLoading}
                   onChange={(e) => {
                     setUseExampleLdscore(e.target.checked);
                         setLdscoreResultRef(null);

@@ -175,6 +175,7 @@ export default function Correlation() {
                   })}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
+                  disabled={geneticLoading}
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
@@ -214,6 +215,7 @@ export default function Correlation() {
                   })}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
+                  disabled={geneticLoading}
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
@@ -246,6 +248,7 @@ export default function Correlation() {
                 id="use-example-correlation"
                 label="Use example data"
                 checked={useExampleCorrelation}
+                disabled={geneticLoading}
                 onChange={(e) => {
                   setUseExampleCorrelation(e.target.checked);
                    setGeneticCorrelationResultRef(null);
