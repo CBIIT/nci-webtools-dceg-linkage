@@ -309,14 +309,14 @@ export default function Correlation() {
            <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="pop" className="mb-3">
               <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={geneticForm.control} rules={{ required: "Population is required" }} />
+              <LdscorePopSelect name="pop" control={geneticForm.control} isLoading={geneticLoading} rules={{ required: "Population is required" }} />
               <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
             </Form.Group>
           </Col>
           <Col />
           <Col s={12} sm={12} md={5} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1">
+              <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
                 Reset
               </Button>
               <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>

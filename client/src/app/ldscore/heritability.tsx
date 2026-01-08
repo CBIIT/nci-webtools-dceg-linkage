@@ -256,7 +256,7 @@ export default function Heritability() {
           <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="pop" className="mb-3">
               <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={heritabilityForm.control} rules={{ required: "Population is required" }} />
+              <LdscorePopSelect name="pop" control={heritabilityForm.control} isLoading={heritabilityLoading} rules={{ required: "Population is required" }} />
               <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
             </Form.Group>
           </Col>
@@ -264,7 +264,7 @@ export default function Heritability() {
           <Col />
          <Col s={12} sm={12} md={5} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1">
+              <Button type="reset" variant="outline-danger" className="me-1" disabled={heritabilityLoading}>
                 Reset
               </Button>
               <Button 

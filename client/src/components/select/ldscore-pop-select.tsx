@@ -19,7 +19,7 @@ const ldscorePopOptions: LdscorePopOption[] = [
   { value: "SEU", label: "(SEU) Southern European" },
 ];
 
-export default function LdscorePopSelect({ name, control, rules }: { name: string; control: any; rules?: any }) {
+export default function LdscorePopSelect({ name, control, rules, isLoading }: { name: string; control: any; rules?: any; isLoading?: boolean }) {
   return (
     <Controller
       name={name}
@@ -35,6 +35,7 @@ export default function LdscorePopSelect({ name, control, rules }: { name: strin
             isMulti={false}
             classNamePrefix="react-select"
             placeholder="Select..."
+            isDisabled={isLoading}
           />
         </div>
       )}

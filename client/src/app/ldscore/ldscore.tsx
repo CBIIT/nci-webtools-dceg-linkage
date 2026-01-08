@@ -392,6 +392,7 @@ export default function LDScore() {
                 <Form.Select
                   {...form.register("windowUnit")}
                   style={{ maxWidth: "80px" }}
+                  disabled={ldscoreLoading}
                   defaultValue="cM"
                   title="Select unit for the window size"
                 >
@@ -407,7 +408,7 @@ export default function LDScore() {
           
           <Col s={12} sm={12} md={6} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1">
+              <Button type="reset" variant="outline-danger" className="me-1" disabled={ldscoreLoading}>
                 Reset
               </Button>
               <Button type="submit" variant="primary" disabled={ldscoreLoading}>
