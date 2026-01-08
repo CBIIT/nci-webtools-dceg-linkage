@@ -388,6 +388,7 @@ export default function LDScore() {
                   defaultValue={1}
                   style={{ maxWidth: "120px", marginRight: "8px" }}
                   title="Please enter an integer greater than 0"
+                  disabled={ldscoreLoading}
                 />
                 <Form.Select
                   {...form.register("windowUnit")}
