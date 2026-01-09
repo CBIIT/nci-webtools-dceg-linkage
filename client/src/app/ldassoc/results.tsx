@@ -27,6 +27,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
 
   const queryClient = useQueryClient();
   const formData = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
+  console.log("LdAssocResults formData:", formData);
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldassoc_results", ref],
     queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),

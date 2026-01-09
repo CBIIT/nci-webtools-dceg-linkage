@@ -687,7 +687,7 @@ export default function LdScoreForm() {
             <Row>
               <Col sm={4}>
                 <Form.Group controlId="ldfiles" className="mb-3">
-                  <Form.Label>Upload .bed, .bim, .fam files (all three required)</Form.Label>
+                  <Form.Label>Upload .bed, .bim, .fam files (all three required and must have the same name)</Form.Label>
                   {(exampleBed || exampleBim || exampleFam) ? (
                     <div className="form-control bg-light">
                       {exampleBed && <div>{exampleBed}</div>}
