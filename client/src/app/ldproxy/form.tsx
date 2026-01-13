@@ -94,7 +94,10 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
       pop: getSelectedPopulationGroups(data.pop),
     };
     queryClient.setQueryData(["ldproxy-form-data", reference], formData);
-    router.push(`${pathname}`);
+    // Store in localStorage as backup
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`ldproxy-form-${reference}`, JSON.stringify(formData));
+    }
     submitForm.mutate(formData);
   }
 
@@ -102,7 +105,9 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
     event.preventDefault();
     router.push("/ldproxy");
     reset(defaultForm);
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({ 
+      predicate: (query) => !query.queryKey[0]?.toString().startsWith('ldproxy-form-data')
+    });
     submitForm.reset();
   }
 
