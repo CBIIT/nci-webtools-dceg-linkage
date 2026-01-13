@@ -96,6 +96,8 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     window.URL.revokeObjectURL(downloadUrl);
   };
   const queryClient = useQueryClient();
+  
+  // Retrieve formData using the ref parameter
   let formData = queryClient.getQueryData(["ldproxy-form-data", ref]) as FormData | undefined;
  
   // Fallback to localStorage if not in cache
@@ -104,12 +106,13 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     if (stored) {
       try {
         formData = JSON.parse(stored);
+        console.log("LdProxyResults - loaded from localStorage for ref:", ref);
       } catch (e) {
         console.error('Failed to parse stored formData:', e);
       }
     }
   }
-  // console.log("LdProxyResults - formData from cache:", formData);
+  
   
   // Extract commonly used values with defaults
   const r2_d = formData?.r2_d ?? "r2";
@@ -289,7 +292,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
                 target="LDProxy-genome-browser_UCSC"
                 title="Genome Browser">
                 View{" "}
-                {(formData as any)?.dprime ? (
+                {dprime ? (
                   "D'"
                 ) : (
                   <span>
