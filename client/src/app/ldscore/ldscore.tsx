@@ -201,7 +201,10 @@ export default function LDScore() {
         <Row>
            <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="ldfiles" className="mb-3">
-              <Form.Label >Upload *.bed, *.bim, *.fam files (all three required and must have the same name)</Form.Label>
+              <Form.Label>
+                <div>Upload *.bed, *.bim, *.fam files</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>(all three required and must have the same name)</div>
+              </Form.Label>
               {(exampleBed || exampleBim || exampleFam) ? (
                 <div className="form-control bg-light">
                   {exampleBed && <div>{exampleBed}</div>}

@@ -106,7 +106,6 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     if (stored) {
       try {
         formData = JSON.parse(stored);
-        console.log("LdProxyResults - loaded from localStorage for ref:", ref);
       } catch (e) {
         console.error('Failed to parse stored formData:', e);
       }

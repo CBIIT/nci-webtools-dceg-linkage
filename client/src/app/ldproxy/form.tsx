@@ -95,21 +95,16 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
 
   async function onSubmit(data: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
-    console.log("LdProxyForm - generating new reference:", reference);
-    console.log("LdProxyForm - form data:", data);
-    console.log("LdProxyForm - genome_build from store:", genome_build);
     const formData: SubmitFormData = {
       ...data,
       reference,
       genome_build: genome_build || data.genome_build || "grch37", // Use store value, fallback to form value
       pop: getSelectedPopulationGroups(data.pop),
     };
-    console.log("LdProxyForm - storing formData with reference:", reference, formData);
     queryClient.setQueryData(["ldproxy-form-data", reference], formData);
     // Store in localStorage as backup
     if (typeof window !== 'undefined') {
       localStorage.setItem(`ldproxy-form-${reference}`, JSON.stringify(formData));
-      console.log("LdProxyForm - stored in localStorage:", `ldproxy-form-${reference}`);
     }
     submitForm.mutate(formData);
   }
