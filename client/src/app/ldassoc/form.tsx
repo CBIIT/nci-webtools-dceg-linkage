@@ -187,7 +187,10 @@ export default function LDAssocForm() {
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     };
     queryClient.setQueryData(["ldassoc-form-data", reference], formData);
-    router.push(`${pathname}`);
+    // Store in localStorage as backup
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`ldassoc-form-${reference}`, JSON.stringify(formData));
+    }
     submitForm.mutate(formData);
   }
 
@@ -195,7 +198,9 @@ export default function LDAssocForm() {
     event.preventDefault();
     router.push("/ldassoc");
     reset(defaultForm);
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({ 
+      predicate: (query) => !query.queryKey[0]?.toString().startsWith('ldassoc-form-data')
+    });
     submitForm.reset();
   }
 
