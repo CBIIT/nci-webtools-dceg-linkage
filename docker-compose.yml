@@ -48,15 +48,15 @@ services:
   #   networks:
   #     - my_network
 
-  ldsc:
-   image: ldsc39
-   container_name: ldsc_container
-   networks:
-     - my_network
-   ports:
-     - "5000:5000"
-   volumes:
-     - ./data:/data
+  # ldsc:
+  #  image: ldsc39
+  #  container_name: ldsc_container
+  #  networks:
+  #    - my_network
+  #  ports:
+  #    - "5000:5000"
+  #  volumes:
+  #    - ./data:/data
 
 networks:
   my_network:

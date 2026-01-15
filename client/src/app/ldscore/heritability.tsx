@@ -30,6 +30,9 @@ export default function Heritability() {
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
   const [reference, setReference] = useState<string>("");
+  const [fileValid, setFileValid] = useState(false);
+  const [validationError, setValidationError] = useState<string>("");
+
 
   const handleFileUpload = async (file: File) => {
     setUploading(true);
@@ -49,11 +52,30 @@ export default function Heritability() {
       });
       if (response.ok) {
         setUploadedFilename(file.name);
+        // After successful upload, validate the file
+        const validateResponse = await fetch(`/LDlinkRestWeb/validate_sumstats?filename=${file.name}&reference=${newReference}`);
+        const validateData = await validateResponse.json();
+        console.log("File validation response:", validateData);
+        
+        if (validateData?.fileValid?.valid) {
+          setFileValid(true);
+          setValidationError("");
+        } else {
+          setFileValid(false);
+          const errors = validateData?.fileValid?.errors || [];
+          const warnings = validateData?.fileValid?.warnings || [];
+          const errorMessages = [...errors, ...warnings].join(". ");
+          setValidationError(errorMessages || "File validation failed. Please check the file format.");
+        }
       } else {
         setUploadedFilename("");
+        setFileValid(false);
+        setValidationError("Failed to upload file.");
       }
     } catch (e) {
       setUploadedFilename("");
+      setFileValid(false);
+      setValidationError("An error occurred during file upload.");
     } finally {
       setUploading(false);
     }
@@ -113,6 +135,8 @@ export default function Heritability() {
     setUploadedFilename("");
     setUseExample(false);
     setReference("");
+    setValidationError("");
+    setFileValid(false);
   };
 
   return (
@@ -139,6 +163,8 @@ export default function Heritability() {
           </div>
         </div>
       )}
+
+
 
       <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
         <Row>
@@ -199,6 +225,7 @@ export default function Heritability() {
                   onChange={async (e) => {
                     setUseExample(e.target.checked);
                     setHeritabilityResultRef(null);
+                    setValidationError("");
                     if (e.target.checked) {
                       // Generate a new reference for example data
                       const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
@@ -298,6 +325,13 @@ export default function Heritability() {
             <CalculateLoading />
           </div>
         </div>
+      )}
+
+      {!fileValid && validationError && (
+          <Alert variant="warning" className="mt-2">
+              The uploaded file has the following issues:<br />
+              {validationError}
+          </Alert>
       )}
 
       {heritabilityResultRef && (

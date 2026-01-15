@@ -33,8 +33,12 @@ export default function Correlation() {
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string>("");
+  const [file1Valid, setFile1Valid] = useState(false);
+  const [file2Valid, setFile2Valid] = useState(false);
+  const [validationError1, setValidationError1] = useState<string>("");
+  const [validationError2, setValidationError2] = useState<string>("");
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, fileNumber: 1 | 2) => {
     setFileError(""); // Clear any previous errors
     setUploading(true);
     
@@ -54,6 +58,34 @@ export default function Correlation() {
         body: formData,
       });
       if (response.ok) {
+        // After successful upload, validate the file
+        const validateResponse = await fetch(`/LDlinkRestWeb/validate_sumstats?filename=${file.name}&reference=${newReference}`);
+        const validateData = await validateResponse.json();
+        console.log("File validation response:", validateData);
+        
+        if (validateData?.fileValid?.valid) {
+          if (fileNumber === 1) {
+            setFile1Valid(true);
+            setValidationError1("");
+          } else {
+            setFile2Valid(true);
+            setValidationError2("");
+          }
+        } else {
+          if (fileNumber === 1) {
+            setFile1Valid(false);
+            const errors = validateData?.fileValid?.errors || [];
+            const warnings = validateData?.fileValid?.warnings || [];
+            const errorMessages = [...errors, ...warnings].join(". ");
+            setValidationError1(errorMessages || "File validation failed. Please check the file format.");
+          } else {
+            setFile2Valid(false);
+            const errors = validateData?.fileValid?.errors || [];
+            const warnings = validateData?.fileValid?.warnings || [];
+            const errorMessages = [...errors, ...warnings].join(". ");
+            setValidationError2(errorMessages || "File validation failed. Please check the file format.");
+          }
+        }
         return file.name;
       } else {
         setFileError('Error: File upload failed');
@@ -126,6 +158,10 @@ export default function Correlation() {
     setUploadedFile2("");
     setUseExampleCorrelation(false);
     setFileError("");
+    setFile1Valid(false);
+    setFile2Valid(false);
+    setValidationError1("");
+    setValidationError2("");
     geneticForm.setValue("pop", null);
   };
 
@@ -181,14 +217,7 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      // Check file extension
-                      // const ext = file.name.split('.').pop()?.toLowerCase();
-                      // if (ext !== 'txt') {
-                      //   setFileError('Error: Only .txt files are allowed');
-                      //   input.value = ''; // Clear the input
-                      //   return;
-                      // }
-                      const filename = await handleFileUpload(file);
+                      const filename = await handleFileUpload(file, 1);
                       setUploadedFile1(filename);
                       geneticForm.clearErrors("file");
                     }
@@ -196,6 +225,7 @@ export default function Correlation() {
                 />
               )}
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
+           
             </Form.Group>
             <Form.Group controlId="file2" className="mb-3">
               <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
@@ -221,14 +251,7 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      // Check file extension
-                      // const ext = file.name.split('.').pop()?.toLowerCase();
-                      // if (ext !== 'txt') {
-                      //   setFileError('Error: Only .txt files are allowed');
-                      //   input.value = ''; // Clear the input
-                      //   return;
-                      // }
-                      const filename = await handleFileUpload(file);
+                      const filename = await handleFileUpload(file, 2);
                       setUploadedFile2(filename);
                       geneticForm.clearErrors("file2");
                     }
@@ -241,6 +264,7 @@ export default function Correlation() {
                 </HoverUnderlineLink>
               </div>
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
+         
             </Form.Group>
                         <div className="mb-3">
               <Form.Check
@@ -260,6 +284,10 @@ export default function Correlation() {
                     setExampleFile2("BBJ_LDLC22.txt");
                     setUploadedFile1("");
                     setUploadedFile2("");
+                    setValidationError1("");
+                    setValidationError2("");
+                    setFile1Valid(false);
+                    setFile2Valid(false);
                     geneticForm.clearErrors("file");
                     geneticForm.clearErrors("file2");
                   } else {
@@ -359,6 +387,19 @@ export default function Correlation() {
         </div>
       )}
 
+   {!file1Valid && validationError1 && (
+                <Alert variant="warning" className="mt-2">
+                  The first uploaded file has the following issues:<br />
+                  {validationError1}
+                </Alert>
+              )}
+
+     {!file2Valid && validationError2 && (
+                <Alert variant="warning" className="mt-2">
+                  The second uploaded file has the following issues:<br />
+                  {validationError2}
+                </Alert>
+              )}
       {geneticCorrelationResultRef && (
            <>
          <hr />

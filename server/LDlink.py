@@ -758,6 +758,54 @@ def upload():
         return "All files were saved"
 
 
+@app.route("/LDlinkRestWeb/validate_sumstats", methods=["GET"])
+def validate_sumstats():
+    """
+    Validates a sumstats file for heritability/correlation analysis.
+    Expects 'filename' and 'reference' as query parameters.
+    Returns JSON with 'fileValid' boolean.
+    """
+    start_time = time.time()
+    app.logger.info("Starting sumstats validation request")
+    
+    filename = request.args.get("filename", None)
+    reference = request.args.get("reference", None)
+    
+    if not filename:
+        app.logger.warning("Validation request missing filename")
+        return jsonify({"fileValid": False, "error": "Missing filename parameter"})
+    
+    filename = secure_filename(filename)
+    
+    # Determine file path based on reference
+    if reference:
+        file_path = os.path.join(app.config["UPLOAD_DIR"], reference, filename)
+    else:
+        file_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+    
+    app.logger.debug(f"Validating sumstats file: {file_path}")
+    
+    # Check if file exists
+    if not os.path.exists(file_path):
+        app.logger.warning(f"File not found for validation: {file_path}")
+        return jsonify({"fileValid": False, "error": "File not found"})
+    
+    # Validate using ldsc_utils
+    try:
+        from ldscore.ldsc_utils import validSumstats
+        file_valid = validSumstats(file_path)
+        app.logger.info(f"Sumstats validation result for {filename}: {file_valid}")
+        
+        execution_time = round(time.time() - start_time, 2)
+        app.logger.info(f"Validation completed ({execution_time}s)")
+        
+        return jsonify({"fileValid": file_valid})
+    except Exception as e:
+        app.logger.error(f"Error validating sumstats file: {e}")
+        app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
+        return jsonify({"fileValid": False, "error": str(e)})
+
+
 @app.route("/LDlinkRestWeb/copy_and_download/<filename>", methods=["GET"])
 def copy_and_download(filename):
     """
