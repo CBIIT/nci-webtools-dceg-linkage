@@ -10,10 +10,17 @@ import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./form";
 import { useStore } from "@/store";
+import { sanitizeRef, sanitizeFormat } from "@/utils/security";
 
 export default function LdAssocResults({ ref }: { ref: string }) {
   const handleDownload = async (format: string) => {
-    const url = `/LDlinkRestWeb/tmp/assoc_plot_${ref}.${format}`;
+    const sanitizedRef = sanitizeRef(ref);
+    const sanitizedFormat = sanitizeFormat(format, ['png', 'jpeg', 'svg', 'pdf']);
+    if (!sanitizedRef || !sanitizedFormat) {
+      console.error('Invalid ref or format for download');
+      return;
+    }
+    const url = `/LDlinkRestWeb/tmp/assoc_plot_${sanitizedRef}.${sanitizedFormat}`;
     const response = await fetch(url);
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);

@@ -41,13 +41,6 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
     defaultValues: defaultForm,
   });
 
-  // Sync genome_build from global store to form
-  useEffect(() => {
-    if (genome_build) {
-      setValue('genome_build', genome_build);
-    }
-  }, [genome_build, setValue]);
-
   // load form from url params
   // similar to ldpair
   // load form form url params
@@ -91,7 +84,7 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
     },
   });
 
-  console.log(submitForm.error);
+ // console.log(submitForm.error);
 
   async function onSubmit(data: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
