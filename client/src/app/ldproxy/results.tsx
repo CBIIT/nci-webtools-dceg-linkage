@@ -9,6 +9,7 @@ import Table from "@/components/table";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./types";
+import { useStore } from "@/store";
 
 // Helper functions for column rendering
 function ldproxy_rs_results_link(data: any) {
@@ -96,28 +97,19 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     window.URL.revokeObjectURL(downloadUrl);
   };
   const queryClient = useQueryClient();
+  const formDataFromQuery = queryClient.getQueryData(["ldproxy-form-data", ref]) as FormData | undefined;
   
-  // Retrieve formData using the ref parameter
-  let formData = queryClient.getQueryData(["ldproxy-form-data", ref]) as FormData | undefined;
- 
-  // Fallback to localStorage if not in cache
-  if (!formData && typeof window !== 'undefined' && ref) {
-    const stored = localStorage.getItem(`ldproxy-form-${ref}`);
-    if (stored) {
-      try {
-        formData = JSON.parse(stored);
-      } catch (e) {
-        console.error('Failed to parse stored formData:', e);
-      }
-    }
-  }
-  
+  // Get formData from Zustand store, fallback to React Query cache
+  const getFormData = useStore((state) => state.getFormData);
+  const formData = getFormData(ref) || formDataFromQuery;
   
   // Extract commonly used values with defaults
   const r2_d = formData?.r2_d ?? "r2";
   const dprime = r2_d === "d";
   const windowSize = formData?.window ?? 500000;
   const genome_build = formData?.genome_build ?? "grch37";
+
+  console.log("LdProxyResults formData:", formData, "genome_build:", genome_build, dprime);
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldproxy_results", ref],
     queryFn: async () => (ref ? fetchOutput(`proxy${ref}.json`) : null),

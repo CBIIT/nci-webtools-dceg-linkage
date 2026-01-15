@@ -9,6 +9,7 @@ import Table from "@/components/table";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./form";
+import { useStore } from "@/store";
 
 export default function LdAssocResults({ ref }: { ref: string }) {
   const handleDownload = async (format: string) => {
@@ -26,24 +27,15 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   };
 
   const queryClient = useQueryClient();
-  let formData = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
-  
-  // Fallback to localStorage if not in cache
-  if (!formData && typeof window !== 'undefined' && ref) {
-    const stored = localStorage.getItem(`ldassoc-form-${ref}`);
-    if (stored) {
-      try {
-        formData = JSON.parse(stored);
-      } catch (e) {
-        console.error('Failed to parse stored formData:', e);
-      }
-    }
-  }
-  
-  // Final fallback to defaults
-  const genome_build = formData?.genome_build ?? "grch37";
+  const formDataFromQuery = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
+ 
+  // Get formData from Zustand store, fallback to React Query cache
+  const getFormData = useStore((state) => state.getFormData);
+  const formData = getFormData(ref) || formDataFromQuery;
+  const genome_build = formData?.genome_build || "grch37";
   const dprime = formData?.dprime ?? false;
-  //console.log("LdAssocResults - genome_build:", genome_build, "dprime:", dprime);
+  //console.log("LdAssocResults formData:", formData, "genome_build:", genome_build);
+ 
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldassoc_results", ref],
     queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),

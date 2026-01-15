@@ -17,7 +17,7 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const { genome_build } = useStore((state) => state);
+  const { genome_build, setFormData } = useStore((state) => state);
 
   const defaultForm: FormData = {
     var: "",
@@ -102,11 +102,9 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
       pop: getSelectedPopulationGroups(data.pop),
     };
     queryClient.setQueryData(["ldproxy-form-data", reference], formData);
+    // Store in Zustand store
+    setFormData(reference, formData);
     router.push(`${pathname}`);
-    // Store in localStorage as backup
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(`ldproxy-form-${reference}`, JSON.stringify(formData));
-    }
     submitForm.mutate(formData);
   }
 
