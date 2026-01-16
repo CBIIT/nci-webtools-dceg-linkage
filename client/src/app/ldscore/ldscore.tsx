@@ -95,6 +95,35 @@ export default function LDScore() {
     }
     
     setAllUploadedFiles(uploadedFileNames);
+    
+    // Validate the uploaded bfile
+    if (uploadedFileNames.length === 3) {
+      const baseName = uploadedFileNames[0].substring(0, uploadedFileNames[0].lastIndexOf('.'));
+      try {
+        const response = await fetch(`/LDlinkRestWeb/validate_bfile?filename=${encodeURIComponent(baseName)}&reference=${newReference}`);
+        const { fileValid } = await response.json();
+        console.log("Validation response:", fileValid);
+        
+        if (!fileValid.valid) {
+          const errorMessages = fileValid.errors || [];
+          const warningMessages = fileValid.warnings || [];
+          const allMessages = [...errorMessages, ...warningMessages];
+          const errorText = allMessages.length > 0 
+            ? allMessages.join('\n') 
+            : "Invalid bfile format. Please check your files.";
+          
+          setFileError(errorText);
+          setUploadedBed("");
+          setUploadedBim("");
+          setUploadedFam("");
+          setAllUploadedFiles([]);
+        }
+      } catch (e) {
+        console.error("Validation error:", e);
+        setFileError("Failed to validate files. Please try again.");
+      }
+    }
+    
     setUploading(false);
   };
 
@@ -263,6 +292,7 @@ export default function LDScore() {
                 />
               )}
                <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
+
                <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
@@ -295,12 +325,14 @@ export default function LDScore() {
                       setAllUploadedFiles([]);
                       form.clearErrors("ldfiles");
                       setError(""); // Clear any previous errors
+                      setFileError(""); // Clear file validation errors
                     } else {
                       setExampleBed("");
                       setExampleBim("");
                       setExampleFam("");
                       setReference("");
                       setError(""); // Clear any previous errors
+                      setFileError(""); // Clear file validation errors
                     }
                   }}
                 />
@@ -423,16 +455,11 @@ export default function LDScore() {
         </Row>
       </Form>
 
-      {fileError && (
-        <Row>
-          <Col>
-            <Alert variant="danger" className="mt-3">
-              {fileError}
-            </Alert>
-          </Col>
-        </Row>
-      )}
-
+               {fileError && (
+                <Alert variant="danger" className="mt-2">
+                  {fileError}
+                </Alert>
+              )}
       {ldscoreLoading && (
         <div className="d-flex flex-column align-items-center my-3">
           <span

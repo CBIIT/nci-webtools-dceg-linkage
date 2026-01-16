@@ -48,7 +48,7 @@ from ApiAccess import (
     lookupUser,
 )
 import requests, glob
-from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command
+from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command, validBfile
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
@@ -802,6 +802,61 @@ def validate_sumstats():
         return jsonify({"fileValid": file_valid})
     except Exception as e:
         app.logger.error(f"Error validating sumstats file: {e}")
+        app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
+        return jsonify({"fileValid": False, "error": str(e)})
+
+
+@app.route("/LDlinkRestWeb/validate_bfile", methods=["GET"])
+def validate_bfile():
+    """
+    Validates bfile (bed/bim/fam) for LDscore calculation.
+    Expects 'filename' (base name without extension) and 'reference' as query parameters.
+    Returns JSON with 'fileValid' boolean.
+    """
+    start_time = time.time()
+    app.logger.info("Starting bfile validation request")
+    
+    filename = request.args.get("filename", None)
+    reference = request.args.get("reference", None)
+    
+    if not filename:
+        app.logger.warning("Validation request missing filename")
+        return jsonify({"fileValid": False, "error": "Missing filename parameter"})
+    
+    filename = secure_filename(filename)
+    # Remove extension if provided
+    fileroot, ext = os.path.splitext(filename)
+    
+    # Determine file path based on reference
+    if reference:
+        bfile_path = os.path.join(app.config["UPLOAD_DIR"], reference, fileroot)
+    else:
+        bfile_path = os.path.join(app.config["UPLOAD_DIR"], fileroot)
+    
+    app.logger.debug(f"Validating bfile: {bfile_path}")
+    
+    # Check if all required files exist (.bed, .bim, .fam)
+    required_extensions = [".bed", ".bim", ".fam"]
+    missing_files = []
+    for ext in required_extensions:
+        if not os.path.exists(bfile_path + ext):
+            missing_files.append(fileroot + ext)
+    
+    if missing_files:
+        app.logger.warning(f"Missing bfile components: {missing_files}")
+        return jsonify({"fileValid": False, "error": f"Missing files: {', '.join(missing_files)}"})
+    
+    # Validate using ldsc_utils
+    try:
+        file_valid = validBfile(bfile_path)
+        app.logger.info(f"Bfile validation result for {filename}: {file_valid}")
+        
+        execution_time = round(time.time() - start_time, 2)
+        app.logger.info(f"Bfile validation completed ({execution_time}s)")
+        
+        return jsonify({"fileValid": file_valid})
+    except Exception as e:
+        app.logger.error(f"Error validating bfile: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
         return jsonify({"fileValid": False, "error": str(e)})
 
