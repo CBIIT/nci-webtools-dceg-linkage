@@ -1,9 +1,9 @@
 export const newsData = [
     { title: "LDlink 6.0.2 Release (TBD)",
       items: [
-        "Fixed LDscore input files names issue when uploading from local computer",
+        "Removed filename restrictions for LDScore input files",
         "Fixed heritability and correlation concurrency issue",
-        "Fixed the genome.ucsc.edu URL issues in LDassoc and LDproxy plots",
+        "Fixed genome build mismatch in genome.ucsc.edu URLs for LDassoc and LDproxyy",
         "Added file input validation for LDscore (heritability, correlation and ldscore) module",
       ],
     },
