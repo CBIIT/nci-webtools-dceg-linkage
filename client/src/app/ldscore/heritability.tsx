@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { fetchHeritabilityResult } from "@/services/queries";
+import { fetchHeritabilityResult, upload, validateSumstats } from "@/services/queries";
 import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
@@ -46,17 +46,12 @@ export default function Heritability() {
     formData.append("reference", newReference);
    
     try {
-      const response = await fetch("/LDlinkRestWeb/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (response.ok) {
+      const response = await upload(formData);
+      if (response.status === 200) {
         setUploadedFilename(file.name);
         // After successful upload, validate the file
-        const validateResponse = await fetch(`/LDlinkRestWeb/validate_sumstats?filename=${file.name}&reference=${newReference}`);
-        const validateData = await validateResponse.json();
-        console.log("File validation response:", validateData);
-        
+        const validateData = await validateSumstats(file.name, newReference);
+       
         if (validateData?.fileValid?.valid) {
           setFileValid(true);
           setValidationError("");
@@ -328,7 +323,7 @@ export default function Heritability() {
       )}
 
       {!fileValid && validationError && (
-          <Alert variant="warning" className="mt-2">
+          <Alert variant="danger" className="mt-2">
               The uploaded file has the following issues:<br />
               {validationError}
           </Alert>

@@ -1,7 +1,7 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { fetchLdScoreCalculationResult } from "@/services/queries";
+import { fetchLdScoreCalculationResult, upload, validateBfile } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useState } from "react";
@@ -78,11 +78,8 @@ export default function LDScore() {
       formData.append("reference", newReference);
       
       try {
-        const response = await fetch("/LDlinkRestWeb/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (response.ok) {
+        const response = await upload(formData);
+        if (response.status === 200) {
           uploadedFileNames.push(file.name);
           // Keep the specific type tracking for the submission logic
           if (ext === 'bed') setUploadedBed(file.name);
@@ -100,10 +97,8 @@ export default function LDScore() {
     if (uploadedFileNames.length === 3) {
       const baseName = uploadedFileNames[0].substring(0, uploadedFileNames[0].lastIndexOf('.'));
       try {
-        const response = await fetch(`/LDlinkRestWeb/validate_bfile?filename=${encodeURIComponent(baseName)}&reference=${newReference}`);
-        const { fileValid } = await response.json();
-        console.log("Validation response:", fileValid);
-        
+        const { fileValid } = await validateBfile(baseName, newReference);
+               
         if (!fileValid.valid) {
           const errorMessages = fileValid.errors || [];
           const warningMessages = fileValid.warnings || [];

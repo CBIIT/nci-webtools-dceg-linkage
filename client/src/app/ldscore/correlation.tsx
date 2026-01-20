@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { fetchGeneticCorrelationResult } from "@/services/queries";
+import { fetchGeneticCorrelationResult, upload, validateSumstats } from "@/services/queries";
 import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
@@ -53,14 +53,10 @@ export default function Correlation() {
     formData.append("reference", newReference);
    
     try {
-      const response = await fetch("/LDlinkRestWeb/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (response.ok) {
+      const response = await upload(formData);
+      if (response.status === 200) {
         // After successful upload, validate the file
-        const validateResponse = await fetch(`/LDlinkRestWeb/validate_sumstats?filename=${file.name}&reference=${newReference}`);
-        const validateData = await validateResponse.json();
+        const validateData = await validateSumstats(file.name, newReference);
         console.log("File validation response:", validateData);
         
         if (validateData?.fileValid?.valid) {
@@ -359,7 +355,7 @@ export default function Correlation() {
       {fileError && (
         <Row>
           <Col>
-            <Alert variant="danger" className="mt-3">
+            <Alert variant="warning" className="mt-3">
               {fileError}
             </Alert>
           </Col>
@@ -388,14 +384,14 @@ export default function Correlation() {
       )}
 
    {!file1Valid && validationError1 && (
-                <Alert variant="warning" className="mt-2">
+                <Alert variant="danger" className="mt-2">
                   The first uploaded file has the following issues:<br />
                   {validationError1}
                 </Alert>
               )}
 
      {!file2Valid && validationError2 && (
-                <Alert variant="warning" className="mt-2">
+                <Alert variant="danger" className="mt-2">
                   The second uploaded file has the following issues:<br />
                   {validationError2}
                 </Alert>
