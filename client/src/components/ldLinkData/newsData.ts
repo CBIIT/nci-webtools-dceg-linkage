@@ -1,6 +1,14 @@
 export const newsData = [
+    { title: "LDlink 6.0.2 Release (TBD)",
+      items: [
+        "Fixed LDscore input files names issue when uploading from local computer",
+        "Fixed heritability and correlation concurrency issue",
+        "Fixed the genome.ucsc.edu URL issues in LDassoc and LDproxy plots",
+        "Added file input validation for LDscore (heritability, correlation and ldscore) module",
+      ],
+    },
     {
-    title: "LDlink 6.0.0 Release (12/05/2025)",
+    title: "LDlink 6.0.0 Release (12/10/2025)",
     items: [
       `Modernized UI Technology with update from jQuery to Next.js and React's component-based architecture`,
       `Improved site's UI responsiveness, layouts and error/warning messaging`
