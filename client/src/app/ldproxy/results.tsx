@@ -10,7 +10,6 @@ import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./types";
 import { useStore } from "@/store";
-import { sanitizeRef, sanitizeFormat } from "@/utils/security";
 
 // Helper functions for column rendering
 function ldproxy_rs_results_link(data: any) {
@@ -85,13 +84,7 @@ function ldproxy_haploreg_link(row: any) {
 
 export default function LdProxyResults({ ref }: { ref: string }) {
   const handleDownload = async (format: string) => {
-    const sanitizedRef = sanitizeRef(ref);
-    const sanitizedFormat = sanitizeFormat(format, ['png', 'jpeg', 'svg', 'pdf']);
-    if (!sanitizedRef || !sanitizedFormat) {
-      console.error('Invalid ref or format for download');
-      return;
-    }
-    const url = `/LDlinkRestWeb/tmp/proxy_plot_${sanitizedRef}.${sanitizedFormat}`;
+    const url = `/LDlinkRestWeb/tmp/proxy_plot_${ref}.${format}`;
     const response = await fetch(url);
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
