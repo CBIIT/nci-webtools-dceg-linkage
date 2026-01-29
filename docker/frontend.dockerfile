@@ -10,6 +10,9 @@ RUN dnf -y update \
    nginx \
    && dnf clean all
 
+# Update npm to version compatible with Node 18 that includes tar@7.5.3+ (fixes CVE-2026-23745)
+RUN npm install -g npm@10.9.2
+
 RUN mkdir -p /app/client
 
 WORKDIR /app/client
