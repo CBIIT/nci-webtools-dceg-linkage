@@ -261,7 +261,7 @@ export default function Heritability() {
                     <a
                       href={exampleFilename
                         ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
-                        : `/LDlinkRestWeb/tmp/uploads/${heritabilityResultRef}/${encodeURIComponent(uploadedFilename)}`}
+                        : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFilename)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       download

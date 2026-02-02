@@ -300,7 +300,7 @@ export default function Correlation() {
                   {(exampleFile1 || uploadedFile1) && (
                     <>
                       <a
-                        href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile1)}`}
+                        href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile1)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download
@@ -314,7 +314,7 @@ export default function Correlation() {
                   {(exampleFile2 || uploadedFile2) && (
                     <>
                       <a
-                        href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile2)}`}
+                        href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile2)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download

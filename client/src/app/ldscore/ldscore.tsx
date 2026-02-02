@@ -405,7 +405,7 @@ export default function LDScore() {
                     {!useExampleLdscore && allUploadedFiles.map((fileName, index) => (
                       <div key={index}>
                         <a
-                          href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(fileName)}`}
+                          href={`/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(fileName)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           download
