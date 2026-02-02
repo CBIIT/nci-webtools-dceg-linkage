@@ -730,15 +730,21 @@ def upload():
     
         reference = request.form.get("reference", None)
         uploaded_files = []
+        renamed_notifications = []
         app.logger.debug(f"Upload reference: {reference}")
         for file_key in request.files:
             file = request.files[file_key]
             if file.filename == "":
                 app.logger.warning("Empty filename provided in upload")
-                return "No selected file"
-
+                return jsonify({"message": "No selected file"}), 400
+    
             if file:
-                filename = secure_filename(file.filename)
+                original_filename = file.filename
+                filename = secure_filename(original_filename)
+                # If secure_filename changed the name, record a notification for the user
+                if filename != original_filename:
+                    renamed_notifications.append({"original": original_filename, "sanitized": filename})
+
                 app.logger.debug(f"Processing upload: {filename}")
 
                 os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
@@ -755,7 +761,19 @@ def upload():
 
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Upload completed ({execution_time}s) - {len(uploaded_files)} files saved")
-        return "All files were saved"
+
+        # Return JSON with uploaded filenames and any sanitization notes
+        # Only include the `renamed` field when there were actual sanitizations.
+        if renamed_notifications:
+            response = {
+                "message": "All files were saved",
+                "uploaded_files": uploaded_files,
+                "renamed": renamed_notifications,
+            }
+            return jsonify(response)
+        else:
+            # Preserve previous simple-text behavior when nothing was renamed
+            return "All files were saved"
 
 
 @app.route("/LDlinkRestWeb/validate_sumstats", methods=["GET"])

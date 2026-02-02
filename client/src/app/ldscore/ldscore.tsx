@@ -6,6 +6,7 @@ import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useState } from "react";
 import LdScoreResults from "./results";
+import { map } from "@bokeh/bokehjs/build/js/lib/core/util/iterator";
 
 interface FormData {
   ldfiles?: FileList;
@@ -38,6 +39,7 @@ export default function LDScore() {
   const [error, setError] = useState<string>("");
   const [fileError, setFileError] = useState<string>("");
   const [reference, setReference] = useState<string>("");
+  const [renameWarnings, setRenameWarnings] = useState<string>("");
 
   // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
   const handleLdFilesUpload = async (files: FileList) => {
@@ -46,6 +48,7 @@ export default function LDScore() {
     setUploadedBim(""); 
     setUploadedFam("");
     setAllUploadedFiles([]);
+    setRenameWarnings("");
     form.clearErrors("ldfiles");
     setError(""); // Clear any previous errors
     
@@ -79,12 +82,30 @@ export default function LDScore() {
       
       try {
         const response = await upload(formData);
-        if (response.status === 200) {
-          uploadedFileNames.push(file.name);
+        if (response && response.status === 200) {
+          const data = response.data;
+          // If server returned a renamed mapping, surface it as a user warning
+          if (data && data.renamed) {
+            if (Array.isArray(data.renamed) && data.renamed.length > 0) {
+              const mapping = data.renamed[0];
+              if(mapping.original !== mapping.sanitized)
+                setRenameWarnings(`File was renamed to ${mapping.sanitized}`);
+              uploadedFileNames.push(mapping.sanitized);
           // Keep the specific type tracking for the submission logic
-          if (ext === 'bed') setUploadedBed(file.name);
-          if (ext === 'bim') setUploadedBim(file.name);
-          if (ext === 'fam') setUploadedFam(file.name);
+              if (ext === 'bed') setUploadedBed(mapping.sanitized);
+              if (ext === 'bim') setUploadedBim(mapping.sanitized);
+              if (ext === 'fam') setUploadedFam(mapping.sanitized);
+            }
+         
+          }
+          else{
+            uploadedFileNames.push(file.name);
+            // Keep the specific type tracking for the submission logic
+            if (ext === 'bed') setUploadedBed(file.name);
+            if (ext === 'bim') setUploadedBim(file.name);
+            if (ext === 'fam') setUploadedFam(file.name);
+          }
+        
         }
       } catch (e) {
         // ignore individual file upload errors
@@ -182,6 +203,7 @@ export default function LDScore() {
     setReference("");
     setError("");
     setFileError("");
+    setRenameWarnings("");
   };
 
   return (
@@ -228,6 +250,7 @@ export default function LDScore() {
               <Form.Label>
                 <div>Upload *.bed, *.bim, *.fam files</div>
                 <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>(all three required and must have the same name)</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically, Use: A-Z, 0-9, dots, hyphens, and underscores only</div>
               </Form.Label>
               {(exampleBed || exampleBim || exampleFam) ? (
                 <div className="form-control bg-light">
@@ -392,6 +415,11 @@ export default function LDScore() {
                         </a>
                       </div>
                     ))}
+                    {!useExampleLdscore && renameWarnings.length > 0 && (
+                      <Alert variant="warning" className="mt-2">
+                        {renameWarnings}
+                      </Alert>
+                    )}
                   </div>
                 )}
               </div>
