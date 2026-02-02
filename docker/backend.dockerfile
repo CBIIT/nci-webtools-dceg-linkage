@@ -1,8 +1,13 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-# install dependencies
-RUN dnf -y update \
-    && dnf -y install \
+# Install Python 3.11 explicitly and required build/runtime deps
+RUN dnf -y update && \
+    dnf -y install \
+    python3.11 \
+    python3.11-devel \
+    python3.11-pip \
+    python3.11-setuptools \
+    python3.11-wheel \
     bzip2 \
     bzip2-devel \
     fontconfig \
@@ -15,17 +20,18 @@ RUN dnf -y update \
     libcurl-devel \
     ncurses-devel \
     openssl-devel \
-    python3 \
-    python3-devel \
-    python3-pip \
-    python3-setuptools \
-    python3-wheel \
     tar \
     xz-devel \
     zlib-devel \
     firefox \
     xorg-x11-server-Xvfb \
+    make \
     && dnf clean all
+
+# Create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
+RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3.11 /usr/bin/python && \
+    /usr/bin/python3.11 -m pip install --upgrade pip setuptools wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.21
@@ -92,7 +98,7 @@ WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
 
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
+RUN /usr/bin/python3.11 -m pip install --no-cache-dir -r requirements.txt
 
 # Install ldsc package from GitHub
 #RUN pip install git+https://github.com/CBIIT/ldsc.git@master

@@ -5,6 +5,8 @@ export const newsData = [
         "Fixed heritability and correlation concurrency issue",
         "Fixed genome build mismatch in genome.ucsc.edu URLs for LDassoc and LDproxyy",
         "Added file input validation for LDscore (heritability, correlation and ldscore) module",
+        "Updated urllib3 to address security vulnerabilities and boto3 dependency issues",
+        "Python updated to 3.11",
       ],
     },
     {
