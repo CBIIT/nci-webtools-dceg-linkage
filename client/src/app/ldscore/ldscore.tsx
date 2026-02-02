@@ -250,7 +250,6 @@ export default function LDScore() {
               <Form.Label>
                 <div>Upload *.bed, *.bim, *.fam files</div>
                 <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>(all three required and must have the same name)</div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically, Use: A-Z, 0-9, dots, hyphens, and underscores only</div>
               </Form.Label>
               {(exampleBed || exampleBim || exampleFam) ? (
                 <div className="form-control bg-light">
@@ -309,6 +308,8 @@ export default function LDScore() {
                   }}
                 />
               )}
+               <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically, Use: A-Z, 0-9, dots, hyphens, and underscores only</div>
+
                <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
 
                <div className="mt-2">
