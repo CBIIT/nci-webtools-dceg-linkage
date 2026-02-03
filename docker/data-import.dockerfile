@@ -1,8 +1,14 @@
+# Use Amazon Linux like backend and install Python 3.11
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-# install dependencies
-RUN dnf -y update \
-    && dnf -y install \
+# install Python 3.11 and build/runtime deps
+RUN dnf -y update && \
+    dnf -y install \
+    python3.11 \
+    python3.11-devel \
+    python3.11-pip \
+    python3.11-setuptools \
+    python3.11-wheel \
     bzip2 \
     bzip2-devel \
     fontconfig \
@@ -15,15 +21,16 @@ RUN dnf -y update \
     libcurl-devel \
     ncurses-devel \
     openssl-devel \
-    python3 \
-    python3-devel \
-    python3-pip \
-    python3-setuptools \
-    python3-wheel \
     tar \
     xz-devel \
     zlib-devel \
+    make \
     && dnf clean all
+
+# create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
+RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3.11 /usr/bin/python && \
+    /usr/bin/python3.11 -m pip install --upgrade pip setuptools wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
