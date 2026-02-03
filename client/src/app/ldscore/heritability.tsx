@@ -25,6 +25,7 @@ export default function Heritability() {
   const [exampleFilename, setExampleFilename] = useState<string>("");
   const [exampleFilepath, setExampleFilepath] = useState<string>("");
   const [uploadedFilename, setUploadedFilename] = useState<string>("");
+  const [renameWarnings, setRenameWarnings] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [useExample, setUseExample] = useState(false);
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
@@ -36,6 +37,7 @@ export default function Heritability() {
 
   const handleFileUpload = async (file: File) => {
     setUploading(true);
+    setRenameWarnings("");
     
     // Generate a new reference for this upload session
     const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
@@ -48,9 +50,20 @@ export default function Heritability() {
     try {
       const response = await upload(formData);
       if (response.status === 200) {
-        setUploadedFilename(file.name);
-        // After successful upload, validate the file
-        const validateData = await validateSumstats(file.name, newReference);
+        // If server returned a renamed mapping, surface it as a user warning
+        let filenameToUse = file.name;
+        if (response.data && response.data.renamed) {
+          if (Array.isArray(response.data.renamed) && response.data.renamed.length > 0) {
+            const mapping = response.data.renamed[0];
+            if (mapping.original !== mapping.sanitized) {
+              setRenameWarnings(`File was renamed to ${mapping.sanitized}`);
+            }
+            filenameToUse = mapping.sanitized;
+          }
+        }
+        setUploadedFilename(filenameToUse);
+        // After successful upload, validate the file (use server-provided name)
+        const validateData = await validateSumstats(filenameToUse, newReference);
        
         if (validateData?.fileValid?.valid) {
           setFileValid(true);
@@ -132,6 +145,7 @@ export default function Heritability() {
     setReference("");
     setValidationError("");
     setFileValid(false);
+    setRenameWarnings("");
   };
 
   return (
@@ -202,6 +216,8 @@ export default function Heritability() {
                   }}
                 />
               )}
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically, Use: A-Z, 0-9, dots, hyphens, and underscores only</div>
+
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
@@ -269,6 +285,11 @@ export default function Heritability() {
                     >
                       {exampleFilename || uploadedFilename}
                     </a>
+                    {!useExample && renameWarnings.length > 0 && (
+                      <Alert variant="warning" className="mt-2">
+                        {renameWarnings}
+                      </Alert>
+                    )}
                   </div>
                 )}
               </div>

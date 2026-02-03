@@ -33,6 +33,7 @@ export default function Correlation() {
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string>("");
+  const [renameWarnings, setRenameWarnings] = useState<string>("");
   const [file1Valid, setFile1Valid] = useState(false);
   const [file2Valid, setFile2Valid] = useState(false);
   const [validationError1, setValidationError1] = useState<string>("");
@@ -55,17 +56,31 @@ export default function Correlation() {
     try {
       const response = await upload(formData);
       if (response.status === 200) {
-        // After successful upload, validate the file
-        const validateData = await validateSumstats(file.name, newReference);
-        console.log("File validation response:", validateData);
+        // Determine filename to use; handle server rename mapping if present
+        let filenameToUse = file.name;
+        if (response.data && response.data.renamed) {
+          if (Array.isArray(response.data.renamed) && response.data.renamed.length > 0) {
+            const mapping = response.data.renamed[0];
+            if (mapping.original !== mapping.sanitized) {
+              // append warning message (multiple uploads will concatenate)
+              setRenameWarnings((prev) => (prev ? prev + "; " + `File was renamed to ${mapping.sanitized}` : `File was renamed to ${mapping.sanitized}`));
+            }
+            filenameToUse = mapping.sanitized;
+          }
+        }
+        // After successful upload, validate the file (use server-provided name)
+        const validateData = await validateSumstats(filenameToUse, newReference);
+       // console.log("File validation response:", validateData);
         
         if (validateData?.fileValid?.valid) {
           if (fileNumber === 1) {
             setFile1Valid(true);
             setValidationError1("");
+            setUploadedFile1(filenameToUse);
           } else {
             setFile2Valid(true);
             setValidationError2("");
+            setUploadedFile2(filenameToUse);
           }
         } else {
           if (fileNumber === 1) {
@@ -74,12 +89,14 @@ export default function Correlation() {
             const warnings = validateData?.fileValid?.warnings || [];
             const errorMessages = [...errors, ...warnings].join(". ");
             setValidationError1(errorMessages || "File validation failed. Please check the file format.");
+            setUploadedFile1(filenameToUse);
           } else {
             setFile2Valid(false);
             const errors = validateData?.fileValid?.errors || [];
             const warnings = validateData?.fileValid?.warnings || [];
             const errorMessages = [...errors, ...warnings].join(". ");
             setValidationError2(errorMessages || "File validation failed. Please check the file format.");
+            setUploadedFile2(filenameToUse);
           }
         }
         return file.name;
@@ -159,6 +176,7 @@ export default function Correlation() {
     setValidationError1("");
     setValidationError2("");
     geneticForm.setValue("pop", null);
+    setRenameWarnings("");
   };
 
   return (
@@ -254,6 +272,8 @@ export default function Correlation() {
                   }}
                 />
               )}
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically, Use: A-Z, 0-9, dots, hyphens, and underscores only</div>
+
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
@@ -299,7 +319,7 @@ export default function Correlation() {
                   <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
                   {(exampleFile1 || uploadedFile1) && (
                     <>
-                      <a
+                          <a
                         href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile1)}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -324,6 +344,11 @@ export default function Correlation() {
                       </a>
                       <br />
                     </>
+                  )}
+                  {!useExampleCorrelation && renameWarnings.length > 0 && (
+                    <Alert variant="warning" className="mt-2">
+                      {renameWarnings}
+                    </Alert>
                   )}
                 </>
               )}
