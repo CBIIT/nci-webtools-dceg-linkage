@@ -538,7 +538,6 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         <HeritabilityResultTable result={result} />
         <DownloadOptionsPanel result={result} filename="heritability_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} reference={reference} />
         <CollapsibleRawPanel result={result} title="Heritability Analysis Output" />
-       <CreditsPanel />
       </Container>
     );
   }
@@ -564,7 +563,6 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
           parsedTableText={parsedTableText} 
           reference={reference} />
         <CollapsibleRawPanel result={result} title="Genetic Correlation Output" />
-       <CreditsPanel />
       </Container>
     );
   }
@@ -588,7 +586,6 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
         <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} reference={reference} />
         <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
-        <CreditsPanel />
       </Container>
     );
    }
@@ -596,18 +593,3 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
 
 }
 
-function CreditsPanel() {
-  return (
-    <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
-        Credits
-      </div>
-      <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <span style={{ display: 'inline', textAlign: 'left' }}>
-           Breeze C.E., Yao, X., Park, B., Kanigicherla, M., Lan, Q., Rothman, N., Teschendorff, A.E., Franceschini, N., Berndt, S.I., and Machiela, M.J. (2025). LDscore: a scalable, Python 3-powered web platform for LD score regression analysis. 2025.12.19.695639. bioRxiv{' '}
-           <a href="https://doi.org/10.64898/2025.12.19.695639" target="_blank" rel="noopener noreferrer">https://doi.org/10.64898/2025.12.19.695639</a>
-          </span>
-      </div>
-    </div>
-  );
-}
