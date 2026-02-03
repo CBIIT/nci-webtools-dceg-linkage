@@ -16,7 +16,7 @@ export default function SNPClipForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const { genome_build } = useStore((state: { genome_build: string }) => state);
+  const { genome_build, setFormData } = useStore((state: any) => state);
 
   const defaultForm: FormData = {
     snps: "",
@@ -74,6 +74,8 @@ export default function SNPClipForm() {
     };
 
     queryClient.setQueryData(["snpclip-form-data", reference.toString()], formData);
+    // Also store form data in the Zustand store so results components can read it
+    setFormData(reference.toString(), formData);
     submitForm.mutate(formData);
   }
 

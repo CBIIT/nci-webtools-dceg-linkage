@@ -20,8 +20,11 @@ export default function SNPClipResults({ ref }: { ref: string }) {
 
   const getFormData = useStore((state) => state.getFormData);
   const queryClient = useQueryClient();
-  const formData = getFormData(ref) || queryClient.getQueryData(["snpclip-form-data", ref]) as FormData;
-
+  const formDataFromQuery = queryClient.getQueryData(["snpclip-form-data", ref]) as FormData | undefined;
+    
+  const formData = getFormData(ref) || formDataFromQuery;
+  //console.log("formData:", formData);
+  
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["snpclip_results", ref],
     queryFn: async () => (ref ? fetchOutput(`snpclip${ref}.json`) : null),

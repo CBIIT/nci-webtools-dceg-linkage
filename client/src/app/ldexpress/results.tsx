@@ -17,7 +17,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
   const getFormData = useStore((state) => state.getFormData);
   
   const formData = getFormData(ref) || queryClient.getQueryData(["ldexpress-form-data", ref]) as FormData;
-   //const formData = queryClient.getQueryData(["ldexpress-form-data", ref]) as FormData | undefined;
+
   const { data: results } = useSuspenseQuery<LocusData | null>({
     queryKey: ["ldexpress_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldexpress${ref}.json`) : null),

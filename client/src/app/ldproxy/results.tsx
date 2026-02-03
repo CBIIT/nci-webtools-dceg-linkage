@@ -102,7 +102,6 @@ export default function LdProxyResults({ ref }: { ref: string }) {
   // Get formData from Zustand store, fallback to React Query cache
   const getFormData = useStore((state) => state.getFormData);
   const formData = getFormData(ref) || formDataFromQuery;
-  
   // Extract commonly used values with defaults
   const r2_d = formData?.r2_d ?? "r2";
   const dprime = r2_d === "d";

@@ -16,7 +16,7 @@ export default function LdHapForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const { genome_build } = useStore((state: { genome_build: string }) => state);
+  const { genome_build, setFormData } = useStore((state: any) => state);
 
   const defaultForm: FormData = {
     snps: "",
@@ -72,6 +72,8 @@ export default function LdHapForm() {
     };
 
     queryClient.setQueryData(["ldhap-form-data", reference], formData);
+    // Also store form data in Zustand so results components can read it from the store
+    setFormData(reference, formData);
     router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
