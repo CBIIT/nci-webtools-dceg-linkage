@@ -4,12 +4,13 @@ import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, SNP, Haplotype } from "./types";
-import { genomeBuildMap } from "@/store";
+import { genomeBuildMap, useStore } from "@/store";
 import "./styles.scss";
 
 export default function LdHapResults({ ref }: { ref: string }) {
   const queryClient = useQueryClient();
-  const formData = queryClient.getQueryData(["ldhap-form-data", ref]) as FormData | undefined;
+  const getFormData = useStore((state) => state.getFormData); 
+  const formData =  getFormData(ref) || queryClient.getQueryData(["ldhap-form-data", ref]) as FormData;
 
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["ldhap_results", ref],

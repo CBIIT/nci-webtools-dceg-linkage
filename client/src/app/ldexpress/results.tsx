@@ -8,12 +8,16 @@ import Table from "@/components/table";
 import { fetchOutput } from "@/services/queries";
 import { FormData, LocusData, FormValues } from "./types";
 import { genomeBuildMap } from "@/store";
+import { useStore } from "@/store";
 
 export default function LdExpressResults({ ref }: { ref: string }) {
   const [viewWarnings, setViewWarnings] = useState(false);
   const { register, reset, control } = useForm<FormValues>();
   const queryClient = useQueryClient();
-  const formData = queryClient.getQueryData(["ldexpress-form-data", ref]) as FormData | undefined;
+  const getFormData = useStore((state) => state.getFormData);
+  
+  const formData = getFormData(ref) || queryClient.getQueryData(["ldexpress-form-data", ref]) as FormData;
+   //const formData = queryClient.getQueryData(["ldexpress-form-data", ref]) as FormData | undefined;
   const { data: results } = useSuspenseQuery<LocusData | null>({
     queryKey: ["ldexpress_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldexpress${ref}.json`) : null),

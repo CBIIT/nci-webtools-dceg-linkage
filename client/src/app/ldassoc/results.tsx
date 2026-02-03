@@ -30,7 +30,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   const queryClient = useQueryClient();
   const formDataFromQuery = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
  
-  // Get formData from Zustand store, fallback to React Query cache
+ // Get form data from global store as fallback
   const getFormData = useStore((state) => state.getFormData);
   const formData = getFormData(ref) || formDataFromQuery;
   const genome_build = formData?.genome_build || "grch37";
