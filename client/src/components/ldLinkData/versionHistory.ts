@@ -5,13 +5,15 @@ export type NewsEntry = {
 
 export const versionHistory: NewsEntry[] = [
     {
-    title: "LDlink 6.0.2 Release (TBD)",
+    title: "LDlink 7.0.0 Release (MM/DD/YYYY)",
     items: [
+      "Credit reference added to LDscore",
       "Removed filename restrictions for LDScore input files",
       "Fixed heritability and correlation concurrency issue",
-      "Fixed genome build mismatch in genome.ucsc.edu URLs for LDassoc and LDproxyy",
+      "Fixed genome build mismatches for LDassoc, LDexpress, LDhap, LDproxy, SNPclip",
       "Added file input validation for LDscore (heritability, correlation and ldscore) module",
       "Updated urllib3 to address security vulnerabilities and boto3 dependency issues",
+      "Mongo DB migrated to a new AWS account",
       "Python updated to 3.11",
     ],
   },
