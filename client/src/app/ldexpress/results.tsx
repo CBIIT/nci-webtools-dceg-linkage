@@ -7,8 +7,7 @@ import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import Table from "@/components/table";
 import { fetchOutput } from "@/services/queries";
 import { FormData, LocusData, FormValues } from "./types";
-import { genomeBuildMap } from "@/store";
-import { useStore } from "@/store";
+import { genomeBuildMap,useStore } from "@/store";
 
 export default function LdExpressResults({ ref }: { ref: string }) {
   const [viewWarnings, setViewWarnings] = useState(false);

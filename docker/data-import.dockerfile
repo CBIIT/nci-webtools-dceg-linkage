@@ -1,7 +1,6 @@
-# Use Amazon Linux like backend and install Python 3.11
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-# install Python 3.11 and build/runtime deps
+# install dependencies
 RUN dnf -y update && \
     dnf -y install \
     python3.11 \
