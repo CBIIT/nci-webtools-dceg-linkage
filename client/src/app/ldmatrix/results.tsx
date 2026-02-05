@@ -32,7 +32,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
 
       // Create and load new script
       const script = document.createElement('script');
-      script.src = 'https://cdn.bokeh.org/bokeh/release/bokeh-3.4.3.min.js';
+      script.src = 'https://cdn.bokeh.org/bokeh/release/bokeh-3.8.2.min.js';
       script.crossOrigin = 'anonymous';
       script.async = true;
       
