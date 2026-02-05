@@ -1,17 +1,20 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
+# Install Node.js 20 from NodeSource repository
 RUN dnf -y update \
    && dnf -y install \
    gcc-c++ \
    httpd \
    make \
-   nodejs \
-   npm \
+   tar \
+   gzip \
    nginx \
+   && curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - \
+   && dnf -y install nodejs \
    && dnf clean all
 
-# Update npm to version compatible with Node 18 that includes tar@7.5.3+ (fixes CVE-2026-23745)
-RUN npm install -g npm@10.9.2
+# Update npm to latest version
+RUN npm install -g npm@10.9.4
 
 RUN mkdir -p /app/client
 
