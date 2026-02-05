@@ -29,7 +29,7 @@ RUN dnf -y update && \
 # create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
 RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
     ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    /usr/bin/python3.11 -m pip install --upgrade 'pip==24.3.1' setuptools wheel
+    /usr/bin/python3.11 -m pip install --upgrade 'pip==25.3' setuptools wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
