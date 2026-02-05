@@ -56,7 +56,9 @@ export default function LdScore() {
         </Row>
       
       <Row className="border rounded bg-white my-3 p-3 shadow-sm">
-          Breeze C.E., Yao, X., Park, B., Kanigicherla, M., Lan, Q., Rothman, N., Teschendorff, A.E., Franceschini, N., Berndt, S.I., and Machiela, M.J. (2025). LDscore: a scalable, Python 3-powered web platform for LD score regression analysis. 2025.12.19.695639. bioRxiv <a href="https://doi.org/10.64898/2025.12.19.695639" target="_blank">https://doi.org/10.64898/2025.12.19.695639</a>        
+        <div style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
+          Breeze C.E., Yao, X., Park, B., Kanigicherla, M., Lan, Q., Rothman, N., Teschendorff, A.E., Franceschini, N., Berndt, S.I., and Machiela, M.J. (2025). LDscore: a scalable, Python 3-powered web platform for LD score regression analysis. 2025.12.19.695639. bioRxiv <a href="https://doi.org/10.64898/2025.12.19.695639" target="_blank" style={{ whiteSpace: 'nowrap' }}>https://doi.org/10.64898/2025.12.19.695639</a>
+        </div>
       </Row>
   
               
