@@ -14,7 +14,7 @@ RUN dnf -y update \
    && dnf clean all
 
 # Update npm to latest version
-RUN npm install -g npm@10.9.4
+RUN npm install -g npm@latest
 
 RUN mkdir -p /app/client
 

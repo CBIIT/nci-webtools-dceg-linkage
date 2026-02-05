@@ -37,6 +37,6 @@
     "typescript": "^5"
   },
   "overrides": {
-    "tar": ">=7.5.4"
+    "tar": "^7.5.4"
   }
 }
