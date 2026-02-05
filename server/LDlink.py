@@ -842,8 +842,11 @@ def validate_bfile():
         return jsonify({"fileValid": False, "error": "Missing filename parameter"})
     
     filename = secure_filename(filename)
-    # Remove extension if provided
-    fileroot, ext = os.path.splitext(filename)
+    # Remove only the bfile extension (.bed, .bim, or .fam) if provided
+    if filename.endswith(('.bed', '.bim', '.fam')):
+        fileroot = filename[:-4]  # Remove last 4 characters (.bed/.bim/.fam)
+    else:
+        fileroot = filename
     
     # Determine file path based on reference
     if reference:
