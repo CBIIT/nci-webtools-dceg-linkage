@@ -98,10 +98,18 @@ WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
 
+# Install setuptools and wheel first for building packages
+RUN /usr/bin/python3.11 -m pip install --no-cache-dir setuptools wheel
+
+# Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
+RUN /usr/bin/python3.11 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
+
+# Install remaining requirements (excluding pybedtools and pysam which are already installed)
 RUN /usr/bin/python3.11 -m pip install --no-cache-dir -r requirements.txt
 
-# Install ldsc package from GitHub
-#RUN pip install git+https://github.com/CBIIT/ldsc.git@master
+# Copy and install ldsc package from vendor folder
+COPY vendor/ldsc /tmp/ldsc
+RUN cd /tmp/ldsc && /usr/bin/python3.11 -m pip install --no-cache-dir --no-build-isolation . && rm -rf /tmp/ldsc
 
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig

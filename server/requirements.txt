@@ -1,4 +1,4 @@
-bokeh>=3.8.2
+bokeh==3.8.2
 boto3==1.42.39
 Flask==3.1.1
 jinja2==3.1.6
@@ -16,5 +16,5 @@ svgutils==0.3.1
 cairosvg==2.8.2
 Pillow==11.3.0
 pybedtools==0.9.1  # Specify a known working version
-ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
+#ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
 Flask-Limiter[mongodb]==3.11.0
