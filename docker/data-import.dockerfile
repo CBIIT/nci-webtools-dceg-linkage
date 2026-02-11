@@ -26,6 +26,9 @@ RUN dnf -y update && \
     make \
     && dnf clean all
 
+# Restrict Python 3.9 to root only (security mitigation)
+RUN chmod 700 /usr/bin/python3.9 
+
 # create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
 RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
     ln -sf /usr/bin/python3.11 /usr/bin/python && \
