@@ -34,7 +34,7 @@ RUN chmod 700 /usr/bin/python3.9
 # Create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
 RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
     ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    /usr/bin/python3.11 -m pip install --upgrade 'pip==22.3.1' setuptools wheel
+    python3 -m pip install --upgrade pip==22.3.1 setuptools wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.21
@@ -102,17 +102,17 @@ WORKDIR ${LDLINK_HOME}
 COPY server/requirements.txt .
 
 # Install setuptools and wheel first for building packages
-RUN /usr/bin/python3.11 -m pip install --no-cache-dir setuptools wheel
+RUN python3 -m pip install --no-cache-dir setuptools wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN /usr/bin/python3.11 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
+RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
 
 # Install remaining requirements (excluding pybedtools and pysam which are already installed)
-RUN /usr/bin/python3.11 -m pip install --no-cache-dir -r requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 # Copy and install ldsc package from vendor folder
 COPY vendor/ldsc /tmp/ldsc
-RUN cd /tmp/ldsc && /usr/bin/python3.11 -m pip install --no-cache-dir --no-build-isolation . && rm -rf /tmp/ldsc
+RUN cd /tmp/ldsc && python3 -m pip install --no-cache-dir --no-build-isolation . && rm -rf /tmp/ldsc
 
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig

@@ -32,7 +32,7 @@ RUN chmod 700 /usr/bin/python3.9
 # create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
 RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
     ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    /usr/bin/python3.11 -m pip install --upgrade 'pip==22.3.1' setuptools wheel
+    python3 -m pip install --upgrade pip==22.3.1 setuptools wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
