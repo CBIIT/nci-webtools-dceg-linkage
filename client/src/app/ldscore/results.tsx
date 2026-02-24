@@ -28,8 +28,17 @@ function parseHeritabilityResult(result: string) {
       }
     }
   });
+  const observedKey = Object.keys(parsed).find(
+    (k) => k.includes('Total Observed scale h2') || k.includes('Total Observed scale h²')
+  );
+  const liabilityKey = Object.keys(parsed).find(
+    (k) => k.includes('Total Liability scale h2') || k.includes('Total Liability scale h²')
+  );
+  const h2Key = liabilityKey || observedKey || '';
+
   return {
-    h2: parsed['Total Observed scale h2'] || '',
+    h2Label: liabilityKey ? 'Total Liability scale h²' : 'Total Observed scale h²',
+    h2: h2Key ? parsed[h2Key] : '',
     lambdaGC: parsed['Lambda GC'] || '',
     meanChi2: parsed['Mean Chi^2'] || '',
     intercept: parsed['Intercept'] || '',
@@ -84,7 +93,12 @@ function renderKeyValueTable(section: string) {
   
   // Helper function to format key text with superscripts
   const formatKeyText = (key: string) => {
-    if (key.includes('Total Observed scale h2') || key.includes('Total Observed scale h²')) {
+    if (
+      key.includes('Total Observed scale h2') ||
+      key.includes('Total Observed scale h²') ||
+      key.includes('Total Liability scale h2') ||
+      key.includes('Total Liability scale h²')
+    ) {
       return key.replace(/h2|h²/g, 'h²');
     }
     if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {
@@ -160,7 +174,7 @@ function renderSummaryTable(section: string) {
 function HeritabilityResultTable({ result }: { result: string }) {
   const parsed = parseHeritabilityResult(result);
   const rows = [
-    ['Total Observed scale h²', parsed.h2],
+    [parsed.h2Label, parsed.h2],
     ['Lambda GC', parsed.lambdaGC],
     ['Mean Chi²', parsed.meanChi2],
     ['Intercept', parsed.intercept],
@@ -219,7 +233,7 @@ function CollapsibleRawPanel({ result, title }: { result: string; title: string 
 function formatHeritabilityTableText(result: string) {
   const parsed = parseHeritabilityResult(result);
   const rows = [
-    ['Total Observed scale h²', parsed.h2],
+    [parsed.h2Label, parsed.h2],
     ['Lambda GC', parsed.lambdaGC],
     ['Mean Chi²', parsed.meanChi2],
     ['Intercept', parsed.intercept],
@@ -267,7 +281,12 @@ function formatKeyValueSection(section: string) {
   
   // Helper function to format key text with superscripts for download
   const formatKeyTextForDownload = (key: string) => {
-    if (key.includes('Total Observed scale h2') || key.includes('Total Observed scale h²')) {
+    if (
+      key.includes('Total Observed scale h2') ||
+      key.includes('Total Observed scale h²') ||
+      key.includes('Total Liability scale h2') ||
+      key.includes('Total Liability scale h²')
+    ) {
       return key.replace(/h2|h²/g, 'h²');
     }
     if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {

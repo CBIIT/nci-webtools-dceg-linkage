@@ -1377,8 +1377,11 @@ def ldherit():
     filename = request.args.get("filename", False)
     isexample = request.args.get("isExample", False)
     reference = request.args.get("reference", False)
+    scale = request.args.get("scale", "observed")
+    samp_prev = request.args.get("samp_prev", "")
+    pop_prev = request.args.get("pop_prev", "")
     app.logger.debug(
-        f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+        f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
     )
     if filename:
         filename = secure_filename(filename)
@@ -1412,7 +1415,7 @@ def ldherit():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(filename, fileDir, pop, isexample)
+        result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1470,11 +1473,14 @@ def ldheritAPI():
     genome_build = request.args.get("genome_build", "grch37")
     filename = request.args.get("filename", False)
     isexample = request.args.get("isExample", False)
+    scale = request.args.get("scale", "observed")
+    samp_prev = request.args.get("samp_prev", "")
+    pop_prev = request.args.get("pop_prev", "")
 
     start_time = time.time()
 
     app.logger.debug(
-        f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+        f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
     )
     if filename:
         filename = secure_filename(filename)
@@ -1487,7 +1493,7 @@ def ldheritAPI():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(filename, pop, isexample)
+        result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
 
         # Pretty-print the JSON output
         summary_index = result.find("Total Observed scale")

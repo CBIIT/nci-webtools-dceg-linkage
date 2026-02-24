@@ -14,6 +14,9 @@ import LdScoreResults from "./results";
 interface HeritabilityFormData {
   file?: File;
   pop: LdscorePopOption | null;
+  scale: "observed" | "liability";
+  samplePrev?: string;
+  popPrev?: string;
 }
 
 export default function Heritability() {
@@ -92,9 +95,14 @@ export default function Heritability() {
   const heritabilityForm = useForm<HeritabilityFormData>({
     defaultValues: {
       file: undefined,
-      pop: null
+      pop: null,
+      scale: "observed",
+      samplePrev: "",
+      popPrev: ""
     }
   });
+
+  const selectedScale = heritabilityForm.watch("scale");
 
   const heritabilityMutation = useMutation({
     mutationFn: fetchHeritabilityResult,
@@ -125,6 +133,15 @@ export default function Heritability() {
       isExample: isExample ? "true" : "false",
       reference,
     });
+
+    if (data.scale === "liability") {
+      params.append("scale", "liability");
+      params.append("samp_prev", data.samplePrev || "");
+      params.append("pop_prev", data.popPrev || "");
+    } else {
+      params.append("scale", "observed");
+    }
+
     try {
       await fetchHeritabilityResult(params);
       setHeritabilityResultRef(reference);
@@ -146,6 +163,9 @@ export default function Heritability() {
     setValidationError("");
     setFileValid(false);
     setRenameWarnings("");
+    heritabilityForm.setValue("scale", "observed");
+    heritabilityForm.setValue("samplePrev", "");
+    heritabilityForm.setValue("popPrev", "");
   };
 
   return (
@@ -302,6 +322,72 @@ export default function Heritability() {
               <LdscorePopSelect name="pop" control={heritabilityForm.control} isLoading={heritabilityLoading} rules={{ required: "Population is required" }} />
               <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
             </Form.Group>
+
+            <Form.Group controlId="scale" className="mb-3">
+              <Form.Label>Heritability scale</Form.Label>
+              <Form.Check
+                type="switch"
+                id="use-liability-scale"
+                disabled={heritabilityLoading}
+                label={selectedScale === "liability" ? "Liability" : "Observed"}
+                checked={selectedScale === "liability"}
+                onChange={(e) => {
+                  const liabilitySelected = e.target.checked;
+                  heritabilityForm.setValue("scale", liabilitySelected ? "liability" : "observed");
+                  if (!liabilitySelected) {
+                    heritabilityForm.setValue("samplePrev", "");
+                    heritabilityForm.setValue("popPrev", "");
+                    heritabilityForm.clearErrors(["samplePrev", "popPrev"]);
+                  }
+                }}
+              />
+            </Form.Group>
+
+            {selectedScale === "liability" && (
+              <>
+                <Form.Group controlId="samplePrev" className="mb-3">
+                  <Form.Label>Sample prevalence (sample-prev)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="any"
+                    min={0}
+                    max={1}
+                    disabled={heritabilityLoading}
+                    placeholder="e.g. 0.5"
+                    {...heritabilityForm.register("samplePrev", {
+                      required: "Sample prevalence is required for liability scale",
+                      validate: (value) => {
+                        const num = Number(value);
+                        if (Number.isNaN(num)) return "Sample prevalence must be numeric";
+                        return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
+                      },
+                    })}
+                  />
+                  <Form.Text className="text-danger">{heritabilityForm.formState.errors?.samplePrev?.message}</Form.Text>
+                </Form.Group>
+
+                <Form.Group controlId="popPrev" className="mb-3">
+                  <Form.Label>Population prevalence (pop-prev)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="any"
+                    min={0}
+                    max={1}
+                    disabled={heritabilityLoading}
+                    placeholder="e.g. 0.01"
+                    {...heritabilityForm.register("popPrev", {
+                      required: "Population prevalence is required for liability scale",
+                      validate: (value) => {
+                        const num = Number(value);
+                        if (Number.isNaN(num)) return "Population prevalence must be numeric";
+                        return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
+                      },
+                    })}
+                  />
+                  <Form.Text className="text-danger">{heritabilityForm.formState.errors?.popPrev?.message}</Form.Text>
+                </Form.Group>
+              </>
+            )}
           </Col>
 
           <Col />
