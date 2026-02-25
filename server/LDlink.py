@@ -1544,8 +1544,11 @@ def ldcorrelation():
     filename2 = request.args.get("filename2", False)
     isexample = request.args.get("isExample", False)
     reference = request.args.get("reference", False)
+    scale = request.args.get("scale", "observed")
+    samp_prev = request.args.get("samp_prev", "")
+    pop_prev = request.args.get("pop_prev", "")
     app.logger.debug(
-        f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}"
+        f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}, scale: {scale}"
     )
     if filename:
         filename = secure_filename(filename)
@@ -1576,7 +1579,16 @@ def ldcorrelation():
                     app.logger.error(f"Uploaded file not found at {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
-        result = run_correlation_command(filename, filename2, fileDir, pop, isexample)
+        result = run_correlation_command(
+            filename,
+            filename2,
+            fileDir,
+            pop,
+            isexample,
+            scale=scale,
+            samp_prev=samp_prev,
+            pop_prev=pop_prev,
+        )
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1588,6 +1600,8 @@ def ldcorrelation():
         else:
             # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
+            if summary_index == -1:
+                summary_index = result.find("Total Liability scale")
             if summary_index != -1:
                 filtered_result = result[summary_index:]
             else:

@@ -479,7 +479,7 @@ def run_herit_command(sumstats_file, fileDir, ld_scores_dir, isExample, scale='o
         print(f"Command stderr: {e.stderr}")
         return f"An error occurred while running the command: {e.stderr}"
 
-def run_correlation_command(sumstats_file, sumstats_file2, fileDir, ld_scores_dir,isExample):
+def run_correlation_command(sumstats_file, sumstats_file2, fileDir, ld_scores_dir, isExample, scale='observed', samp_prev='', pop_prev=''):
     fallExampleDir = f"/data/ldscore"
     w_hm3_snplist = f"/data/ldscore/w_hm3.snplist"
     if isinstance(isExample, str):
@@ -525,6 +525,8 @@ def run_correlation_command(sumstats_file, sumstats_file2, fileDir, ld_scores_di
         ldsc_script_path = os.path.join(parent_dir, 'ldsc.py')
         print("Second command ################:",ld_scores_dir)
         command2 = f"cd {fileDir} && python3 {ldsc_script_path} --rg {out_file},{out_file2} --ref-ld-chr {ld_scores_dir} --w-ld-chr {ld_scores_dir} --out {base_name}"
+        if str(scale).lower() == 'liability' and str(samp_prev).strip() and str(pop_prev).strip():
+            command2 += f" --samp-prev {samp_prev} --pop-prev {pop_prev}"
        
         #result2 = subprocess.run( ['bash', '-c', command2], check=True, capture_output=True, text=True)
 
