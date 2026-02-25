@@ -97,8 +97,8 @@ export default function Heritability() {
       file: undefined,
       pop: null,
       scale: "observed",
-      samplePrev: "",
-      popPrev: ""
+      samplePrev: "0.5",
+      popPrev: "0.01"
     }
   });
 
@@ -164,8 +164,8 @@ export default function Heritability() {
     setFileValid(false);
     setRenameWarnings("");
     heritabilityForm.setValue("scale", "observed");
-    heritabilityForm.setValue("samplePrev", "");
-    heritabilityForm.setValue("popPrev", "");
+    heritabilityForm.setValue("samplePrev", "0.5");
+    heritabilityForm.setValue("popPrev", "0.01");
   };
 
   return (
@@ -317,14 +317,8 @@ export default function Heritability() {
           </Col>
 
           <Col s={12} sm={12} md={6} lg={4}>
-            <Form.Group controlId="pop" className="mb-3">
-              <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={heritabilityForm.control} isLoading={heritabilityLoading} rules={{ required: "Population is required" }} />
-              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
-            </Form.Group>
-
             <Form.Group controlId="scale" className="mb-3">
-              <Form.Label className="d-block">Heritability scale</Form.Label>
+              <Form.Label className="d-block">Scale</Form.Label>
               <ButtonGroup>
                 <ToggleButton
                   id="radio-scale-observed"
@@ -337,8 +331,8 @@ export default function Heritability() {
                   checked={selectedScale === "observed"}
                   onChange={() => {
                     heritabilityForm.setValue("scale", "observed");
-                    heritabilityForm.setValue("samplePrev", "");
-                    heritabilityForm.setValue("popPrev", "");
+                    heritabilityForm.setValue("samplePrev", "0.5");
+                    heritabilityForm.setValue("popPrev", "0.01");
                     heritabilityForm.clearErrors(["samplePrev", "popPrev"]);
                   }}>
                   Observed
@@ -368,10 +362,11 @@ export default function Heritability() {
                       <Form.Label>Sample prevalence</Form.Label>
                       <Form.Control
                         type="number"
-                        step="any"
+                        step="0.01"
                         min={0}
                         max={1}
-                      disabled={heritabilityLoading}
+                        disabled={heritabilityLoading}
+                        style={{ maxWidth: "160px" }}
                         placeholder="0.5"
                         {...heritabilityForm.register("samplePrev", {
                           required: "Sample prevalence is required for liability scale",
@@ -390,10 +385,11 @@ export default function Heritability() {
                       <Form.Label>Population prevalence</Form.Label>
                       <Form.Control
                         type="number"
-                        step="any"
+                        step="0.01"
                         min={0}
                         max={1}
                         disabled={heritabilityLoading}
+                        style={{ maxWidth: "160px" }}
                         placeholder="0.01"
                         {...heritabilityForm.register("popPrev", {
                           required: "Population prevalence is required for liability scale",
@@ -412,8 +408,15 @@ export default function Heritability() {
             )}
           </Col>
 
-          <Col />
-         <Col s={12} sm={12} md={5} lg={3} style={{ minWidth: "180px" }}>
+          <Col s={12} sm={12} md={6} lg={2}>
+            <Form.Group controlId="pop" className="mb-3">
+              <Form.Label>Population</Form.Label>
+              <LdscorePopSelect name="pop" control={heritabilityForm.control} isLoading={heritabilityLoading} rules={{ required: "Population is required" }} />
+              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
+            </Form.Group>
+          </Col>
+
+         <Col s={12} sm={12} md={12} lg={2}>
             <div className="text-end">
               <Button type="reset" variant="outline-danger" className="me-1" disabled={heritabilityLoading}>
                 Reset
