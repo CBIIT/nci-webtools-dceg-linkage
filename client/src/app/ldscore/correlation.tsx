@@ -337,20 +337,18 @@ export default function Correlation() {
         </Row>
 
            <div className="mb-1 position-relative">
-           {selectedScale === "liability" && (
             <div
               style={{
                 position: "absolute",
                 top: 0,
                 bottom: 10,
-                left: 0,
-                width: "71%",
+                left: -5,
+                width: selectedScale === "liability" ? "71%" : "33%",
                 border: "1px solid #dee2e6",
                 borderRadius: "0.375rem",
                 pointerEvents: "none",
               }}
             />
-           )}
            <Row>
              <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
             <Col s={12} sm={12} md={6} lg={4}>
@@ -449,20 +447,18 @@ export default function Correlation() {
         </Row>
         </div>
         <div className="mb-1 position-relative">
-        {selectedScale === "liability" && (
           <div
             style={{
               position: "absolute",
               top: 0,
               bottom: 50,
-              left: 0,
-              width: "71%",
+              left: -5,
+              width: selectedScale === "liability" ? "71%" : "33%",
               border: "1px solid #dee2e6",
               borderRadius: "0.375rem",
               pointerEvents: "none",
             }}
           />
-        )}
         <Row>  
            <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
           <Col s={12} sm={12} md={6} lg={4}>
