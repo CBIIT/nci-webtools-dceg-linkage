@@ -179,6 +179,60 @@ def sendJSON(inputString):
     return current_app.response_class(out_json, mimetype="application/json")
 
 
+def _parse_probability_value(raw_value, field_name):
+    try:
+        parsed_value = float(str(raw_value).strip())
+    except (TypeError, ValueError):
+        raise ValueError(f"Invalid {field_name}: value must be a number between 0 and 1 (exclusive).")
+
+    if not 0 < parsed_value < 1:
+        raise ValueError(f"Invalid {field_name}: value must be between 0 and 1 (exclusive).")
+
+    return format(parsed_value, ".15g")
+
+
+def _parse_probability_pair(raw_value, field_name):
+    parts = [part.strip() for part in str(raw_value).split(",")]
+    if len(parts) != 2 or any(part == "" for part in parts):
+        raise ValueError(
+            f"Invalid {field_name}: for liability scale in LDcorrelation, provide two comma-separated values between 0 and 1."
+        )
+
+    normalized_parts = []
+    for index, value in enumerate(parts):
+        normalized_parts.append(_parse_probability_value(value, f"{field_name}[{index + 1}]"))
+    return ",".join(normalized_parts)
+
+
+def _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=False):
+    normalized_scale = str(scale or "observed").strip().lower()
+    if normalized_scale not in {"observed", "liability"}:
+        raise ValueError("Invalid scale: allowed values are 'observed' or 'liability'.")
+
+    if normalized_scale != "liability":
+        return normalized_scale, "", ""
+
+    normalized_samp_prev = str(samp_prev).strip()
+    normalized_pop_prev = str(pop_prev).strip()
+    if not normalized_samp_prev or not normalized_pop_prev:
+        if require_pair:
+            raise ValueError(
+                "When scale=liability for LDcorrelation, both samp_prev and pop_prev are required as two comma-separated values between 0 and 1."
+            )
+        raise ValueError(
+            "When scale=liability for LDherit, both samp_prev and pop_prev are required as values between 0 and 1."
+        )
+
+    if require_pair:
+        normalized_samp_prev = _parse_probability_pair(normalized_samp_prev, "samp_prev")
+        normalized_pop_prev = _parse_probability_pair(normalized_pop_prev, "pop_prev")
+    else:
+        normalized_samp_prev = _parse_probability_value(normalized_samp_prev, "samp_prev")
+        normalized_pop_prev = _parse_probability_value(normalized_pop_prev, "pop_prev")
+
+    return normalized_scale, normalized_samp_prev, normalized_pop_prev
+
+
 # Read headers from uploaded data files for LDassoc
 def read_csv_headers(example_filepath):
     final_headers = []
@@ -1380,6 +1434,11 @@ def ldherit():
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
+    try:
+        scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDherit prevalence input: {validation_error}")
+        return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
     )
@@ -1476,6 +1535,11 @@ def ldheritAPI():
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
+    try:
+        scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDherit API prevalence input: {validation_error}")
+        return sendTraceback(str(validation_error))
 
     start_time = time.time()
 
@@ -1547,6 +1611,11 @@ def ldcorrelation():
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
+    try:
+        scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=True)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDcorrelation prevalence input: {validation_error}")
+        return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}, scale: {scale}"
     )
