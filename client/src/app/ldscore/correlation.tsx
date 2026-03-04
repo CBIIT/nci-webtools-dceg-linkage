@@ -22,6 +22,17 @@ interface CorrelationFormData {
   popPrev2?: string;
 }
 
+const defaultGeneticForm: CorrelationFormData = {
+  file: undefined,
+  file2: undefined,
+  pop: null,
+  scale: "observed",
+  samplePrev1: "0.5",
+  popPrev1: "0.01",
+  samplePrev2: "0.5",
+  popPrev2: "0.01",
+};
+
 export default function Correlation() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -118,16 +129,7 @@ export default function Correlation() {
   };
 
   const geneticForm = useForm<CorrelationFormData>({
-    defaultValues: {
-      file: undefined,
-      file2: undefined,
-      pop: null,
-      scale: "observed",
-      samplePrev1: "0.5",
-      popPrev1: "0.01",
-      samplePrev2: "0.5",
-      popPrev2: "0.01",
-    }
+    defaultValues: defaultGeneticForm,
   });
 
   const selectedScale = geneticForm.watch("scale");
@@ -182,7 +184,7 @@ export default function Correlation() {
   };
 
   const onGeneticReset = () => {
-    geneticForm.reset();
+    geneticForm.reset(defaultGeneticForm);
     setGeneticCorrelationResultRef(null);
     setReference("");
     setExampleFile1("");
@@ -195,12 +197,6 @@ export default function Correlation() {
     setFile2Valid(false);
     setValidationError1("");
     setValidationError2("");
-    geneticForm.setValue("pop", null);
-    geneticForm.setValue("scale", "observed");
-    geneticForm.setValue("samplePrev1", "0.5");
-    geneticForm.setValue("popPrev1", "0.01");
-    geneticForm.setValue("samplePrev2", "0.5");
-    geneticForm.setValue("popPrev2", "0.01");
     setRenameWarnings("");
   };
 

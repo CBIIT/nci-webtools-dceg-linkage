@@ -19,6 +19,14 @@ interface HeritabilityFormData {
   popPrev?: string;
 }
 
+const defaultHeritabilityForm: HeritabilityFormData = {
+  file: undefined,
+  pop: null,
+  scale: "observed",
+  samplePrev: "0.5",
+  popPrev: "0.01",
+};
+
 export default function Heritability() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -26,7 +34,6 @@ export default function Heritability() {
   const { genome_build } = useStore((state) => state);
   
   const [exampleFilename, setExampleFilename] = useState<string>("");
-  const [exampleFilepath, setExampleFilepath] = useState<string>("");
   const [uploadedFilename, setUploadedFilename] = useState<string>("");
   const [renameWarnings, setRenameWarnings] = useState<string>("");
   const [uploading, setUploading] = useState(false);
@@ -34,8 +41,10 @@ export default function Heritability() {
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
   const [reference, setReference] = useState<string>("");
-  const [fileValid, setFileValid] = useState(false);
-  const [validationError, setValidationError] = useState<string>("");
+
+  const heritabilityForm = useForm<HeritabilityFormData>({
+    defaultValues: defaultHeritabilityForm,
+  });
 
 
   const handleFileUpload = async (file: File) => {
@@ -69,38 +78,33 @@ export default function Heritability() {
         const validateData = await validateSumstats(filenameToUse, newReference);
        
         if (validateData?.fileValid?.valid) {
-          setFileValid(true);
-          setValidationError("");
+          heritabilityForm.clearErrors("file");
         } else {
-          setFileValid(false);
           const errors = validateData?.fileValid?.errors || [];
           const warnings = validateData?.fileValid?.warnings || [];
           const errorMessages = [...errors, ...warnings].join(". ");
-          setValidationError(errorMessages || "File validation failed. Please check the file format.");
+          heritabilityForm.setError("file", {
+            type: "server",
+            message: errorMessages || "File validation failed. Please check the file format.",
+          });
         }
       } else {
         setUploadedFilename("");
-        setFileValid(false);
-        setValidationError("Failed to upload file.");
+        heritabilityForm.setError("file", {
+          type: "server",
+          message: "Failed to upload file.",
+        });
       }
     } catch (e) {
       setUploadedFilename("");
-      setFileValid(false);
-      setValidationError("An error occurred during file upload.");
+      heritabilityForm.setError("file", {
+        type: "server",
+        message: "An error occurred during file upload.",
+      });
     } finally {
       setUploading(false);
     }
   };
-
-  const heritabilityForm = useForm<HeritabilityFormData>({
-    defaultValues: {
-      file: undefined,
-      pop: null,
-      scale: "observed",
-      samplePrev: "0.5",
-      popPrev: "0.01"
-    }
-  });
 
   const selectedScale = heritabilityForm.watch("scale");
 
@@ -153,19 +157,14 @@ export default function Heritability() {
   };
 
   const onHeritabilityReset = () => {
-    heritabilityForm.reset();
+    heritabilityForm.reset(defaultHeritabilityForm);
     setHeritabilityResultRef(null);
     setExampleFilename("");
-    setExampleFilepath("");
     setUploadedFilename("");
     setUseExample(false);
     setReference("");
-    setValidationError("");
-    setFileValid(false);
     setRenameWarnings("");
-    heritabilityForm.setValue("scale", "observed");
-    heritabilityForm.setValue("samplePrev", "0.5");
-    heritabilityForm.setValue("popPrev", "0.01");
+    heritabilityForm.clearErrors("file");
   };
 
   return (
@@ -227,11 +226,7 @@ export default function Heritability() {
                     const file = input.files && input.files[0];
                     setHeritabilityResultRef(null);
                     if (file) {
-                      setUploading(true);
                       await handleFileUpload(file);
-                      setUploading(false);
-                      setUploadedFilename(file.name);
-                      heritabilityForm.clearErrors("file");
                     }
                   }}
                 />
@@ -256,13 +251,11 @@ export default function Heritability() {
                   onChange={async (e) => {
                     setUseExample(e.target.checked);
                     setHeritabilityResultRef(null);
-                    setValidationError("");
                     if (e.target.checked) {
                       // Generate a new reference for example data
                       const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
                       setReference(newReference);
                       setExampleFilename("");
-                      setExampleFilepath("");
                       setUploadedFilename("");
                       heritabilityForm.clearErrors("file");
                       try {
@@ -270,20 +263,16 @@ export default function Heritability() {
                         if (response.ok) {
                           const data = await response.json();
                           setExampleFilename(data.filenames || "");
-                          setExampleFilepath(data.filepaths || "");
                         } else {
                           setExampleFilename("");
-                          setExampleFilepath("");
                           console.error("Failed to fetch example data");
                         }
                       } catch (error) {
                         setExampleFilename("");
-                        setExampleFilepath("");
                         console.error("Error fetching example data:", error);
                       }
                     } else {
                       setExampleFilename("");
-                      setExampleFilepath("");
                       setUploadedFilename("");
                       setReference("");
                       //heritabilityForm.setValue("pop", null);
@@ -454,10 +443,10 @@ export default function Heritability() {
         </div>
       )}
 
-      {!fileValid && validationError && (
+        {heritabilityForm.formState.errors?.file?.type === "server" && heritabilityForm.formState.errors?.file?.message && (
           <Alert variant="danger" className="mt-2">
               The uploaded file has the following issues:<br />
-              {validationError}
+            {heritabilityForm.formState.errors.file.message}
           </Alert>
       )}
 
