@@ -1520,7 +1520,10 @@ def ldheritAPI():
         return jsonify({"error": "No file part"}), 400
 
     file = request.files["file"]
-    fileDir = f"/data/tmp/uploads"
+    reference = secure_filename(str(request.args.get("reference", "")).strip())
+    if not reference:
+        reference = str(random.randint(10000, 99999))
+    fileDir = f"/data/tmp/uploads/{reference}"
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
@@ -1623,14 +1626,14 @@ def ldcorrelation():
     )
     if filename:
         filename = secure_filename(filename)
-        fileroot, ext = os.path.splitext(filename)
+    if filename2:
+        filename2 = secure_filename(filename2)
 
     fileDir = f"/data/tmp/uploads/{reference}/"
     
     # Handle file copying based on example vs uploaded
     for fname in [filename, filename2]:
         if fname:
-            fname = secure_filename(fname)
             # Create the reference subfolder if it doesn't exist
             os.makedirs(fileDir, exist_ok=True)
             new_file_path = os.path.join(fileDir, fname)
