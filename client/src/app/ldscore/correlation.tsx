@@ -115,7 +115,7 @@ export default function Correlation() {
             setUploadedFile2(filenameToUse);
           }
         }
-        return file.name;
+        return filenameToUse;
       } else {
         setFileError('Error: File upload failed');
         return "";
@@ -374,8 +374,7 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      const filename = await handleFileUpload(file, 1);
-                      setUploadedFile1(filename);
+                      await handleFileUpload(file, 1);
                       geneticForm.clearErrors("file");
                     }
                   }}
@@ -487,8 +486,7 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      const filename = await handleFileUpload(file, 2);
-                      setUploadedFile2(filename);
+                      await handleFileUpload(file, 2);
                       geneticForm.clearErrors("file2");
                     }
                   }}

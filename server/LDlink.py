@@ -1524,17 +1524,30 @@ def ldheritAPI():
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    if file:
-        # Save the file to a desired location
-        file.save(f"{fileDir}/{file.filename}")
+    uploaded_filename = secure_filename(file.filename)
+    if not uploaded_filename:
+        return jsonify({"error": "Invalid filename"}), 400
+
+    os.makedirs(fileDir, exist_ok=True)
+    saved_file_path = os.path.join(fileDir, uploaded_filename)
+    file.save(saved_file_path)
 
     pop = request.args.get("pop", False)
     genome_build = request.args.get("genome_build", "grch37")
-    filename = request.args.get("filename", False)
+    requested_filename = request.args.get("filename", False)
     isexample = request.args.get("isExample", False)
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
+    filename = uploaded_filename
+
+    if requested_filename:
+        sanitized_requested_filename = secure_filename(str(requested_filename))
+        if sanitized_requested_filename and sanitized_requested_filename != uploaded_filename:
+            app.logger.warning(
+                f"LDherit API filename mismatch: request filename '{sanitized_requested_filename}' differs from uploaded filename '{uploaded_filename}'. Using uploaded filename."
+            )
+
     try:
         scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
     except ValueError as validation_error:
@@ -1546,9 +1559,6 @@ def ldheritAPI():
     app.logger.debug(
         f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
     )
-    if filename:
-        filename = secure_filename(filename)
-        fileroot, ext = os.path.splitext(filename)
 
     app.logger.debug(f"LDherit API processing filename: {filename}")
     try:
@@ -1566,20 +1576,12 @@ def ldheritAPI():
         else:
             filtered_result = result
 
-        # Delete the uploaded files
-        for file_path in saved_files.values():
-            try:
-                os.remove(file_path)
-                print(f"Deleted file: {file_path}")
-            except Exception as e:
-                print(f"Error deleting file {file_path}: {e}")
-
-        # Delete the uploaded files
+        # Delete uploaded file after processing
         try:
-            os.remove(file)
-            app.logger.info(f"Deleted file: {file}")
+            os.remove(saved_file_path)
+            app.logger.info(f"Deleted file: {saved_file_path}")
         except Exception as e:
-            app.logger.error(f"Error deleting file {file}: {e}")
+            app.logger.error(f"Error deleting file {saved_file_path}: {e}")
         return filtered_result
 
     except requests.RequestException as e:
