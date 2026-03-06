@@ -554,7 +554,7 @@ export default function Correlation() {
                 </div>
                  <Row>
                   <Col s={12} sm={12} md={6} lg={4}>
-                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically, Use: A-Z, 0-9, dots, hyphens, and underscores only</div>
+                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
                   </Col>
                 </Row>  
 
