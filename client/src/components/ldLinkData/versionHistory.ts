@@ -5,7 +5,7 @@ export type NewsEntry = {
 
 export const versionHistory: NewsEntry[] = [
     {
-    title: "LDlink 7.0.0 Release (MM/DD/YYYY)",
+    title: "LDlink 7.0.0 Release (03/06/2026)",
     items: [
       "Credit reference added to LDscore",
       "Removed filename restrictions for LDScore input files",
