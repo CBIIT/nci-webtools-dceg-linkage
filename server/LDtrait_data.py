@@ -12,7 +12,7 @@ from LDcommon import connectMongoDBReadOnly
 
 start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
-filename_download = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".zip"
+filename_download = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d')  + ".zip"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
@@ -54,31 +54,12 @@ def downloadGWASCatalog():
             with zip_file.open(tsv_member) as zipped_tsv, open(tsv_path, 'wb') as extracted_tsv:
                 extracted_tsv.write(zipped_tsv.read())
     except zipfile.BadZipFile:
-        print("GWAS source did not return a ZIP archive. Treating download as raw TSV...")
-        os.rename(zip_path, tsv_path)
-        return filename
-
-    if (os.path.isfile(zip_path)):
-        os.remove(zip_path)
+        raise RuntimeError("GWAS source is not a valid ZIP archive; aborting update.")
+    finally:
+        if (os.path.isfile(zip_path)):
+            os.remove(zip_path)
 
     return filename
-
-
-def read_catalog_lines(catalog_file_path):
-    with open(catalog_file_path, 'rb') as f:
-        catalog_bytes = f.read()
-
-    try:
-        return catalog_bytes.decode('utf-8-sig').splitlines(True)
-    except UnicodeDecodeError:
-        print("GWAS catalog is not valid UTF-8. Retrying with cp1252 decoding...")
-
-    try:
-        return catalog_bytes.decode('cp1252').splitlines(True)
-    except UnicodeDecodeError:
-        print("GWAS catalog is not valid cp1252. Retrying with latin-1 decoding...")
-
-    return catalog_bytes.decode('latin-1').splitlines(True)
 
 def main():
     print("Downloading GWAS catalog...")
@@ -102,60 +83,55 @@ def main():
         gwas_catalog_tmp = db.gwas_catalog_tmp
 
     # read and insert downloaded file
-    lines = read_catalog_lines(tmp_dir + filename)
-    if len(lines) == 0:
-        raise RuntimeError("Downloaded GWAS catalog file is empty; aborting update.")
-
-    if '\t' not in lines[0]:
-        raise RuntimeError("Downloaded GWAS catalog file does not appear to be a TSV; aborting update.")
-
-    headers = lines[0].strip().split('\t')
-    print("\n".join(headers))
-    headers.append("chromosome")
-    headers.append("position_grch37")
-    headers.append("position_grch38")
-    # trim headers from list
-    lines = lines[1:]
-    print("Finding genomics coordinates from dbsnp and inserting to MongoDB collection...")
-    no_dbsnp_match = 0
-    missing_field = 0
-    errSNPs = []
-    for line in lines:
-        values = line.strip().split('\t')
-        # placeholder for chromosome to be retrieved from dbsnp
-        values.append("NA")
-        # placeholder for position_grch37 to be retrieved from dbsnp
-        values.append("NA")
-        # placeholder for position_grch38 to be retrieved from dbsnp
-        values.append("NA")
-        document = dict(list(zip(headers, values)))
-        # check if orginal gwas row has populated rs number column
-        # check field: "SNP_ID_CURRENT"
-        # To-do: check field "SNPS" (with possible merged RSIDs and genomic coords)
-        if 'SNP_ID_CURRENT' in document:
-            if len(document['SNP_ID_CURRENT']) > 0:
-                # find chr, pos in dbsnp using rsid
-                record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
-                # if found in dbsnp, add to chr, pos to record
-                if record is not None and (record["position_grch37"] != "NA" or record["position_grch38"] != "NA"): 
-                    document["chromosome"] = record["chromosome"]
-                    document["position_grch37"] = int(record["position_grch37"]) if record["position_grch37"] != "NA" else "NA"
-                    document["position_grch38"] = int(record["position_grch38"]) if record["position_grch38"] != "NA" else "NA"
-                    gwas_catalog_tmp.insert_one(document)
+    with open(tmp_dir + filename) as f:
+        lines = f.readlines()
+        headers = lines[0].strip().split('\t')
+        print("\n".join(headers))
+        headers.append("chromosome")
+        headers.append("position_grch37")
+        headers.append("position_grch38")
+        # trim headers from list
+        lines = lines[1:]
+        print("Finding genomics coordinates from dbsnp and inserting to MongoDB collection...")
+        no_dbsnp_match = 0
+        missing_field = 0
+        errSNPs = []
+        for line in lines:
+            values = line.strip().split('\t')
+            # placeholder for chromosome to be retrieved from dbsnp
+            values.append("NA")
+            # placeholder for position_grch37 to be retrieved from dbsnp
+            values.append("NA")
+            # placeholder for position_grch38 to be retrieved from dbsnp
+            values.append("NA")
+            document = dict(list(zip(headers, values)))
+            # check if orginal gwas row has populated rs number column
+            # check field: "SNP_ID_CURRENT"
+            # To-do: check field "SNPS" (with possible merged RSIDs and genomic coords)
+            if 'SNP_ID_CURRENT' in document:
+                if len(document['SNP_ID_CURRENT']) > 0:
+                    # find chr, pos in dbsnp using rsid
+                    record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
+                    # if found in dbsnp, add to chr, pos to record
+                    if record is not None and (record["position_grch37"] != "NA" or record["position_grch38"] != "NA"): 
+                        document["chromosome"] = record["chromosome"]
+                        document["position_grch37"] = int(record["position_grch37"]) if record["position_grch37"] != "NA" else "NA"
+                        document["position_grch38"] = int(record["position_grch38"]) if record["position_grch38"] != "NA" else "NA"
+                        gwas_catalog_tmp.insert_one(document)
+                    else:
+                        document["err_msg"] = "Genomic coordinates not found in dbSNP."
+                        errSNPs.append(document)
+                        no_dbsnp_match += 1
                 else:
-                    document["err_msg"] = "Genomic coordinates not found in dbSNP."
+                    document["err_msg"] = "SNP missing valid RSID."
                     errSNPs.append(document)
-                    no_dbsnp_match += 1
+                    missing_field += 1
             else:
-                document["err_msg"] = "SNP missing valid RSID."
+                document["err_msg"] = "GWAS Catalog entry missing SNP_ID_CURRENT key."
                 errSNPs.append(document)
                 missing_field += 1
-        else:
-            document["err_msg"] = "GWAS Catalog entry missing SNP_ID_CURRENT key."
-            errSNPs.append(document)
-            missing_field += 1
-    with open(tmp_dir + errFilename, 'a') as errFile:
-        json.dump(errSNPs, errFile)
+        with open(tmp_dir + errFilename, 'a') as errFile:
+            json.dump(errSNPs, errFile)
 
     print("Problematic GWAS variants:", missing_field)
     print("Genomic position not found in dbSNP:", no_dbsnp_match)
