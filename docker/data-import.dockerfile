@@ -29,10 +29,10 @@ RUN dnf -y update && \
 # Restrict Python 3.9 to root only (security mitigation)
 RUN chmod 700 /usr/bin/python3.9 
 
-# create python symlinks and upgrade pip/setuptools/wheel using Python 3.13
+# create python symlinks and upgrade setuptools/wheel using Python 3.13
 RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 && \
     ln -sf /usr/bin/python3.13 /usr/bin/python && \
-    python3 -m pip install --upgrade pip setuptools wheel
+    python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
@@ -61,7 +61,7 @@ WORKDIR ${LDLINK_HOME}
 COPY server/requirements.txt .
 
 # Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir setuptools wheel
+RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
 RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools pysam==0.23.3
