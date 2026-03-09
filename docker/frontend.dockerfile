@@ -13,8 +13,9 @@ RUN dnf -y update \
    && dnf -y install nodejs \
    && dnf clean all
 
-# Update npm to latest version
-RUN npm install -g npm@latest
+# Update npm at system prefix (/usr) so bundled dependencies under
+# /usr/lib/node_modules/npm (including tar) are also updated.
+RUN npm install -g npm@latest --prefix /usr
 
 RUN mkdir -p /app/client
 
