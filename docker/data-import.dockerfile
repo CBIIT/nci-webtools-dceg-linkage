@@ -3,11 +3,11 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 # install dependencies
 RUN dnf -y update && \
     dnf -y install \
-    python3.11 \
-    python3.11-devel \
-    python3.11-pip \
-    python3.11-setuptools \
-    python3.11-wheel \
+    python3.13 \
+    python3.13-devel \
+    python3.13-pip \
+    python3.13-setuptools \
+    python3.13-wheel \
     bzip2 \
     bzip2-devel \
     fontconfig \
@@ -29,10 +29,10 @@ RUN dnf -y update && \
 # Restrict Python 3.9 to root only (security mitigation)
 RUN chmod 700 /usr/bin/python3.9 
 
-# create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
-RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
-    ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    python3 -m pip install --upgrade pip==22.3.1 setuptools wheel
+# create python symlinks and upgrade pip/setuptools/wheel using Python 3.13
+RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3.13 /usr/bin/python && \
+    python3 -m pip install --upgrade pip setuptools wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
@@ -64,7 +64,7 @@ COPY server/requirements.txt .
 RUN python3 -m pip install --no-cache-dir setuptools wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
+RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools pysam==0.23.3
 
 # Install remaining requirements
 RUN python3 -m pip install -r requirements.txt

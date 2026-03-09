@@ -4,7 +4,8 @@ Flask==3.1.1
 jinja2==3.1.6
 MarkupSafe==3.0.2
 mod_wsgi==5.0.2
-numpy==1.23.3
+#numpy==1.23.3; python_version < "3.13"
+numpy==2.4.3 # python_version >= "3.13"
 pymongo==4.14.0
 python-dateutil==2.8.2
 python-dotenv==1.1.1
@@ -15,6 +16,7 @@ httpx==0.28.1
 svgutils==0.3.1
 cairosvg==2.8.2
 Pillow==12.1.1
-pybedtools==0.9.1  # Specify a known working version
+#pybedtools==0.9.1 # python_version < "3.13"  # Specify a known working version for older Python
+pybedtools # #python_version >= "3.13"
 #ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
 Flask-Limiter[mongodb]==3.11.0
