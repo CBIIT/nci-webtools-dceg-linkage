@@ -1,15 +1,13 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
+ENV PYTHON_VERSION=3.13.10
+
 # install dependencies
 RUN dnf -y update && \
     dnf -y install \
-    python3.13 \
-    python3.13-devel \
-    python3.13-pip \
-    python3.13-setuptools \
-    python3.13-wheel \
     bzip2 \
     bzip2-devel \
+    curl-minimal \
     fontconfig \
     gcc \
     g++ \
@@ -18,21 +16,37 @@ RUN dnf -y update && \
     httpd \
     httpd-devel \
     libcurl-devel \
+    libffi-devel \
     ncurses-devel \
     openssl-devel \
+    readline-devel \
+    sqlite-devel \
     tar \
     xz-devel \
     zlib-devel \
     make \
     && dnf clean all
 
+# Install exact CPython version
+RUN cd /tmp \
+    && curl -fsSLO "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
+    && tar -xzf "Python-${PYTHON_VERSION}.tgz" \
+    && cd "Python-${PYTHON_VERSION}" \
+    && ./configure --enable-optimizations --enable-shared --with-ensurepip=install \
+    && make -j"$(nproc)" \
+    && make altinstall \
+    && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
+    && ldconfig \
+    && ln -sf /usr/local/bin/python3.13 /usr/bin/python3 \
+    && ln -sf /usr/local/bin/python3.13 /usr/bin/python \
+    && python3 --version \
+    && rm -rf "/tmp/Python-${PYTHON_VERSION}" "/tmp/Python-${PYTHON_VERSION}.tgz"
+
 # Restrict Python 3.9 to root only (security mitigation)
 RUN chmod 700 /usr/bin/python3.9 
 
-# create python symlinks and upgrade setuptools/wheel using Python 3.13
-RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 && \
-    ln -sf /usr/bin/python3.13 /usr/bin/python && \
-    python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
+# Upgrade setuptools/wheel using Python 3.13.10
+RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
