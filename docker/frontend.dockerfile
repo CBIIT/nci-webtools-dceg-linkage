@@ -15,7 +15,7 @@ RUN dnf -y update \
 
 # Update npm at system prefix (/usr) so bundled dependencies under
 # /usr/lib/node_modules/npm (including tar) are also updated.
-RUN npm install -g npm@latest --prefix /usr
+RUN npm install -g npm@10
 
 RUN mkdir -p /app/client
 
