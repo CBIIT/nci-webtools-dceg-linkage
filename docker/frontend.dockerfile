@@ -17,8 +17,12 @@ RUN dnf -y update \
 RUN rm -f /usr/bin/python3.9 || true
 # Update npm at system prefix (/usr) so bundled dependencies under
 # /usr/lib/node_modules/npm (including tar) are also updated.
-RUN npm install -g npm@latest
-
+RUN set -eux; \
+   npm install -g npm@latest --prefix /usr; \
+   npm install -g tar@7.5.10 --prefix /usr; \
+   rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
+   cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar; 
+ 
 RUN mkdir -p /app/client
 
 WORKDIR /app/client
