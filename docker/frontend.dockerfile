@@ -17,7 +17,7 @@ RUN dnf -y update \
 # /usr/lib/node_modules/npm (including tar) are also updated.
 RUN set -eux; \
    npm install -g npm@latest --prefix /usr; \
-   npm install -g tar@7.5.10 --prefix /usr; \
+   npm install -g tar@7.5.11 --prefix /usr; \
    rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
    cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar; 
  
