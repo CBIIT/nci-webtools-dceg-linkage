@@ -762,6 +762,9 @@ def upload():
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Upload completed ({execution_time}s) - {len(uploaded_files)} files saved")
 
+        if reference:
+            schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
+
         # Return JSON with uploaded filenames and any sanitization notes
         # Only include the `renamed` field when there were actual sanitizations.
         if renamed_notifications:
@@ -1252,6 +1255,8 @@ def ldscore():
             # out_json = {"result": filtered_result}
             # pretty_out_json = json.dumps(out_json, indent=4)
             # print(pretty_out_json)
+            schedule_tmp_cleanup(reference, app.logger)
+            schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
             return filtered_result
             out_json = pretty_out_json
 
@@ -1263,7 +1268,7 @@ def ldscore():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
-    schedule_tmp_cleanup_ldscore(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
     return jsonify(out_json)
 
 
@@ -1432,6 +1437,8 @@ def ldherit():
             # out_json = {"result": filtered_result}
             # pretty_out_json = json.dumps(out_json, indent=4)
             # print(pretty_out_json)
+            schedule_tmp_cleanup(reference, app.logger)
+            schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
             return filtered_result
             out_json = pretty_out_json
 
@@ -1443,7 +1450,7 @@ def ldherit():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
-    schedule_tmp_cleanup_ldscore(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
     return jsonify(out_json)
 
 
@@ -1590,6 +1597,8 @@ def ldcorrelation():
             # out_json = {"result": filtered_result}
             # pretty_out_json = json.dumps(out_json, indent=4)
             # print(pretty_out_json)
+            schedule_tmp_cleanup(reference, app.logger)
+            schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
             return filtered_result
             out_json = pretty_out_json
 
@@ -1601,7 +1610,7 @@ def ldcorrelation():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
-    schedule_tmp_cleanup_ldscore(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
     return jsonify(out_json)
 
 

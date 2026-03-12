@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@bokeh/bokehjs": "^3.8.2",
+    "@bokeh/bokehjs": "3.8.2",
     "@react-google-maps/api": "^2.20.7",
     "@tanstack/react-query": "^5.81.2",
     "@tanstack/react-table": "^8.21.3",
@@ -35,8 +35,5 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.5",
     "typescript": "^5"
-  },
-  "overrides": {
-    "tar": "^7.5.10"
   }
 }

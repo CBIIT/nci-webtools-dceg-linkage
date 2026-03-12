@@ -13,13 +13,11 @@ RUN dnf -y update \
    && dnf -y install nodejs \
    && dnf clean all
 
-# Remove legacy system Python 3.9 binary so scanners don't flag unused interpreter
-RUN rm -f /usr/bin/python3.9 || true
 # Update npm at system prefix (/usr) so bundled dependencies under
 # /usr/lib/node_modules/npm (including tar) are also updated.
 RUN set -eux; \
    npm install -g npm@latest --prefix /usr; \
-   npm install -g tar@7.5.10 --prefix /usr; \
+   npm install -g tar@7.5.11 --prefix /usr; \
    rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
    cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar; 
  
