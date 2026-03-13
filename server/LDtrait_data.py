@@ -68,7 +68,6 @@ def main():
 
     db = connectMongoDBReadOnly()
     dbsnp = db.dbsnp
-    print(db)
     # delete old error SNPs file if there is one
     if (os.path.isfile(tmp_dir + errFilename)):
         print("Deleting existing error SNPs file...")
