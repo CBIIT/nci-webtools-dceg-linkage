@@ -8,6 +8,7 @@ import { Container, Row, Col, Form } from "react-bootstrap";
 import LDAssocForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import CitationBox from "../../components/citationBox";
 
 const LdAssocResults = dynamic(() => import("./results"), {
   ssr: false,
@@ -33,6 +34,12 @@ export default function LdAssoc() {
               <Suspense fallback={<CalculateLoading />}>{ref && <LdAssocResults ref={ref} />}</Suspense>
             </ErrorBoundary>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+        <CitationBox />
+          <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
+            Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" target="_blank" rel="noopener noreferrer" >LDassoc: an online tool for interactively exploring genome-wide association study results and prioritizing variants for functional investigation.</a> Bioinformatics. 2017 Sept 12.
+          </div>
         </Row>
       </Container>
     </>

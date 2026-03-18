@@ -8,6 +8,7 @@ import { Container, Row, Col, Form } from "react-bootstrap";
 import LdProxyForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import CitationBox from "@/components/citationBox";
 import { SubmitFormData } from "./types";
 
 const LdProxyResults = dynamic(() => import("./results"), {
@@ -35,6 +36,9 @@ export default function LdProxy() {
               <Suspense fallback={<CalculateLoading />}>{ref && <LdProxyResults ref={ref} />}</Suspense>
             </ErrorBoundary>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+          <CitationBox />
         </Row>
       </Container>
     </>

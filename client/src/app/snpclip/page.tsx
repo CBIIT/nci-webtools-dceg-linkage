@@ -8,6 +8,7 @@ import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import CitationBox from "@/components/citationBox";
 
 const Results = dynamic(() => import("./results"), {
   ssr: false,
@@ -32,6 +33,9 @@ export default function SNPclip() {
               <Suspense fallback={<CalculateLoading />}>{ref && <Results ref={ref} />}</Suspense>
             </ErrorBoundary>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+          <CitationBox />
         </Row>
       </Container>
     </>
