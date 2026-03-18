@@ -1,15 +1,13 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-# Install Python 3.11 explicitly and required build/runtime deps
+ENV PYTHON_VERSION=3.13.10
+
+# Install required build/runtime dependencies
 RUN dnf -y update && \
     dnf -y install \
-    python3.11 \
-    python3.11-devel \
-    python3.11-pip \
-    python3.11-setuptools \
-    python3.11-wheel \
     bzip2 \
     bzip2-devel \
+    curl-minimal \
     fontconfig \
     gcc \
     g++ \
@@ -18,8 +16,11 @@ RUN dnf -y update && \
     httpd \
     httpd-devel \
     libcurl-devel \
+    libffi-devel \
     ncurses-devel \
     openssl-devel \
+    readline-devel \
+    sqlite-devel \
     tar \
     xz-devel \
     zlib-devel \
@@ -28,13 +29,26 @@ RUN dnf -y update && \
     make \
     && dnf clean all
 
-# Restrict Python 3.9 to root only (security mitigation)
-RUN chmod 700 /usr/bin/python3.9
+# Install exact CPython version
+RUN cd /tmp \
+    && curl -fsSLO "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
+    && tar -xzf "Python-${PYTHON_VERSION}.tgz" \
+    && cd "Python-${PYTHON_VERSION}" \
+    && ./configure --enable-optimizations --enable-shared --with-ensurepip=install \
+    && make -j"$(nproc)" \
+    && make altinstall \
+    && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
+    && ldconfig \
+    && ln -sf /usr/local/bin/python3.13 /usr/bin/python3 \
+    && ln -sf /usr/local/bin/python3.13 /usr/bin/python \
+    && python3 --version \
+    && rm -rf "/tmp/Python-${PYTHON_VERSION}" "/tmp/Python-${PYTHON_VERSION}.tgz"
 
-# Create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
-RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
-    ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    python3 -m pip install --upgrade pip==22.3.1 setuptools wheel
+# Remove legacy system Python 3.9 binary so scanners don't flag unused interpreter
+RUN rm -f /usr/bin/python3.9 || true
+
+# Upgrade setuptools/wheel using Python 3.13.10
+RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.21
@@ -102,10 +116,10 @@ WORKDIR ${LDLINK_HOME}
 COPY server/requirements.txt .
 
 # Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir setuptools wheel
+RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
+RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools pysam==0.23.3
 
 # Install remaining requirements (excluding pybedtools and pysam which are already installed)
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
