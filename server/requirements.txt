@@ -11,10 +11,11 @@ python-dateutil==2.8.2
 python-dotenv==1.1.1
 requests==2.32.4
 urllib3==2.6.3  # CVE-2026-21441: Limited by botocore constraint with Python 3.9 (requires urllib3<1.27)
+tornado>=6.5.5  # CVE fix: multipart/form-data parsing DoS in versions <6.5.5
 selenium==4.32.0
 httpx==0.28.1
 svgutils==0.3.1
-cairosvg==2.8.2
+cairosvg==2.9.0
 Pillow==12.1.1
 #pybedtools==0.9.1 # python_version < "3.13"  # Specify a known working version for older Python
 pybedtools # #python_version >= "3.13"
