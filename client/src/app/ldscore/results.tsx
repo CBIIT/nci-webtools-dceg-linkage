@@ -126,9 +126,38 @@ function isScaleH2MetricKey(key: string) {
   return /total\s+(observed|liability)\s+scale\s+h(?:2|²)/i.test(key);
 }
 
-function formatScaleH2MetricKey(key: string) {
-  const normalized = key.replace(/h2|h²/g, 'h²');
+function isScaleGencovMetricKey(key: string) {
+  return /total\s+(observed|liability)\s+scale\s+gencov/i.test(key);
+}
+
+function isGeneticCorrelationMetricKey(key: string) {
+  return /^genetic\s+correlation$/i.test(key);
+}
+
+function is95CIMetricKey(key: string) {
+  return isScaleH2MetricKey(key) || isScaleGencovMetricKey(key) || isGeneticCorrelationMetricKey(key);
+}
+
+function format95CIMetricKey(key: string) {
+  const keyWithScale = key.replace(/\bscale\b/gi, 'Scale');
+  const normalized = isScaleH2MetricKey(keyWithScale) ? keyWithScale.replace(/h2|h²/g, 'h²') : keyWithScale;
+  
   return /\(95%\s*CI\)/i.test(normalized) ? normalized : `${normalized} (95% CI)`;
+}
+
+function getFormattedMetricValue(key: string, value: string) {
+  return is95CIMetricKey(key) ? (formatH295CI(value) || value) : value;
+}
+
+function getStandardErrorRowForMetric(key: string, value: string): [string, string] | null {
+  const se = parseEstimateAndSE(value)?.seText || '';
+  if (!se) return null;
+
+  if (isScaleH2MetricKey(key)) return ['h2 Standard Error', se];
+  if (isScaleGencovMetricKey(key)) return ['Gencov Standard Error', se];
+  if (isGeneticCorrelationMetricKey(key)) return ['Genetic Correlation Standard Error', se];
+
+  return null;
 }
 
 function TableContainer({ children }: { children: React.ReactNode }) {
@@ -146,8 +175,8 @@ function renderKeyValueTable(section: string) {
   
   // Helper function to format key text with superscripts
   const formatKeyText = (key: string) => {
-    if (isScaleH2MetricKey(key)) {
-      return formatScaleH2MetricKey(key);
+    if (is95CIMetricKey(key)) {
+      return format95CIMetricKey(key);
     }
     if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {
       return key.replace(/Chi\^2|Chi²/g, 'Chi²');
@@ -161,7 +190,9 @@ function renderKeyValueTable(section: string) {
     for (const pair of colonPairs) {
       const key = pair[1].trim();
       const value = pair[2].trim();
-      kvPairs.push([key, isScaleH2MetricKey(key) ? (formatH295CI(value) || value) : value]);
+      kvPairs.push([key, getFormattedMetricValue(key, value)]);
+      const seRow = getStandardErrorRowForMetric(key, value);
+      if (seRow) kvPairs.push(seRow);
       found = true;
     }
     if (!found) {
@@ -225,7 +256,7 @@ function HeritabilityResultTable({ result }: { result: string }) {
   const parsed = parseHeritabilityResult(result);
   const rows = [
     [parsed.h2Label, parsed.h2],
-    ['h2 standard error', parsed.h2SE],
+    ['h2 Standard Error', parsed.h2SE],
     ['Lambda GC', parsed.lambdaGC],
     ['Mean Chi²', parsed.meanChi2],
     ['Intercept', parsed.intercept],
@@ -333,8 +364,8 @@ function formatKeyValueSection(section: string) {
   
   // Helper function to format key text with superscripts for download
   const formatKeyTextForDownload = (key: string) => {
-    if (isScaleH2MetricKey(key)) {
-      return formatScaleH2MetricKey(key);
+    if (is95CIMetricKey(key)) {
+      return format95CIMetricKey(key);
     }
     if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {
       return key.replace(/Chi\^2|Chi²/g, 'Chi²');
@@ -353,7 +384,9 @@ function formatKeyValueSection(section: string) {
     if (idx !== -1) {
       lastKey = line.slice(0, idx).trim();
       const value = line.slice(idx + 1).trim();
-      kvPairs.push([lastKey, isScaleH2MetricKey(lastKey) ? (formatH295CI(value) || value) : value]);
+      kvPairs.push([lastKey, getFormattedMetricValue(lastKey, value)]);
+      const seRow = getStandardErrorRowForMetric(lastKey, value);
+      if (seRow) kvPairs.push(seRow);
     } else if (lastKey) {
       // If the line contains 'Ratio' (with or without <, >, =), split it out as a new row
       const ratioMatch = line.match(/(Ratio\s*[<>=]?.*)/i);
