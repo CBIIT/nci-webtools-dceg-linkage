@@ -348,7 +348,11 @@ export default function Heritability() {
                 <Row>
                   <Col md={6}>
                     <Form.Group controlId="samplePrev" className="mb-3">
-                      <Form.Label>Sample prevalence</Form.Label>
+                      <Form.Label>
+                       Sample prevalence
+                        <br />
+                        <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
+                      </Form.Label>
                       <Form.Control
                         type="number"
                         step="0.01"
@@ -371,7 +375,11 @@ export default function Heritability() {
                   </Col>
                   <Col md={6}>
                     <Form.Group controlId="popPrev" className="mb-3">
-                      <Form.Label>Population prevalence</Form.Label>
+                      <Form.Label>
+                        Population prevalence
+                        <br />
+                        <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
+                      </Form.Label>
                       <Form.Control
                         type="number"
                         step="0.01"
