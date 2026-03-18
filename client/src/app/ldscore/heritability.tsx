@@ -238,7 +238,7 @@ export default function Heritability() {
                   Click here for sample format
                 </HoverUnderlineLink>
               </div>
-              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
+              {/* <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text> */}
             </Form.Group>
             <Form.Group controlId="useEx" className="mb-3">
               <div className="mt-2">
