@@ -49,7 +49,7 @@ RUN rm -f /usr/bin/python3.9 || true
 
 
 # Upgrade setuptools/wheel using Python 3.13.10
-RUN python3 -m pip install --upgrade "setuptools>=78.1.1" "tornado>=6.5.5" wheel
+RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" "tornado>=6.5.5" wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
