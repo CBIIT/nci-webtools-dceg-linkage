@@ -1,7 +1,20 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS builder
 
 ENV PYTHON_VERSION=3.13.10
 ENV PYTHON_SHA256=de5930852e95ba8c17b56548e04648470356ac47f7506014664f8f510d7bd61b
+
+ENV HTSLIB_VERSION=1.21
+ENV PHANTOMJS_VERSION=2.1.1
+ENV GECKODRIVER_VERSION=0.36.0
+ENV MOZ_HEADLESS=1
+ENV DISPLAY=:99
+ENV OPENSSL_CONF=/dev/null
+
+ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
+ENV LDLINK_HOME=/opt/ldlink
+ENV LDLINK_HEALTHCHECK_PORT=8080
+ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
+ENV PYTHONPATH=${LDLINK_HOME}
 
 # Install required build/runtime dependencies
 RUN dnf -y update && \
@@ -46,14 +59,8 @@ RUN cd /tmp \
     && python3 --version \
     && rm -rf "/tmp/Python-${PYTHON_VERSION}" "/tmp/Python-${PYTHON_VERSION}.tgz"
 
-# Restrict Python 3.9 to root only (security mitigation)
-RUN chmod 700 /usr/bin/python3.9
-
-# Upgrade setuptools/wheel using Python 3.13.10
+# Upgrade pip, setuptools/wheel using Python 3.13.10
 RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
-
-# install htslib
-ENV HTSLIB_VERSION=1.21
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
@@ -64,12 +71,6 @@ RUN cd /tmp \
     && popd \
     && rm -rf htslib-${HTSLIB_VERSION}
 
-# install phantomjs
-ENV PHANTOMJS_VERSION=2.1.1
-
-# workaround for phantomjs, use --ignore-ssl-errors=true/yes --web-security=false/no to ignore ssl errors
-ENV OPENSSL_CONF=/dev/null
-
 #RUN cd /tmp \
 #    && curl -L https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -xj \
 #    && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
@@ -79,11 +80,6 @@ RUN cd /tmp \
     && tar -xjf phantomjs.tar.bz2 \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
     && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64 phantomjs.tar.bz2
-
-# install geckodriver
-ENV GECKODRIVER_VERSION=0.36.0
-ENV MOZ_HEADLESS=1
-ENV DISPLAY=:99
 
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
@@ -100,16 +96,6 @@ RUN ARCH=$(uname -m) && \
     chmod +x /usr/local/bin/geckodriver && \
     ln -s /usr/local/bin/geckodriver /usr/bin/geckodriver && \
     rm geckodriver.tar.gz
-
-ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
-
-ENV LDLINK_HOME=/opt/ldlink
-
-ENV LDLINK_HEALTHCHECK_PORT=8080
-
-ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
-
-ENV PYTHONPATH=${LDLINK_HOME}:${PYTHONPATH}
 
 RUN mkdir -p ${LDLINK_HOME}
 
@@ -135,12 +121,73 @@ RUN mkdir -p /var/cache/fontconfig \
 
 COPY server/ .
 
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+
+ENV PYTHON_VERSION=3.13.10
+ENV HTSLIB_VERSION=1.21
+ENV PHANTOMJS_VERSION=2.1.1
+ENV GECKODRIVER_VERSION=0.36.0
+ENV MOZ_HEADLESS=1
+ENV DISPLAY=:99
+ENV OPENSSL_CONF=/dev/null
+
+ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
+ENV LDLINK_HOME=/opt/ldlink
+ENV LDLINK_HEALTHCHECK_PORT=8080
+ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
+ENV PYTHONPATH=${LDLINK_HOME}
+
+# Install runtime dependencies before removing distro Python packages.
+RUN dnf -y update && \
+    dnf -y install \
+    bzip2 \
+    bzip2-devel \
+    curl-minimal \
+    fontconfig \
+    gcc \
+    g++ \
+    git \
+    glibc-langpack-en \
+    httpd \
+    httpd-devel \
+    libcurl-devel \
+    libffi-devel \
+    ncurses-devel \
+    openssl-devel \
+    readline-devel \
+    sqlite-devel \
+    tar \
+    xz-devel \
+    zlib-devel \
+    firefox \
+    xorg-x11-server-Xvfb \
+    make \
+    && dnf clean all
+
+COPY --from=builder /usr/local /usr/local
+COPY --from=builder /opt/ldlink /opt/ldlink
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
+
+# Remove distro Python packages to avoid scanner findings and keep only Python 3.13.
+RUN for pkg in $(rpm -qa | grep -E '^python3(-|$)|^python-srpm-macros'); do rpm -e --nodeps "$pkg" || true; done \
+    && rm -f /usr/bin/python3.9 || true \
+    && rm -rf /usr/lib64/python3.9 /usr/lib/python3.9 \
+    && ln -sf /usr/local/bin/python3.13 /usr/bin/python3 \
+    && ln -sf /usr/local/bin/python3.13 /usr/bin/python \
+    && ln -sf /usr/local/bin/geckodriver /usr/bin/geckodriver \
+    && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
+    && ldconfig \
+    && python3 --version
+
+RUN mkdir -p /var/cache/fontconfig \
+    && chown -R apache:apache /var/cache/fontconfig
 
 RUN chown -R apache:apache ${LDLINK_HOME}
 
 # RUN mkdir -p /usr/share/httpd/.cache/selenium \
 #     && chown -R apache:apache /usr/share/httpd/.cache
+
+WORKDIR ${LDLINK_HOME}
 
 EXPOSE 80
 
