@@ -36,7 +36,7 @@ RUN cd /tmp \
     && echo "${PYTHON_SHA256}  Python-${PYTHON_VERSION}.tgz" | sha256sum -c - \
     && tar -xzf "Python-${PYTHON_VERSION}.tgz" \
     && cd "Python-${PYTHON_VERSION}" \
-    && ./configure --enable-optimizations --enable-shared --with-ensurepip=install \
+    && ./configure --enable-shared --with-ensurepip=install \
     && make -j"$(nproc)" \
     && make altinstall \
     && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \

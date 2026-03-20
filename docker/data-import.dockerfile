@@ -34,7 +34,7 @@ RUN cd /tmp \
     && echo "${PYTHON_SHA256}  Python-${PYTHON_VERSION}.tgz" | sha256sum -c - \
     && tar -xzf "Python-${PYTHON_VERSION}.tgz" \
     && cd "Python-${PYTHON_VERSION}" \
-    && ./configure --enable-optimizations --enable-shared --with-ensurepip=install \
+    && ./configure --enable-shared --with-ensurepip=install \
     && make -j"$(nproc)" \
     && make altinstall \
     && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
@@ -48,7 +48,7 @@ RUN cd /tmp \
 RUN rm -f /usr/bin/python3.9 || true
 
 # Upgrade setuptools/wheel using Python 3.13.10
-RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
+RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
