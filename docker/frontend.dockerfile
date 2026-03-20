@@ -21,6 +21,9 @@ RUN set -eux; \
    rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
    cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar; 
  
+# Remove legacy system Python 3.9 binary so scanners don't flag unused interpreter
+RUN rm -f /usr/bin/python3.9 || true
+
 RUN mkdir -p /app/client
 
 WORKDIR /app/client

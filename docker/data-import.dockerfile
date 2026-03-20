@@ -46,7 +46,7 @@ RUN cd /tmp \
 RUN rm -f /usr/bin/python3.9 || true
 
 # Upgrade setuptools/wheel using Python 3.13.10
-RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
+RUN python3 -m pip install --upgrade "setuptools>=78.1.1" "tornado>=6.5.5" wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
@@ -75,7 +75,7 @@ WORKDIR ${LDLINK_HOME}
 COPY server/requirements.txt .
 
 # Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" wheel
+RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" "tornado>=6.5.5" wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
 RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools pysam==0.23.3
