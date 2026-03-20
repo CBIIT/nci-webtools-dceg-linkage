@@ -1,6 +1,7 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
 ENV PYTHON_VERSION=3.13.10
+ENV PYTHON_SHA256=de5930852e95ba8c17b56548e04648470356ac47f7506014664f8f510d7bd61b
 
 # install dependencies
 RUN dnf -y update && \
@@ -30,6 +31,7 @@ RUN dnf -y update && \
 # Install exact CPython version
 RUN cd /tmp \
     && curl -fsSLO "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
+    && echo "${PYTHON_SHA256}  Python-${PYTHON_VERSION}.tgz" | sha256sum -c - \
     && tar -xzf "Python-${PYTHON_VERSION}.tgz" \
     && cd "Python-${PYTHON_VERSION}" \
     && ./configure --enable-optimizations --enable-shared --with-ensurepip=install \
@@ -46,7 +48,7 @@ RUN cd /tmp \
 RUN rm -f /usr/bin/python3.9 || true
 
 # Upgrade setuptools/wheel using Python 3.13.10
-RUN python3 -m pip install --upgrade "setuptools>=78.1.1" "tornado>=6.5.5" wheel
+RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.16
@@ -75,10 +77,10 @@ WORKDIR ${LDLINK_HOME}
 COPY server/requirements.txt .
 
 # Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" "tornado>=6.5.5" wheel
+RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools pysam==0.23.3
+RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
 # Install remaining requirements
 RUN python3 -m pip install -r requirements.txt
