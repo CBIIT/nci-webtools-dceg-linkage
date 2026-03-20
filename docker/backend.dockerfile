@@ -138,30 +138,16 @@ ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
 ENV PYTHONPATH=${LDLINK_HOME}
 
 # Install runtime dependencies before removing distro Python packages.
+# Build tooling and *-devel packages are only needed in the builder stage.
 RUN dnf -y update && \
     dnf -y install \
-    bzip2 \
-    bzip2-devel \
     curl-minimal \
     fontconfig \
-    gcc \
-    g++ \
-    git \
     glibc-langpack-en \
     httpd \
-    httpd-devel \
-    libcurl-devel \
-    libffi-devel \
-    ncurses-devel \
-    openssl-devel \
-    readline-devel \
-    sqlite-devel \
     tar \
-    xz-devel \
-    zlib-devel \
     firefox \
     xorg-x11-server-Xvfb \
-    make \
     && dnf clean all
 
 COPY --from=builder /usr/local /usr/local
