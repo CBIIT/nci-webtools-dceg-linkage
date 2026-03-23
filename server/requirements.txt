@@ -17,7 +17,6 @@ httpx==0.28.1
 svgutils==0.3.1
 cairosvg==2.9.0
 Pillow==12.1.1
-#pybedtools==0.9.1 # python_version < "3.13"  # Specify a known working version for older Python
-pybedtools # #python_version >= "3.13"
-#ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
+pybedtools==0.9.1  # Specify a known working version
+ldsc @ git+https://github.com/CBIIT/ldsc.git@6c67395 #for ldsc39
 Flask-Limiter[mongodb]==3.11.0

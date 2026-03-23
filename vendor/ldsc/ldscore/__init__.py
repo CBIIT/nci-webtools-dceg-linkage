@@ -1,1 +1,0 @@
-from .ldsc_utils import run_ldsc_command

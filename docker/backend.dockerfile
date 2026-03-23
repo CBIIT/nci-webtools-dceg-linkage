@@ -124,10 +124,6 @@ RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools pysam=
 # Install remaining requirements (excluding pybedtools and pysam which are already installed)
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-# Copy and install ldsc package from vendor folder
-COPY vendor/ldsc /tmp/ldsc
-RUN cd /tmp/ldsc && python3 -m pip install --no-cache-dir --no-build-isolation . && rm -rf /tmp/ldsc
-
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig
 
