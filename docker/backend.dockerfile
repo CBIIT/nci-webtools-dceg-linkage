@@ -1,7 +1,6 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS builder
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
 ENV PYTHON_VERSION=3.13.10
-ENV PYTHON_SHA256=de5930852e95ba8c17b56548e04648470356ac47f7506014664f8f510d7bd61b
 
 ENV HTSLIB_VERSION=1.21
 ENV PHANTOMJS_VERSION=2.1.1
@@ -15,6 +14,7 @@ ENV LDLINK_HOME=/opt/ldlink
 ENV LDLINK_HEALTHCHECK_PORT=8080
 ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
 ENV PYTHONPATH=${LDLINK_HOME}
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Install required build/runtime dependencies
 RUN dnf -y update && \
@@ -33,6 +33,9 @@ RUN dnf -y update && \
     libffi-devel \
     ncurses-devel \
     openssl-devel \
+    python3.13 \
+    python3.13-devel \
+    python3.13-pip \
     readline-devel \
     sqlite-devel \
     tar \
@@ -43,21 +46,9 @@ RUN dnf -y update && \
     make \
     && dnf clean all
 
-# Install exact CPython version
-RUN cd /tmp \
-    && curl -fsSLO "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
-    && echo "${PYTHON_SHA256}  Python-${PYTHON_VERSION}.tgz" | sha256sum -c - \
-    && tar -xzf "Python-${PYTHON_VERSION}.tgz" \
-    && cd "Python-${PYTHON_VERSION}" \
-    && ./configure --enable-shared --with-ensurepip=install \
-    && make -j"$(nproc)" \
-    && make altinstall \
-    && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
-    && ldconfig \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python3 \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python \
-    && python3 --version \
-    && rm -rf "/tmp/Python-${PYTHON_VERSION}" "/tmp/Python-${PYTHON_VERSION}.tgz"
+RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
+    && ln -sf /usr/bin/python3.13 /usr/bin/python \
+    && python3 --version
 
 # Upgrade pip, setuptools/wheel using Python 3.13.10
 RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
@@ -120,60 +111,12 @@ RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig
 
 COPY server/ .
-
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023
-
-ENV PYTHON_VERSION=3.13.10
-ENV HTSLIB_VERSION=1.21
-ENV PHANTOMJS_VERSION=2.1.1
-ENV GECKODRIVER_VERSION=0.36.0
-ENV MOZ_HEADLESS=1
-ENV DISPLAY=:99
-ENV OPENSSL_CONF=/dev/null
-
-ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
-ENV LDLINK_HOME=/opt/ldlink
-ENV LDLINK_HEALTHCHECK_PORT=8080
-ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
-ENV PYTHONPATH=${LDLINK_HOME}
-
-# Install runtime dependencies before removing distro Python packages.
-# Build tooling and *-devel packages are only needed in the builder stage.
-RUN dnf -y update && \
-    dnf -y install \
-    curl-minimal \
-    fontconfig \
-    glibc-langpack-en \
-    httpd \
-    tar \
-    firefox \
-    xorg-x11-server-Xvfb \
-    && dnf clean all
-
-COPY --from=builder /usr/local /usr/local
-COPY --from=builder /opt/ldlink /opt/ldlink
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
-
-# Remove distro Python packages to avoid scanner findings and keep only Python 3.13.
-RUN for pkg in $(rpm -qa | grep -E '^python3(-|$)|^python-srpm-macros'); do rpm -e --nodeps "$pkg" || true; done \
-    && rm -f /usr/bin/python3.9 || true \
-    && rm -rf /usr/lib64/python3.9 /usr/lib/python3.9 \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python3 \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python \
-    && ln -sf /usr/local/bin/geckodriver /usr/bin/geckodriver \
-    && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
-    && ldconfig \
-    && python3 --version
-
-RUN mkdir -p /var/cache/fontconfig \
-    && chown -R apache:apache /var/cache/fontconfig
 
 RUN chown -R apache:apache ${LDLINK_HOME}
 
 # RUN mkdir -p /usr/share/httpd/.cache/selenium \
 #     && chown -R apache:apache /usr/share/httpd/.cache
-
-WORKDIR ${LDLINK_HOME}
 
 EXPOSE 80
 

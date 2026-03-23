@@ -16,5 +16,5 @@ svgutils==0.3.1
 cairosvg==2.9.0
 Pillow==12.1.1
 pybedtools==0.12.0
-#ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
+ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
 Flask-Limiter[mongodb]==3.11.0

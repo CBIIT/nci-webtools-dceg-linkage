@@ -1,13 +1,13 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS builder
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
 ENV PYTHON_VERSION=3.13.10
-ENV PYTHON_SHA256=de5930852e95ba8c17b56548e04648470356ac47f7506014664f8f510d7bd61b
 ENV HTSLIB_VERSION=1.16
 
 ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
 ENV LDLINK_HOME=/opt/ldlink
 ENV PYTHONPATH=${LDLINK_HOME}
 ENV PYTHONUNBUFFERED=1
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # install dependencies
 RUN dnf -y update && \
@@ -26,6 +26,9 @@ RUN dnf -y update && \
     libffi-devel \
     ncurses-devel \
     openssl-devel \
+    python3.13 \
+    python3.13-devel \
+    python3.13-pip \
     readline-devel \
     sqlite-devel \
     tar \
@@ -34,21 +37,9 @@ RUN dnf -y update && \
     make \
     && dnf clean all
 
-# Install exact CPython version
-RUN cd /tmp \
-    && curl -fsSLO "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" \
-    && echo "${PYTHON_SHA256}  Python-${PYTHON_VERSION}.tgz" | sha256sum -c - \
-    && tar -xzf "Python-${PYTHON_VERSION}.tgz" \
-    && cd "Python-${PYTHON_VERSION}" \
-    && ./configure --enable-shared --with-ensurepip=install \
-    && make -j"$(nproc)" \
-    && make altinstall \
-    && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
-    && ldconfig \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python3 \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python \
-    && python3 --version \
-    && rm -rf "/tmp/Python-${PYTHON_VERSION}" "/tmp/Python-${PYTHON_VERSION}.tgz"
+RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
+    && ln -sf /usr/bin/python3.13 /usr/bin/python \
+    && python3 --version
 
 # Upgrade setuptools/wheel using Python 3.13.10
 RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
@@ -78,41 +69,5 @@ RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 COPY server/ .
-
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023
-
-ENV PYTHON_VERSION=3.13.10
-ENV HTSLIB_VERSION=1.16
-
-ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
-ENV LDLINK_HOME=/opt/ldlink
-ENV PYTHONPATH=${LDLINK_HOME}
-ENV PYTHONUNBUFFERED=1
-
-# Install runtime dependencies before removing distro Python packages.
-# Build tooling and *-devel packages are only needed in the builder stage.
-RUN dnf -y update && \
-    dnf -y install \
-    curl-minimal \
-    fontconfig \
-    glibc-langpack-en \
-    httpd \
-    tar \
-    && dnf clean all
-
-COPY --from=builder /usr/local /usr/local
-COPY --from=builder /opt/ldlink /opt/ldlink
-
-# Remove distro Python packages to avoid scanner findings and keep only Python 3.13.
-RUN for pkg in $(rpm -qa | grep -E '^python3(-|$)|^python-srpm-macros'); do rpm -e --nodeps "$pkg" || true; done \
-    && rm -f /usr/bin/python3.9 || true \
-    && rm -rf /usr/lib64/python3.9 /usr/lib/python3.9 \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python3 \
-    && ln -sf /usr/local/bin/python3.13 /usr/bin/python \
-    && echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf \
-    && ldconfig \
-    && python3 --version
-
-WORKDIR ${LDLINK_HOME}
 
 CMD ["python3", "LDtrait_data.py"]
