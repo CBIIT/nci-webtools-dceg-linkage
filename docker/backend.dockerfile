@@ -1,7 +1,5 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-ENV PYTHON_VERSION=3.13.10
-
 ENV HTSLIB_VERSION=1.21
 ENV PHANTOMJS_VERSION=2.1.1
 ENV GECKODRIVER_VERSION=0.36.0
@@ -103,10 +101,6 @@ RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.
 # Install remaining requirements (excluding pybedtools and pysam which are already installed)
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-# Copy and install ldsc package from vendor folder
-COPY vendor/ldsc /tmp/ldsc
-RUN cd /tmp/ldsc && python3 -m pip install --no-cache-dir --no-build-isolation . && rm -rf /tmp/ldsc
-
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig
 
@@ -114,6 +108,8 @@ COPY server/ .
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
+
+RUN rm -f /usr/bin/python3.9 || true
 
 # RUN mkdir -p /usr/share/httpd/.cache/selenium \
 #     && chown -R apache:apache /usr/share/httpd/.cache

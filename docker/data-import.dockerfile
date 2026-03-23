@@ -1,6 +1,5 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-ENV PYTHON_VERSION=3.13.10
 ENV HTSLIB_VERSION=1.16
 
 ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
@@ -67,6 +66,8 @@ RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.
 
 # Install remaining requirements
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
+
+RUN rm -f /usr/bin/python3.9 || true
 
 COPY server/ .
 
