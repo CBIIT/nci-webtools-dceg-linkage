@@ -1,11 +1,17 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-# Install Node.js 20 from NodeSource repository
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Install Node.js 20 and Python 3.13 via RPM
 RUN dnf -y update \
    && dnf -y install \
+   curl-minimal \
    gcc-c++ \
+   glibc-langpack-en \
    httpd \
    make \
+   python3.13 \
+   python3.13-pip \
    tar \
    gzip \
    nginx \
@@ -13,15 +19,20 @@ RUN dnf -y update \
    && dnf -y install nodejs \
    && dnf clean all
 
+RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
+   && ln -sf /usr/bin/python3.13 /usr/bin/python \
+   && python3 --version
+
+RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
+
 # Update npm at system prefix (/usr) so bundled dependencies under
 # /usr/lib/node_modules/npm (including tar) are also updated.
 RUN set -eux; \
    npm install -g npm@latest --prefix /usr; \
    npm install -g tar@7.5.11 --prefix /usr; \
    rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
-   cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar; 
- 
-# Remove legacy system Python 3.9 binary so scanners don't flag unused interpreter
+   cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar;
+
 RUN rm -f /usr/bin/python3.9 || true
 
 RUN mkdir -p /app/client
@@ -47,7 +58,7 @@ ENV NEXT_PUBLIC_VERSION=${NEXT_PUBLIC_VERSION}
 ARG GOOGLE_MAPS_API_KEY=none
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 
-RUN npm run build 
+RUN npm run build
 
 EXPOSE 80
 EXPOSE 443
