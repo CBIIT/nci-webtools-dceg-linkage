@@ -1,15 +1,19 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
+ENV HTSLIB_VERSION=1.16
+
+ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
+ENV LDLINK_HOME=/opt/ldlink
+ENV PYTHONPATH=${LDLINK_HOME}
+ENV PYTHONUNBUFFERED=1
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
 # install dependencies
 RUN dnf -y update && \
     dnf -y install \
-    python3.11 \
-    python3.11-devel \
-    python3.11-pip \
-    python3.11-setuptools \
-    python3.11-wheel \
     bzip2 \
     bzip2-devel \
+    curl-minimal \
     fontconfig \
     gcc \
     g++ \
@@ -18,24 +22,26 @@ RUN dnf -y update && \
     httpd \
     httpd-devel \
     libcurl-devel \
+    libffi-devel \
     ncurses-devel \
     openssl-devel \
+    python3.13 \
+    python3.13-devel \
+    python3.13-pip \
+    readline-devel \
+    sqlite-devel \
     tar \
     xz-devel \
     zlib-devel \
     make \
     && dnf clean all
 
-# Restrict Python 3.9 to root only (security mitigation)
-RUN chmod 700 /usr/bin/python3.9 
+RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
+    && ln -sf /usr/bin/python3.13 /usr/bin/python \
+    && python3 --version
 
-# create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
-RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
-    ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    python3 -m pip install --upgrade pip==22.3.1 setuptools wheel
-
-# install htslib
-ENV HTSLIB_VERSION=1.16
+# Upgrade setuptools/wheel using Python 3.13.10
+RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
@@ -46,14 +52,6 @@ RUN cd /tmp \
     && popd \
     && rm -rf htslib-${HTSLIB_VERSION}
 
-ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
-
-ENV LDLINK_HOME=/opt/ldlink
-
-ENV PYTHONPATH=${LDLINK_HOME}:${PYTHONPATH}
-
-ENV PYTHONUNBUFFERED=1
-
 RUN mkdir -p ${LDLINK_HOME}
 
 WORKDIR ${LDLINK_HOME}
@@ -61,13 +59,15 @@ WORKDIR ${LDLINK_HOME}
 COPY server/requirements.txt .
 
 # Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir setuptools wheel
+RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
+RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
 # Install remaining requirements
-RUN python3 -m pip install -r requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+
+RUN rm -f /usr/bin/python3.9 || true
 
 COPY server/ .
 
