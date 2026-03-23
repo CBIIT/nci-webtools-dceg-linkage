@@ -10,20 +10,12 @@ RUN dnf -y update \
    glibc-langpack-en \
    httpd \
    make \
-   python3.13 \
-   python3.13-pip \
    tar \
    gzip \
    nginx \
    && curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - \
    && dnf -y install nodejs \
    && dnf clean all
-
-RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
-   && ln -sf /usr/bin/python3.13 /usr/bin/python \
-   && python3 --version
-
-RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 # Update npm at system prefix (/usr) so bundled dependencies under
 # /usr/lib/node_modules/npm (including tar) are also updated.
