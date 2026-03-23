@@ -308,7 +308,7 @@ export default function LDScore() {
                   }}
                 />
               )}
-               <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+               <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
                <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
 

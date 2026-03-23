@@ -231,7 +231,7 @@ export default function Heritability() {
                   }}
                 />
               )}
-              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
@@ -350,8 +350,6 @@ export default function Heritability() {
                     <Form.Group controlId="samplePrev" className="mb-3">
                       <Form.Label>
                        Sample prevalence
-                        <br />
-                        <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
                       </Form.Label>
                       <Form.Control
                         type="number"
@@ -369,6 +367,7 @@ export default function Heritability() {
                             return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
                           },
                         })}
+                         title="Percentage (enter as 0–1)"
                       />
                       <Form.Text className="text-danger">{heritabilityForm.formState.errors?.samplePrev?.message}</Form.Text>
                     </Form.Group>
@@ -377,8 +376,7 @@ export default function Heritability() {
                     <Form.Group controlId="popPrev" className="mb-3">
                       <Form.Label>
                         Population prevalence
-                        <br />
-                        <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
+                      
                       </Form.Label>
                       <Form.Control
                         type="number"
@@ -396,6 +394,7 @@ export default function Heritability() {
                             return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
                           },
                         })}
+                         title="Percentage (enter as 0–1)"
                       />
                       <Form.Text className="text-danger">{heritabilityForm.formState.errors?.popPrev?.message}</Form.Text>
                     </Form.Group>

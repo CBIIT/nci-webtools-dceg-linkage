@@ -347,8 +347,8 @@ export default function Correlation() {
               />
              )}
            <Row>
+             <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
             <Col s={12} sm={12} md={6} lg={4}>
-            <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
@@ -392,9 +392,8 @@ export default function Correlation() {
                   <Col xs={6}>
                     <Form.Group controlId="samplePrev1">
                       <Form.Label>
-                        <span style={{ display: 'block', marginTop: '0rem' }}>Sample prevalence</span>
-                        <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
-                      </Form.Label>
+                       Sample prevalence
+                        </Form.Label>
                       <Form.Control
                         type="number"
                         step="0.01"
@@ -412,6 +411,7 @@ export default function Correlation() {
                             return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
                           },
                         })}
+                          title="Percentage (enter as 0–1)"
                       />
                       <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev1?.message}</Form.Text>
                     </Form.Group>
@@ -419,9 +419,8 @@ export default function Correlation() {
                   <Col xs={6}>
                     <Form.Group controlId="popPrev1">
                       <Form.Label>
-                        <span style={{ display: 'block', marginTop: '0rem' }}>Population prevalence</span>
-                        <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
-                      </Form.Label>
+                        Population prevalence
+                       </Form.Label>
                       <Form.Control
                         type="number"
                         step="0.01"
@@ -439,6 +438,7 @@ export default function Correlation() {
                             return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
                           },
                         })}
+                          title="Percentage (enter as 0–1)"
                       />
                       <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev1?.message}</Form.Text>
                     </Form.Group>
@@ -465,8 +465,9 @@ export default function Correlation() {
             />
           )}
         <Row>  
+           <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
           <Col s={12} sm={12} md={6} lg={4}>
-            <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
+           
             <Form.Group controlId="file2" className="mb-3">
               <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
               {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
@@ -507,9 +508,8 @@ export default function Correlation() {
                     <Row>
                       <Col xs={6}>
                         <Form.Group controlId="samplePrev2">
-                          <Form.Label><span style={{ display: 'block', marginTop: '0rem' }}>Sample prevalence</span>
-                            <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
-                          </Form.Label>
+                          <Form.Label>Sample prevalence
+                           </Form.Label>
                           <Form.Control
                             type="number"
                             step="0.01"
@@ -527,15 +527,15 @@ export default function Correlation() {
                                 return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
                               },
                             })}
+                             title="Percentage (enter as 0–1)"
                           />
                           <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev2?.message}</Form.Text>
                         </Form.Group>
                       </Col>
                       <Col xs={6}>
                         <Form.Group controlId="popPrev2">
-                          <Form.Label><span style={{ display: 'block', marginTop: '0rem' }}>Population prevalence</span>
-                            <span style={{ fontSize: "0.85em", fontWeight: 400 }}>Percentage (enter as 0–1)</span>
-                          </Form.Label>
+                          <Form.Label>Population prevalence
+                           </Form.Label>
                           <Form.Control
                             type="number"
                             step="0.01"
@@ -553,6 +553,7 @@ export default function Correlation() {
                                 return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
                               },
                             })}
+                               title="Percentage (enter as 0–1)"
                           />
                           <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev2?.message}</Form.Text>
                         </Form.Group>
@@ -564,7 +565,7 @@ export default function Correlation() {
                 </div>
                  <Row>
                   <Col s={12} sm={12} md={6} lg={4}>
-                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
                   </Col>
                 </Row>  
 
