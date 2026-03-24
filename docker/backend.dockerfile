@@ -49,7 +49,7 @@ RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
     && python3 --version
 
 # Upgrade pip, setuptools/wheel using Python 3.13.10
-RUN python3 -m pip install --upgrade pip==26.0.1 "setuptools>=78.1.1" wheel
+RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
