@@ -219,6 +219,7 @@ export default function Heritability() {
                       return ext === 'txt' || 'Only .txt files are allowed';
                     }
                   })}
+                  style={{ maxWidth: "400px" }}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
@@ -231,7 +232,7 @@ export default function Heritability() {
                   }}
                 />
               )}
-              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">

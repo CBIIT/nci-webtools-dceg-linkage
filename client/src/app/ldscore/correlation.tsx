@@ -368,7 +368,7 @@ export default function Correlation() {
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   disabled={geneticLoading}
-                  style={{ maxWidth: "350px" }}
+                  style={{ maxWidth: "400px" }}
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
@@ -393,7 +393,7 @@ export default function Correlation() {
                     <Form.Group controlId="samplePrev1">
                       <Form.Label>
                        Sample prevalence
-                        </Form.Label>
+                      </Form.Label>
                       <Form.Control
                         type="number"
                         step="0.01"
@@ -487,7 +487,7 @@ export default function Correlation() {
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   disabled={geneticLoading}
-                  style={{ maxWidth: "350px" }}
+                  style={{ maxWidth: "400px" }}
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
@@ -565,7 +565,7 @@ export default function Correlation() {
                 </div>
                  <Row>
                   <Col s={12} sm={12} md={6} lg={4}>
-                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
                   </Col>
                 </Row>  
 
