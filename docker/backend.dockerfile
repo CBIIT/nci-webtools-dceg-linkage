@@ -92,9 +92,6 @@ WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
 
-# Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" wheel
-
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
 RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
