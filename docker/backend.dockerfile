@@ -49,7 +49,7 @@ RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
     && python3 --version
 
 # Upgrade pip, setuptools/wheel using Python 3.13.10
-RUN python3 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
+RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
@@ -91,9 +91,6 @@ RUN mkdir -p ${LDLINK_HOME}
 WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
-
-# Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir "setuptools>=78.1.1" wheel
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
 RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
