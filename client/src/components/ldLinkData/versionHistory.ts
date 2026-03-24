@@ -4,7 +4,7 @@ export type NewsEntry = {
 };
 
 export const versionHistory: NewsEntry[] = [
-    { title: "LDlink 7.0.1 Release (04/02/2026)",
+    { title: "LDlink 7.1.0 Release (04/02/2026)",
       items: [
       "Added Liability Scale to LDscore's Heritability Analysis and Genetic Correlation",
       "Updated LDpop to support automatic submission",
