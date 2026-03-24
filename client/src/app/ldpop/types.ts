@@ -65,6 +65,7 @@ export interface FormData {
   pop: PopOption[];
   genome_build: string;
   r2_d: string;
+  reference?: string;
 }
 
 export interface LdPop {

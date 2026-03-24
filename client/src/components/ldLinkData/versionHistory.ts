@@ -4,8 +4,16 @@ export type NewsEntry = {
 };
 
 export const versionHistory: NewsEntry[] = [
+    { title: "LDlink 7.0.1 Release (04/02/2026)",
+      items: [
+      "Added Liability Scale to LDscore's Heritability Analysis and Genetic Correlation",
+      "Updated LDpop to support automatic submission",
+      "Credit references added to all modules",
+      "Python updated to 3.13",
+      ],
+    },
     {
-    title: "LDlink 7.0.0 Release (03/12/2026)",
+    title: "LDlink 7.0.0 Release (03/19/2026)",
     items: [
       "Credit reference added to LDscore",
       "Removed filename restrictions for LDScore input files",
