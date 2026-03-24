@@ -9,6 +9,7 @@ import Table from "@/components/table";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./types";
+import { useStore } from "@/store";
 
 // Helper functions for column rendering
 function ldproxy_rs_results_link(data: any) {
@@ -96,7 +97,18 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     window.URL.revokeObjectURL(downloadUrl);
   };
   const queryClient = useQueryClient();
-  const formData = queryClient.getQueryData(["ldproxy-form-data", ref]) as FormData | undefined;
+  const formDataFromQuery = queryClient.getQueryData(["ldproxy-form-data", ref]) as FormData | undefined;
+  
+  // Get formData from Zustand store, fallback to React Query cache
+  const getFormData = useStore((state) => state.getFormData);
+  const formData = getFormData(ref) || formDataFromQuery;
+  // Extract commonly used values with defaults
+  const r2_d = formData?.r2_d ?? "r2";
+  const dprime = r2_d === "d";
+  const windowSize = formData?.window ?? 500000;
+  const genome_build = formData?.genome_build ?? "grch37";
+
+  //console.log("LdProxyResults formData:", formData, "genome_build:", genome_build, dprime);
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldproxy_results", ref],
     queryFn: async () => (ref ? fetchOutput(`proxy${ref}.json`) : null),
@@ -165,8 +177,8 @@ export default function LdProxyResults({ ref }: { ref: string }) {
       cell: (info) => info.getValue().substring(3),
     }),
     columnHelper.accessor((row) => row[2], {
-      header: `Position (${genomeBuildMap[formData?.genome_build ?? "grch37"]})`,
-      cell: (info) => ldproxy_position_link(info.getValue(), info.row.original, formData?.genome_build ?? "grch37"),
+      header: `Position (${genomeBuildMap[genome_build]})`,
+      cell: (info) => ldproxy_position_link(info.getValue(), info.row.original, genome_build),
     }),
     columnHelper.accessor((row) => row[3], {
       header: "Alleles",
@@ -198,7 +210,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     }),
     columnHelper.accessor((row) => row[10], {
       header: "RegulomeDB",
-      cell: (info) => ldproxy_regulome_link(info.getValue(), info.row.original, formData?.genome_build ?? "grch37"),
+      cell: (info) => ldproxy_regulome_link(info.getValue(), info.row.original, genome_build),
     }),
     columnHelper.accessor((row) => row[11], {
       header: "HaploReg",
@@ -265,12 +277,12 @@ export default function LdProxyResults({ ref }: { ref: string }) {
               <a
                 id="ldproxy-genome"
                 href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=${
-                  formData?.genome_build === "grch37" ? "hg19" : "hg38"
+                  genome_build === "grch37" ? "hg19" : "hg38"
                 }&hgt.customText=http://${location.hostname}/LDlinkRestWeb/tmp/track${ref}.txt`}
                 target="LDProxy-genome-browser_UCSC"
                 title="Genome Browser">
                 View{" "}
-                {(formData as any)?.dprime ? (
+                {dprime ? (
                   "D'"
                 ) : (
                   <span>

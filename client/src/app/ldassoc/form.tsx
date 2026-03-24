@@ -44,7 +44,7 @@ export default function LDAssocForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const { genome_build } = useStore((state) => state);
+  const { genome_build, setFormData } = useStore((state) => state);
 
   const defaultForm: FormData = {
     pop: [],
@@ -187,6 +187,8 @@ export default function LDAssocForm() {
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     };
     queryClient.setQueryData(["ldassoc-form-data", reference], formData);
+    // Store in Zustand store
+    setFormData(reference, formData);
     router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
@@ -195,7 +197,9 @@ export default function LDAssocForm() {
     event.preventDefault();
     router.push("/ldassoc");
     reset(defaultForm);
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({ 
+      predicate: (query) => !query.queryKey[0]?.toString().startsWith('ldassoc-form-data')
+    });
     submitForm.reset();
   }
 

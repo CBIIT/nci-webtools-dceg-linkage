@@ -54,11 +54,11 @@ var populations = {
   AFR: {
     fullName: "African",
     subPopulations: {
-      YRI: "Yoruba in Ibadan, Nigera",
+      YRI: "Yoruba in Ibadan, Nigeria",
       LWK: " Luhya in Webuye, Kenya",
       GWD: " Gambian in Western Gambia",
       MSL: "  Mende in Sierra Leone",
-      ESN: "  Esan in Nigera",
+      ESN: "  Esan in Nigeria",
       ASW: " Americans of African Ancestry in SW USA",
       ACB: "  African Carribbeans in Barbados",
     },

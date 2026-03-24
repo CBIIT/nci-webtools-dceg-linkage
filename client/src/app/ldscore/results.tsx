@@ -590,4 +590,6 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     );
    }
 
+
 }
+

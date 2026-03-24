@@ -17,7 +17,7 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const { genome_build } = useStore((state) => state);
+  const { genome_build, setFormData } = useStore((state) => state);
 
   const defaultForm: FormData = {
     var: "",
@@ -84,16 +84,19 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
     },
   });
 
-  console.log(submitForm.error);
+ // console.log(submitForm.error);
 
   async function onSubmit(data: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const formData: SubmitFormData = {
       ...data,
       reference,
+      genome_build: genome_build || data.genome_build || "grch37", // Use store value, fallback to form value
       pop: getSelectedPopulationGroups(data.pop),
     };
     queryClient.setQueryData(["ldproxy-form-data", reference], formData);
+    // Store in Zustand store
+    setFormData(reference, formData);
     router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
@@ -102,7 +105,9 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
     event.preventDefault();
     router.push("/ldproxy");
     reset(defaultForm);
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({ 
+      predicate: (query) => !query.queryKey[0]?.toString().startsWith('ldproxy-form-data')
+    });
     submitForm.reset();
   }
 

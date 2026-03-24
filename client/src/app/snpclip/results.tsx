@@ -7,7 +7,7 @@ import { useForm, useWatch } from "react-hook-form";
 import Table from "@/components/table";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, VariantDetails } from "./types";
-import { genomeBuildMap } from "@/store";
+import { genomeBuildMap, useStore } from "@/store";
 import "./styles.scss";
 
 interface FormValues {
@@ -18,9 +18,13 @@ export default function SNPClipResults({ ref }: { ref: string }) {
   const [showWarnings, setShowWarnings] = useState(false);
   const { register, reset, control } = useForm<FormValues>();
 
+  const getFormData = useStore((state) => state.getFormData);
   const queryClient = useQueryClient();
-  const formData = queryClient.getQueryData(["snpclip-form-data", ref]) as FormData | undefined;
-
+  const formDataFromQuery = queryClient.getQueryData(["snpclip-form-data", ref]) as FormData | undefined;
+    
+  const formData = getFormData(ref) || formDataFromQuery;
+  //console.log("formData:", formData);
+  
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["snpclip_results", ref],
     queryFn: async () => (ref ? fetchOutput(`snpclip${ref}.json`) : null),

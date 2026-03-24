@@ -110,3 +110,11 @@ export async function fetchLdScoreCalculationResult(params: URLSearchParams): Pr
 export async function ldtrait(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/ldtrait`, params)).data;
 }
+
+export async function validateSumstats(filename: string, reference: string): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/validate_sumstats?filename=${filename}&reference=${reference}`)).data;
+}
+
+export async function validateBfile(filename: string, reference: string): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/validate_bfile?filename=${encodeURIComponent(filename)}&reference=${reference}`)).data;
+}

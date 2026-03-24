@@ -4,8 +4,21 @@ export type NewsEntry = {
 };
 
 export const versionHistory: NewsEntry[] = [
+    {
+    title: "LDlink 7.0.0 Release (03/12/2026)",
+    items: [
+      "Credit reference added to LDscore",
+      "Removed filename restrictions for LDScore input files",
+      "Fixed heritability and correlation concurrency issue",
+      "Fixed genome build mismatches for LDassoc, LDexpress, LDhap, LDproxy, SNPclip",
+      "Added file input validation for LDscore (heritability, correlation and ldscore) module",
+      "Updated urllib3 to address security vulnerabilities and boto3 dependency issues",
+      "Mongo DB migrated to a new AWS account",
+      "Python updated to 3.11",
+    ],
+  },
   {
-    title: "LDlink 6.0.0 Release (12/05/2025)",
+    title: "LDlink 6.0.0 Release (12/10/2025)",
     items: [
       "Modernized UI Technology with update from jQuery to Next.js and React's component-based architecture",
       "Improved site's UI responsiveness, layouts and error/warning messaging",

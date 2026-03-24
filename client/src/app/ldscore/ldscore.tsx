@@ -1,11 +1,12 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { fetchLdScoreCalculationResult } from "@/services/queries";
+import { fetchLdScoreCalculationResult, upload, validateBfile } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useState } from "react";
 import LdScoreResults from "./results";
+import { map } from "@bokeh/bokehjs/build/js/lib/core/util/iterator";
 
 interface FormData {
   ldfiles?: FileList;
@@ -37,6 +38,8 @@ export default function LDScore() {
   const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [fileError, setFileError] = useState<string>("");
+  const [reference, setReference] = useState<string>("");
+  const [renameWarnings, setRenameWarnings] = useState<string>("");
 
   // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
   const handleLdFilesUpload = async (files: FileList) => {
@@ -45,7 +48,28 @@ export default function LDScore() {
     setUploadedBim(""); 
     setUploadedFam("");
     setAllUploadedFiles([]);
+    setRenameWarnings("");
     form.clearErrors("ldfiles");
+    setError(""); // Clear any previous errors
+    
+    // Generate a new reference for this upload session
+    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    setReference(newReference);
+    
+    // Validate that all files have the same base name (excluding extension)
+    const baseNames = new Set<string>();
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const lastDotIndex = file.name.lastIndexOf('.');
+      const baseName = lastDotIndex > 0 ? file.name.substring(0, lastDotIndex) : file.name;
+      baseNames.add(baseName);
+    }
+    
+    if (baseNames.size > 1) {
+      setFileError(`All files must have the same base filename. Found: ${Array.from(baseNames).join(', ')}`);
+      setUploading(false);
+      return;
+    }
     
     const uploadedFileNames: string[] = [];
     
@@ -54,18 +78,34 @@ export default function LDScore() {
       const ext = file.name.split('.').pop()?.toLowerCase();
       const formData = new FormData();
       formData.append("ldscoreFile", file);
+      formData.append("reference", newReference);
       
       try {
-        const response = await fetch("/LDlinkRestWeb/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (response.ok) {
-          uploadedFileNames.push(file.name);
+        const response = await upload(formData);
+        if (response && response.status === 200) {
+          const data = response.data;
+          // If server returned a renamed mapping, surface it as a user warning
+          if (data && data.renamed) {
+            if (Array.isArray(data.renamed) && data.renamed.length > 0) {
+              const mapping = data.renamed[0];
+              if(mapping.original !== mapping.sanitized)
+                setRenameWarnings(`File was renamed to ${mapping.sanitized}`);
+              uploadedFileNames.push(mapping.sanitized);
           // Keep the specific type tracking for the submission logic
-          if (ext === 'bed') setUploadedBed(file.name);
-          if (ext === 'bim') setUploadedBim(file.name);
-          if (ext === 'fam') setUploadedFam(file.name);
+              if (ext === 'bed') setUploadedBed(mapping.sanitized);
+              if (ext === 'bim') setUploadedBim(mapping.sanitized);
+              if (ext === 'fam') setUploadedFam(mapping.sanitized);
+            }
+         
+          }
+          else{
+            uploadedFileNames.push(file.name);
+            // Keep the specific type tracking for the submission logic
+            if (ext === 'bed') setUploadedBed(file.name);
+            if (ext === 'bim') setUploadedBim(file.name);
+            if (ext === 'fam') setUploadedFam(file.name);
+          }
+        
         }
       } catch (e) {
         // ignore individual file upload errors
@@ -73,6 +113,33 @@ export default function LDScore() {
     }
     
     setAllUploadedFiles(uploadedFileNames);
+    
+    // Validate the uploaded bfile
+    if (uploadedFileNames.length === 3) {
+      const baseName = uploadedFileNames[0].substring(0, uploadedFileNames[0].lastIndexOf('.'));
+      try {
+        const { fileValid } = await validateBfile(baseName, newReference);
+               
+        if (!fileValid.valid) {
+          const errorMessages = fileValid.errors || [];
+          const warningMessages = fileValid.warnings || [];
+          const allMessages = [...errorMessages, ...warningMessages];
+          const errorText = allMessages.length > 0 
+            ? allMessages.join('\n') 
+            : "Invalid bfile format. Please check your files.";
+          
+          setFileError(errorText);
+          setUploadedBed("");
+          setUploadedBim("");
+          setUploadedFam("");
+          setAllUploadedFiles([]);
+        }
+      } catch (e) {
+        console.error("Validation error:", e);
+        setFileError("Failed to validate files. Please try again.");
+      }
+    }
+    
     setUploading(false);
   };
 
@@ -83,11 +150,21 @@ export default function LDScore() {
     const bed = exampleBed || uploadedBed;
     const bim = exampleBim || uploadedBim;
     const fam = exampleFam || uploadedFam;
+    
+    // Validate that all three files are present
+    if (!bed || !bim || !fam) {
+      form.setError("ldfiles", {
+        type: "manual",
+        message: "Upload must include 3 files, one of each type: .bed, .bim, and .fam"
+      });
+      return;
+    }
+    
     const window = form.getValues("window");
     const windowUnit = form.getValues("windowUnit");
     const isExample = !!exampleBed;
     const filename = `${bed};${bim};${fam}`;
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+  
     
     const params = new URLSearchParams({
       filename,
@@ -123,8 +200,10 @@ export default function LDScore() {
     setUploadedFam("");
     setAllUploadedFiles([]);
     setUseExampleLdscore(false);
+    setReference("");
     setError("");
     setFileError("");
+    setRenameWarnings("");
   };
 
   return (
@@ -168,7 +247,10 @@ export default function LDScore() {
         <Row>
            <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="ldfiles" className="mb-3">
-              <Form.Label >Upload *.bed, *.bim, *.fam files (all three required)</Form.Label>
+              <Form.Label>
+                <div>Upload *.bed, *.bim, *.fam files</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>(all three required and must have the same name)</div>
+              </Form.Label>
               {(exampleBed || exampleBim || exampleFam) ? (
                 <div className="form-control bg-light">
                   {exampleBed && <div>{exampleBed}</div>}
@@ -214,6 +296,7 @@ export default function LDScore() {
                   })}
                   accept=".bed,.bim,.fam"
                   multiple
+                  disabled={ldscoreLoading}
                   title="Upload *.bed, *.bim, *.fam files"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
@@ -225,7 +308,10 @@ export default function LDScore() {
                   }}
                 />
               )}
+               <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use: A-Z, 0-9, dots, hyphens, and underscores only.</div>
+
                <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
+
                <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
@@ -241,10 +327,14 @@ export default function LDScore() {
                   id="use-example-ld"
                   label="Use example data"
                   checked={useExampleLdscore}
+                  disabled={ldscoreLoading}
                   onChange={(e) => {
                     setUseExampleLdscore(e.target.checked);
                         setLdscoreResultRef(null);
                     if (e.target.checked) {
+                      // Generate a new reference for example data
+                      const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                      setReference(newReference);
                       setExampleBed("22.bed");
                       setExampleBim("22.bim");
                       setExampleFam("22.fam");
@@ -253,10 +343,15 @@ export default function LDScore() {
                       setUploadedFam("");
                       setAllUploadedFiles([]);
                       form.clearErrors("ldfiles");
+                      setError(""); // Clear any previous errors
+                      setFileError(""); // Clear file validation errors
                     } else {
                       setExampleBed("");
                       setExampleBim("");
                       setExampleFam("");
+                      setReference("");
+                      setError(""); // Clear any previous errors
+                      setFileError(""); // Clear file validation errors
                     }
                   }}
                 />
@@ -311,7 +406,7 @@ export default function LDScore() {
                     {!useExampleLdscore && allUploadedFiles.map((fileName, index) => (
                       <div key={index}>
                         <a
-                          href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(fileName)}`}
+                          href={`/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(fileName)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           download
@@ -321,6 +416,11 @@ export default function LDScore() {
                         </a>
                       </div>
                     ))}
+                    {!useExampleLdscore && renameWarnings.length > 0 && (
+                      <Alert variant="warning" className="mt-2">
+                        {renameWarnings}
+                      </Alert>
+                    )}
                   </div>
                 )}
               </div>
@@ -347,10 +447,12 @@ export default function LDScore() {
                   defaultValue={1}
                   style={{ maxWidth: "120px", marginRight: "8px" }}
                   title="Please enter an integer greater than 0"
+                  disabled={ldscoreLoading}
                 />
                 <Form.Select
                   {...form.register("windowUnit")}
                   style={{ maxWidth: "80px" }}
+                  disabled={ldscoreLoading}
                   defaultValue="cM"
                   title="Select unit for the window size"
                 >
@@ -366,7 +468,7 @@ export default function LDScore() {
           
           <Col s={12} sm={12} md={6} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1">
+              <Button type="reset" variant="outline-danger" className="me-1" disabled={ldscoreLoading}>
                 Reset
               </Button>
               <Button type="submit" variant="primary" disabled={ldscoreLoading}>
@@ -377,16 +479,11 @@ export default function LDScore() {
         </Row>
       </Form>
 
-      {fileError && (
-        <Row>
-          <Col>
-            <Alert variant="danger" className="mt-3">
-              {fileError}
-            </Alert>
-          </Col>
-        </Row>
-      )}
-
+               {fileError && (
+                <Alert variant="danger" className="mt-2">
+                  {fileError}
+                </Alert>
+              )}
       {ldscoreLoading && (
         <div className="d-flex flex-column align-items-center my-3">
           <span

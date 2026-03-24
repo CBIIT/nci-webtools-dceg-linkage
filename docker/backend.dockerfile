@@ -1,8 +1,13 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-# install dependencies
-RUN dnf -y update \
-    && dnf -y install \
+# Install Python 3.11 explicitly and required build/runtime deps
+RUN dnf -y update && \
+    dnf -y install \
+    python3.11 \
+    python3.11-devel \
+    python3.11-pip \
+    python3.11-setuptools \
+    python3.11-wheel \
     bzip2 \
     bzip2-devel \
     fontconfig \
@@ -15,17 +20,21 @@ RUN dnf -y update \
     libcurl-devel \
     ncurses-devel \
     openssl-devel \
-    python3 \
-    python3-devel \
-    python3-pip \
-    python3-setuptools \
-    python3-wheel \
     tar \
     xz-devel \
     zlib-devel \
     firefox \
     xorg-x11-server-Xvfb \
+    make \
     && dnf clean all
+
+# Restrict Python 3.9 to root only (security mitigation)
+RUN chmod 700 /usr/bin/python3.9
+
+# Create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
+RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3.11 /usr/bin/python && \
+    python3 -m pip install --upgrade pip==22.3.1 setuptools wheel
 
 # install htslib
 ENV HTSLIB_VERSION=1.21
@@ -92,10 +101,18 @@ WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
 
+# Install setuptools and wheel first for building packages
+RUN python3 -m pip install --no-cache-dir setuptools wheel
+
+# Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
+RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
+
+# Install remaining requirements (excluding pybedtools and pysam which are already installed)
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-# Install ldsc package from GitHub
-#RUN pip install git+https://github.com/CBIIT/ldsc.git@master
+# Copy and install ldsc package from vendor folder
+COPY vendor/ldsc /tmp/ldsc
+RUN cd /tmp/ldsc && python3 -m pip install --no-cache-dir --no-build-isolation . && rm -rf /tmp/ldsc
 
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig

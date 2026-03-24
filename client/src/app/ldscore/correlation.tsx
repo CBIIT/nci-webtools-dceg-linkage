@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { fetchGeneticCorrelationResult } from "@/services/queries";
+import { fetchGeneticCorrelationResult, upload, validateSumstats } from "@/services/queries";
 import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
@@ -23,6 +23,7 @@ export default function Correlation() {
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
   
+  const [reference, setReference] = useState<string>("");
   const [exampleFile1, setExampleFile1] = useState<string>("");
   const [exampleFile2, setExampleFile2] = useState<string>("");
   const [uploadedFile1, setUploadedFile1] = useState<string>("");
@@ -32,19 +33,72 @@ export default function Correlation() {
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string>("");
+  const [renameWarnings, setRenameWarnings] = useState<string>("");
+  const [file1Valid, setFile1Valid] = useState(false);
+  const [file2Valid, setFile2Valid] = useState(false);
+  const [validationError1, setValidationError1] = useState<string>("");
+  const [validationError2, setValidationError2] = useState<string>("");
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, fileNumber: 1 | 2) => {
     setFileError(""); // Clear any previous errors
     setUploading(true);
+    
+    // Generate new reference if not already set
+    const newReference = reference || Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    if (!reference) {
+      setReference(newReference);
+    }
+    
     const formData = new FormData();
     formData.append("ldscoreFile", file);
+    formData.append("reference", newReference);
    
     try {
-      const response = await fetch("/LDlinkRestWeb/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (response.ok) {
+      const response = await upload(formData);
+      if (response.status === 200) {
+        // Determine filename to use; handle server rename mapping if present
+        let filenameToUse = file.name;
+        if (response.data && response.data.renamed) {
+          if (Array.isArray(response.data.renamed) && response.data.renamed.length > 0) {
+            const mapping = response.data.renamed[0];
+            if (mapping.original !== mapping.sanitized) {
+              // append warning message (multiple uploads will concatenate)
+              setRenameWarnings((prev) => (prev ? prev + "; " + `File was renamed to ${mapping.sanitized}` : `File was renamed to ${mapping.sanitized}`));
+            }
+            filenameToUse = mapping.sanitized;
+          }
+        }
+        // After successful upload, validate the file (use server-provided name)
+        const validateData = await validateSumstats(filenameToUse, newReference);
+       // console.log("File validation response:", validateData);
+        
+        if (validateData?.fileValid?.valid) {
+          if (fileNumber === 1) {
+            setFile1Valid(true);
+            setValidationError1("");
+            setUploadedFile1(filenameToUse);
+          } else {
+            setFile2Valid(true);
+            setValidationError2("");
+            setUploadedFile2(filenameToUse);
+          }
+        } else {
+          if (fileNumber === 1) {
+            setFile1Valid(false);
+            const errors = validateData?.fileValid?.errors || [];
+            const warnings = validateData?.fileValid?.warnings || [];
+            const errorMessages = [...errors, ...warnings].join(". ");
+            setValidationError1(errorMessages || "File validation failed. Please check the file format.");
+            setUploadedFile1(filenameToUse);
+          } else {
+            setFile2Valid(false);
+            const errors = validateData?.fileValid?.errors || [];
+            const warnings = validateData?.fileValid?.warnings || [];
+            const errorMessages = [...errors, ...warnings].join(". ");
+            setValidationError2(errorMessages || "File validation failed. Please check the file format.");
+            setUploadedFile2(filenameToUse);
+          }
+        }
         return file.name;
       } else {
         setFileError('Error: File upload failed');
@@ -86,7 +140,6 @@ export default function Correlation() {
     setGeneticLoading(true);
     const pop = data.pop?.value || '';
     const genomeBuild = genome_build || "grch37";
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const isExample = !!exampleFile1;
     const filename = exampleFile1 || uploadedFile1;
     const filename2 = exampleFile2 || uploadedFile2;
@@ -111,13 +164,19 @@ export default function Correlation() {
   const onGeneticReset = () => {
     geneticForm.reset();
     setGeneticCorrelationResultRef(null);
+    setReference("");
     setExampleFile1("");
     setExampleFile2("");
     setUploadedFile1("");
     setUploadedFile2("");
     setUseExampleCorrelation(false);
     setFileError("");
+    setFile1Valid(false);
+    setFile2Valid(false);
+    setValidationError1("");
+    setValidationError2("");
     geneticForm.setValue("pop", null);
+    setRenameWarnings("");
   };
 
   return (
@@ -166,19 +225,13 @@ export default function Correlation() {
                   })}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
+                  disabled={geneticLoading}
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      // Check file extension
-                      // const ext = file.name.split('.').pop()?.toLowerCase();
-                      // if (ext !== 'txt') {
-                      //   setFileError('Error: Only .txt files are allowed');
-                      //   input.value = ''; // Clear the input
-                      //   return;
-                      // }
-                      const filename = await handleFileUpload(file);
+                      const filename = await handleFileUpload(file, 1);
                       setUploadedFile1(filename);
                       geneticForm.clearErrors("file");
                     }
@@ -186,6 +239,7 @@ export default function Correlation() {
                 />
               )}
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
+           
             </Form.Group>
             <Form.Group controlId="file2" className="mb-3">
               <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
@@ -205,31 +259,28 @@ export default function Correlation() {
                   })}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
+                  disabled={geneticLoading}
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      // Check file extension
-                      // const ext = file.name.split('.').pop()?.toLowerCase();
-                      // if (ext !== 'txt') {
-                      //   setFileError('Error: Only .txt files are allowed');
-                      //   input.value = ''; // Clear the input
-                      //   return;
-                      // }
-                      const filename = await handleFileUpload(file);
+                      const filename = await handleFileUpload(file, 2);
                       setUploadedFile2(filename);
                       geneticForm.clearErrors("file2");
                     }
                   }}
                 />
               )}
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use: A-Z, 0-9, dots, hyphens, and underscores only.</div>
+
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
                 </HoverUnderlineLink>
               </div>
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
+         
             </Form.Group>
                         <div className="mb-3">
               <Form.Check
@@ -237,17 +288,26 @@ export default function Correlation() {
                 id="use-example-correlation"
                 label="Use example data"
                 checked={useExampleCorrelation}
+                disabled={geneticLoading}
                 onChange={(e) => {
                   setUseExampleCorrelation(e.target.checked);
                    setGeneticCorrelationResultRef(null);
                   if (e.target.checked) {
+                    // Generate new reference for example data
+                    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                    setReference(newReference);
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
                     setUploadedFile1("");
                     setUploadedFile2("");
+                    setValidationError1("");
+                    setValidationError2("");
+                    setFile1Valid(false);
+                    setFile2Valid(false);
                     geneticForm.clearErrors("file");
                     geneticForm.clearErrors("file2");
                   } else {
+                    setReference("");
                     setExampleFile1("");
                     setExampleFile2("");
                     //geneticForm.setValue("pop", null);
@@ -259,8 +319,8 @@ export default function Correlation() {
                   <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
                   {(exampleFile1 || uploadedFile1) && (
                     <>
-                      <a
-                        href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile1)}`}
+                          <a
+                        href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile1)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download
@@ -274,7 +334,7 @@ export default function Correlation() {
                   {(exampleFile2 || uploadedFile2) && (
                     <>
                       <a
-                        href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile2)}`}
+                        href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile2)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download
@@ -285,6 +345,11 @@ export default function Correlation() {
                       <br />
                     </>
                   )}
+                  {!useExampleCorrelation && renameWarnings.length > 0 && (
+                    <Alert variant="warning" className="mt-2">
+                      {renameWarnings}
+                    </Alert>
+                  )}
                 </>
               )}
             </div>
@@ -293,14 +358,14 @@ export default function Correlation() {
            <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="pop" className="mb-3">
               <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={geneticForm.control} rules={{ required: "Population is required" }} />
+              <LdscorePopSelect name="pop" control={geneticForm.control} isLoading={geneticLoading} rules={{ required: "Population is required" }} />
               <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
             </Form.Group>
           </Col>
           <Col />
           <Col s={12} sm={12} md={5} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1">
+              <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
                 Reset
               </Button>
               <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>
@@ -315,7 +380,7 @@ export default function Correlation() {
       {fileError && (
         <Row>
           <Col>
-            <Alert variant="danger" className="mt-3">
+            <Alert variant="warning" className="mt-3">
               {fileError}
             </Alert>
           </Col>
@@ -343,6 +408,19 @@ export default function Correlation() {
         </div>
       )}
 
+   {!file1Valid && validationError1 && (
+                <Alert variant="danger" className="mt-2">
+                  The first uploaded file has the following issues:<br />
+                  {validationError1}
+                </Alert>
+              )}
+
+     {!file2Valid && validationError2 && (
+                <Alert variant="danger" className="mt-2">
+                  The second uploaded file has the following issues:<br />
+                  {validationError2}
+                </Alert>
+              )}
       {geneticCorrelationResultRef && (
            <>
          <hr />

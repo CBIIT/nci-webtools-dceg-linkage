@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { fetchHeritabilityResult } from "@/services/queries";
+import { fetchHeritabilityResult, upload, validateSumstats } from "@/services/queries";
 import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
@@ -25,28 +25,65 @@ export default function Heritability() {
   const [exampleFilename, setExampleFilename] = useState<string>("");
   const [exampleFilepath, setExampleFilepath] = useState<string>("");
   const [uploadedFilename, setUploadedFilename] = useState<string>("");
+  const [renameWarnings, setRenameWarnings] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [useExample, setUseExample] = useState(false);
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
+  const [reference, setReference] = useState<string>("");
+  const [fileValid, setFileValid] = useState(false);
+  const [validationError, setValidationError] = useState<string>("");
+
 
   const handleFileUpload = async (file: File) => {
     setUploading(true);
+    setRenameWarnings("");
+    
+    // Generate a new reference for this upload session
+    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    setReference(newReference);
+    
     const formData = new FormData();
     formData.append("ldscoreFile", file);
+    formData.append("reference", newReference);
    
     try {
-      const response = await fetch("/LDlinkRestWeb/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (response.ok) {
-        setUploadedFilename(file.name);
+      const response = await upload(formData);
+      if (response.status === 200) {
+        // If server returned a renamed mapping, surface it as a user warning
+        let filenameToUse = file.name;
+        if (response.data && response.data.renamed) {
+          if (Array.isArray(response.data.renamed) && response.data.renamed.length > 0) {
+            const mapping = response.data.renamed[0];
+            if (mapping.original !== mapping.sanitized) {
+              setRenameWarnings(`File was renamed to ${mapping.sanitized}`);
+            }
+            filenameToUse = mapping.sanitized;
+          }
+        }
+        setUploadedFilename(filenameToUse);
+        // After successful upload, validate the file (use server-provided name)
+        const validateData = await validateSumstats(filenameToUse, newReference);
+       
+        if (validateData?.fileValid?.valid) {
+          setFileValid(true);
+          setValidationError("");
+        } else {
+          setFileValid(false);
+          const errors = validateData?.fileValid?.errors || [];
+          const warnings = validateData?.fileValid?.warnings || [];
+          const errorMessages = [...errors, ...warnings].join(". ");
+          setValidationError(errorMessages || "File validation failed. Please check the file format.");
+        }
       } else {
         setUploadedFilename("");
+        setFileValid(false);
+        setValidationError("Failed to upload file.");
       }
     } catch (e) {
       setUploadedFilename("");
+      setFileValid(false);
+      setValidationError("An error occurred during file upload.");
     } finally {
       setUploading(false);
     }
@@ -79,7 +116,6 @@ export default function Heritability() {
     setHeritabilityLoading(true);
     const pop = data.pop?.value || '';
     const genomeBuild = genome_build || "grch37";
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const isExample = !!exampleFilename;
     const filename = exampleFilename || uploadedFilename;
     const params = new URLSearchParams({
@@ -106,6 +142,10 @@ export default function Heritability() {
     setExampleFilepath("");
     setUploadedFilename("");
     setUseExample(false);
+    setReference("");
+    setValidationError("");
+    setFileValid(false);
+    setRenameWarnings("");
   };
 
   return (
@@ -133,6 +173,8 @@ export default function Heritability() {
         </div>
       )}
 
+
+
       <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
@@ -143,9 +185,13 @@ export default function Heritability() {
               ) : (
                 <Form.Control 
                   type="file" 
+                  disabled={heritabilityLoading}
                    {...heritabilityForm.register("file", { 
                     required: "File is required",
-                    validate: (file: File | File[] | FileList | undefined) => {
+                    validate: (file: File | FileList | undefined) => {
+                      // If we already have an uploaded filename or example filename, validation passes
+                      if (uploadedFilename || exampleFilename) return true;
+                      
                       if (!file) return 'File is required';
                       // Handle FileList, File[], or single File
                       const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
@@ -170,6 +216,8 @@ export default function Heritability() {
                   }}
                 />
               )}
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use: A-Z, 0-9, dots, hyphens, and underscores only.</div>
+
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
@@ -184,10 +232,15 @@ export default function Heritability() {
                   id="use-example-heritability"
                   label="Use example data"
                   checked={useExample}
+                  disabled={heritabilityLoading}
                   onChange={async (e) => {
                     setUseExample(e.target.checked);
                     setHeritabilityResultRef(null);
+                    setValidationError("");
                     if (e.target.checked) {
+                      // Generate a new reference for example data
+                      const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                      setReference(newReference);
                       setExampleFilename("");
                       setExampleFilepath("");
                       setUploadedFilename("");
@@ -212,6 +265,7 @@ export default function Heritability() {
                       setExampleFilename("");
                       setExampleFilepath("");
                       setUploadedFilename("");
+                      setReference("");
                       //heritabilityForm.setValue("pop", null);
                     }
                   }}
@@ -222,8 +276,8 @@ export default function Heritability() {
 
                     <a
                       href={exampleFilename
-                        ? `/LDlinkRestWeb/copy_and_download/${heritabilityResultRef}/${encodeURIComponent(exampleFilename)}`
-                        : `/LDlinkRestWeb/tmp/uploads/${heritabilityResultRef}/${encodeURIComponent(uploadedFilename)}`}
+                        ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
+                        : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFilename)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       download
@@ -231,6 +285,11 @@ export default function Heritability() {
                     >
                       {exampleFilename || uploadedFilename}
                     </a>
+                    {!useExample && renameWarnings.length > 0 && (
+                      <Alert variant="warning" className="mt-2">
+                        {renameWarnings}
+                      </Alert>
+                    )}
                   </div>
                 )}
               </div>
@@ -240,7 +299,7 @@ export default function Heritability() {
           <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="pop" className="mb-3">
               <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={heritabilityForm.control} rules={{ required: "Population is required" }} />
+              <LdscorePopSelect name="pop" control={heritabilityForm.control} isLoading={heritabilityLoading} rules={{ required: "Population is required" }} />
               <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
             </Form.Group>
           </Col>
@@ -248,7 +307,7 @@ export default function Heritability() {
           <Col />
          <Col s={12} sm={12} md={5} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1">
+              <Button type="reset" variant="outline-danger" className="me-1" disabled={heritabilityLoading}>
                 Reset
               </Button>
               <Button 
@@ -282,6 +341,13 @@ export default function Heritability() {
             <CalculateLoading />
           </div>
         </div>
+      )}
+
+      {!fileValid && validationError && (
+          <Alert variant="danger" className="mt-2">
+              The uploaded file has the following issues:<br />
+              {validationError}
+          </Alert>
       )}
 
       {heritabilityResultRef && (

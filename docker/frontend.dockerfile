@@ -1,15 +1,26 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
+# Install Node.js 20 from NodeSource repository
 RUN dnf -y update \
    && dnf -y install \
    gcc-c++ \
    httpd \
    make \
-   nodejs \
-   npm \
+   tar \
+   gzip \
    nginx \
+   && curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - \
+   && dnf -y install nodejs \
    && dnf clean all
 
+# Update npm at system prefix (/usr) so bundled dependencies under
+# /usr/lib/node_modules/npm (including tar) are also updated.
+RUN set -eux; \
+   npm install -g npm@latest --prefix /usr; \
+   npm install -g tar@7.5.11 --prefix /usr; \
+   rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
+   cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar; 
+ 
 RUN mkdir -p /app/client
 
 WORKDIR /app/client

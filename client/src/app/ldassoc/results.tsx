@@ -9,6 +9,8 @@ import Table from "@/components/table";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./form";
+import { useStore } from "@/store";
+
 
 export default function LdAssocResults({ ref }: { ref: string }) {
   const handleDownload = async (format: string) => {
@@ -26,7 +28,14 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   };
 
   const queryClient = useQueryClient();
-  const formData = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
+  const formDataFromQuery = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
+ 
+ // Get form data from global store as fallback
+  const getFormData = useStore((state) => state.getFormData);
+  const formData = getFormData(ref) || formDataFromQuery;
+  const genome_build = formData?.genome_build || "grch37";
+  const dprime = formData?.dprime ?? false;
+ 
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldassoc_results", ref],
     queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),
@@ -102,7 +111,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[2], {
-      header: `Position (${genomeBuildMap[formData?.genome_build ?? "grch37"]})`,
+      header: `Position (${genomeBuildMap[genome_build]})`,
       cell: (info) => {
         const position = info.getValue();
         const rs = info.row.original[0];
@@ -113,7 +122,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const end = Number(position) + 250;
         const region = `${chr}:${start}-${end}`;
         const params = {
-          "db": formData?.genome_build === "grch37" ? "hg19" : "hg38",
+          "db": genome_build === "grch37" ? "hg19" : "hg38",
           "position": region,
           "snp151": "pack",
           "hgFind.matches": rs,
@@ -178,7 +187,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const start = parseInt(position) - 1;
         const end = parseInt(position);
         const region = `${chr}:${start}-${end}`;
-        const genome = formData?.genome_build === "grch37" ? "GRCh37" : "GRCh38";
+        const genome = genome_build === "grch37" ? "GRCh37" : "GRCh38";
         const url = `https://www.regulomedb.org/regulome-search?genome=${genome}&regions=${encodeURIComponent(region)}`;
         return (
           <a href={url} target="_blank" rel="noopener noreferrer">
@@ -254,12 +263,12 @@ export default function LdAssocResults({ ref }: { ref: string }) {
               <a
                 id="ldassoc-genome"
                 href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=${
-                  formData?.genome_build === "grch37" ? "hg19" : "hg38"
+                  genome_build === "grch37" ? "hg19" : "hg38"
                 }&hgt.customText=http://${location.hostname}/LDlinkRestWeb/tmp/track${ref}.txt`}
                 target="LDProxy-genome-browser_UCSC"
                 title="Genome Browser">
                 View{" "}
-                {(formData as any)?.dprime ? (
+                {dprime ? (
                   "D'"
                 ) : (
                   <span>
