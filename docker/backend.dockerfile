@@ -56,6 +56,9 @@ RUN cd /tmp \
     && popd \
     && rm -rf htslib-${HTSLIB_VERSION}
 
+# Work around PhantomJS/OpenSSL config incompatibility on AL2023.
+ENV OPENSSL_CONF=/dev/null
+
 #RUN cd /tmp \
 #    && curl -L https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -xj \
 #    && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
