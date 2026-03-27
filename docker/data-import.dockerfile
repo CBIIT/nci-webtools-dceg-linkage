@@ -12,6 +12,7 @@ RUN dnf -y update && \
     python3.13-pip \
     && dnf clean all
 
+RUN chmod 700 /usr/bin/python3.9
 # Upgrade setuptools/wheel using Python 3.13
 RUN python3.13 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
