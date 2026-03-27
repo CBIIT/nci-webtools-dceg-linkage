@@ -30,4 +30,4 @@ RUN python3.13 -m pip install --no-cache-dir \
 
 COPY server/ .
 
-CMD ["env", "PATH=/opt/ldlink/ldlink-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "python3", "LDtrait_data.py"]
+CMD python3.13 LDtrait_data.py
