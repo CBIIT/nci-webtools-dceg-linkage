@@ -51,7 +51,8 @@ RUN cd /tmp \
     && popd \
     && rm -rf htslib-${HTSLIB_VERSION}
 
-RUN mkdir -p ${LDLINK_HOME}
+RUN mkdir -p ${LDLINK_HOME}/ldlink-bin \
+    && ln -sf /usr/bin/python3.13 ${LDLINK_HOME}/ldlink-bin/python3
 
 WORKDIR ${LDLINK_HOME}
 
@@ -65,4 +66,4 @@ RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
 
 COPY server/ .
 
-CMD ["python3.13", "LDtrait_data.py"]
+CMD ["env", "PATH=/opt/ldlink/ldlink-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "python3", "LDtrait_data.py"]

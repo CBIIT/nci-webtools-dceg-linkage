@@ -107,7 +107,7 @@ def get_1000g_data(snp_pos, snp_coords, genome_build, query_dir):
     checkS3File(aws_info, aws_info['bucket'], vcf_filepath)
 
     # ensure tabix_coords is a list
-    tabix_coords = re.split('\s+', tabix_coords.strip())
+    tabix_coords = re.split(r'\s+', tabix_coords.strip())
     output = tabix("-fhD", "--separate-regions", query_file, *tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
 
@@ -117,7 +117,7 @@ def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, 
     vcf_filepath, tabix_coords, query_file = get_vcf_snp_params([vcf_pos], [snp_coord], genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filepath)
 
-    tabix_coords = re.split('\s+', tabix_coords.strip())
+    tabix_coords = re.split(r'\s+', tabix_coords.strip())
     output = tabix("-fhD", query_file, *tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
 

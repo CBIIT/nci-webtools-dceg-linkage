@@ -91,7 +91,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     for subprocess_id in range(num_subprocesses):
         getWindowVariantsArgs = " ".join(["True", str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
-        commands.append("python3.13 LDproxy_sub.py " + getWindowVariantsArgs)
+        commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]

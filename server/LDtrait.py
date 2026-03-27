@@ -349,7 +349,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     ld_subprocess_commands = []
     for subprocess_id in range(num_subprocesses):
         getPairLDArgs = " ".join([str(request), str(subprocess_id), genome_build])
-        ld_subprocess_commands.append("python3.13 LDtrait_ld_sub.py " + getPairLDArgs)
+        ld_subprocess_commands.append("python3 LDtrait_ld_sub.py " + getPairLDArgs)
 
     ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
 

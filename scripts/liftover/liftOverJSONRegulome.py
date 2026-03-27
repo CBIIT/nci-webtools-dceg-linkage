@@ -88,8 +88,8 @@ def main():
         chainFile = sys.argv[2]
         outputJSONFile = sys.argv[3]
     except:
-        print("USAGE: python3.13 liftOverJSONRegulome.py <INPUT_REGULOME_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
-        print("EXAMPLE: python3.13 liftOverJSONRegulome.py ./ENCFF297XMQ.tsv ./hg19ToHg38.over.chain.gz regulome.json")
+        print("USAGE: python3 liftOverJSONRegulome.py <INPUT_REGULOME_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
+        print("EXAMPLE: python3 liftOverJSONRegulome.py ./ENCFF297XMQ.tsv ./hg19ToHg38.over.chain.gz regulome.json")
         sys.exit(1)
 
     inputBedFileName = generateInputBed(inputRawFile)
