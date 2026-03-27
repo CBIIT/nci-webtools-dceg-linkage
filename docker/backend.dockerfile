@@ -5,7 +5,6 @@ ENV PHANTOMJS_VERSION=2.1.1
 ENV GECKODRIVER_VERSION=0.36.0
 ENV MOZ_HEADLESS=1
 ENV DISPLAY=:99
-ENV OPENSSL_CONF=/dev/null
 
 ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
 ENV LDLINK_HOME=/opt/ldlink
@@ -44,12 +43,8 @@ RUN dnf -y update && \
     make \
     && dnf clean all
 
-RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
-    && ln -sf /usr/bin/python3.13 /usr/bin/python \
-    && python3 --version
-
-# Upgrade pip, setuptools/wheel using Python 3.13.10
-RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
+# Upgrade setuptools/wheel using Python 3.13.10
+RUN python3.13 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
@@ -86,17 +81,18 @@ RUN ARCH=$(uname -m) && \
     ln -s /usr/local/bin/geckodriver /usr/bin/geckodriver && \
     rm geckodriver.tar.gz
 
-RUN mkdir -p ${LDLINK_HOME}
+RUN mkdir -p ${LDLINK_HOME}/apache-bin \
+    && ln -sf /usr/bin/python3.13 ${LDLINK_HOME}/apache-bin/python3
+
 
 WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
+RUN python3.13 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
-# Install remaining requirements (excluding pybedtools and pysam which are already installed)
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
+RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig
@@ -105,8 +101,6 @@ COPY server/ .
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
-
-RUN rm -f /usr/bin/python3.9 || true
 
 # RUN mkdir -p /usr/share/httpd/.cache/selenium \
 #     && chown -R apache:apache /usr/share/httpd/.cache
