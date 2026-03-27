@@ -2,7 +2,6 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
-# Install Node.js 20 and Python 3.13 via RPM
 RUN dnf -y update \
    && dnf -y install \
    curl-minimal \

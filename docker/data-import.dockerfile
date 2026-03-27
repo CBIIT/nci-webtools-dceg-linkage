@@ -40,7 +40,7 @@ RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
     && ln -sf /usr/bin/python3.13 /usr/bin/python \
     && python3 --version
 
-# Upgrade setuptools/wheel using Python 3.13.10
+# Upgrade setuptools/wheel using Python 3.13
 RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
