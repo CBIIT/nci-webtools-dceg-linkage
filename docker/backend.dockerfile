@@ -109,4 +109,33 @@ EXPOSE 80
 
 EXPOSE 8080
 
-CMD ["/bin/sh", "-lc", "PATH=${LDLINK_HOME}/apache-bin:$PATH flask --app bokehExport run & exec env PATH=${LDLINK_HOME}/apache-bin:$PATH mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi --httpd-executable=/usr/sbin/httpd --modules-directory /etc/httpd/modules/ --include-file /etc/httpd/conf.d/wsgi.conf --user apache --group apache --compress-responses --trust-proxy-header X-Forwarded-For --log-to-terminal --access-log --access-log-format \"%h %{X-Forwarded-For}i %l %u %t \\\"%r\\\" %>s %b \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" combined --port 80 --working-directory ${LDLINK_HOME} --header-buffer-size 50000000 --response-buffer-size 50000000 --limit-request-body 5368709120 --max-clients 200 --initial-workers 1 --socket-timeout 9000 --queue-timeout 9000 --shutdown-timeout 9000 --graceful-timeout 9000 --connect-timeout 9000 --request-timeout 9000 --send-buffer-size 50000000 --receive-buffer-size 50000000 --processes $(((1 + $(nproc)) / 2)) --threads 1"]
+CMD flask --app bokehExport run & \
+    mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
+    --httpd-executable=/usr/sbin/httpd \
+    --modules-directory /etc/httpd/modules/ \
+    --include-file /etc/httpd/conf.d/wsgi.conf \
+    --user apache \
+    --group apache \
+    --compress-responses \
+    --trust-proxy-header X-Forwarded-For \
+    --log-to-terminal \
+    # --log-level info \
+    --access-log \
+    --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined \
+    --port 80 \
+    --working-directory ${LDLINK_HOME} \
+    --header-buffer-size 50000000 \
+    --response-buffer-size 50000000 \
+    --limit-request-body 5368709120 \
+    --max-clients 200 \
+    --initial-workers 1 \
+    --socket-timeout 9000 \
+    --queue-timeout 9000 \
+    --shutdown-timeout 9000 \
+    --graceful-timeout 9000 \
+    --connect-timeout 9000 \
+    --request-timeout 9000 \
+    --send-buffer-size 50000000 \
+    --receive-buffer-size 50000000 \
+    --processes $(((1 + `nproc`) / 2)) \
+    --threads 1
