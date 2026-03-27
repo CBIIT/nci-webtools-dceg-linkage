@@ -1,14 +1,18 @@
 bokeh==3.8.2
+bitarray==2.6.0
 boto3==1.42.39
 Flask==3.1.3
 jinja2==3.1.6
 MarkupSafe==3.0.2
 mod_wsgi==5.0.2
+nose==1.3.7
 numpy==2.4.3 
+pandas==2.3.3
 pymongo==4.14.0
 python-dateutil==2.8.2
 python-dotenv==1.1.1
 requests==2.32.4
+scipy==1.15.0
 urllib3==2.6.3  # CVE-2026-21441: Limited by botocore constraint with Python 3.9 (requires urllib3<1.27)
 tornado>=6.5.5  # CVE fix: multipart/form-data parsing DoS in versions <6.5.5
 selenium==4.32.0
@@ -17,5 +21,5 @@ svgutils==0.3.1
 cairosvg==2.9.0
 Pillow==12.1.1
 pybedtools==0.12.0
-ldsc @ git+https://github.com/CBIIT/ldsc.git@0448dd3 #for ldsc313 branch
+ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc313
 Flask-Limiter[mongodb]==3.11.0
