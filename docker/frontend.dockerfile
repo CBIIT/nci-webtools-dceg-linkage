@@ -4,25 +4,27 @@ RUN dnf -y update \
    && dnf -y install \
    curl-minimal \
    gcc-c++ \
-   glibc-langpack-en \
    httpd \
    make \
    tar \
    gzip \
    nginx \
-   && curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - \
-   && dnf -y install nodejs \
+   && dnf -y install nodejs24 \
    && dnf clean all
 
        # Restrict Python 3.9 to root only (security mitigation)
 RUN chmod 700 /usr/bin/python3.9 
-# Update npm at system prefix (/usr) so bundled dependencies under
-# /usr/lib/node_modules/npm (including tar) are also updated.
+
+# Patch npm's bundled tar without replacing the distro-managed npm/npx binaries.
 RUN set -eux; \
-   npm install -g npm@latest --prefix /usr; \
-   npm install -g tar@7.5.11 --prefix /usr; \
-   rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
-   cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar;
+    npm_root="$(npm root -g)"; \
+    npm_tar_dir="${npm_root}/npm/node_modules/tar"; \
+    npm install --prefix /tmp/npm-tar-patch --install-strategy=nested --ignore-scripts --no-audit --no-fund tar@7.5.11; \
+    rm -rf "${npm_tar_dir}"; \
+    cp -a /tmp/npm-tar-patch/node_modules/tar "${npm_tar_dir}"; \
+    rm -rf /tmp/npm-tar-patch; \
+    test "$(node -p "require('${npm_tar_dir}/package.json').version")" = "7.5.11"
+
 
 #RUN rm -f /usr/bin/python3.9 || true
 
