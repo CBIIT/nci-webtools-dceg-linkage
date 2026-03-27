@@ -36,12 +36,11 @@ RUN dnf -y update && \
     make \
     && dnf clean all
 
-RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
-    && ln -sf /usr/bin/python3.13 /usr/bin/python \
-    && python3 --version
+    # Restrict Python 3.9 to root only (security mitigation)
+RUN chmod 700 /usr/bin/python3.9 
 
 # Upgrade setuptools/wheel using Python 3.13
-RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
+RUN python3.13 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
@@ -59,13 +58,11 @@ WORKDIR ${LDLINK_HOME}
 COPY server/requirements.txt .
 
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
+RUN python3.13 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
 # Install remaining requirements
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
-
-RUN rm -f /usr/bin/python3.9 || true
+RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
 
 COPY server/ .
 
-CMD ["python3", "LDtrait_data.py"]
+CMD ["python3.13", "LDtrait_data.py"]

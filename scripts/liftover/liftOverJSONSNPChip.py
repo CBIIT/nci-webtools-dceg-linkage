@@ -89,8 +89,8 @@ def main():
         chainFile = sys.argv[2]
         outputJSONFile = sys.argv[3]
     except:
-        print("USAGE: python3 liftOverJSONSNPChip.py <INPUT_JSON_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
-        print("EXAMPLE: python3 liftOverJSONSNPChip.py ./export_snp_col.json ./hg19ToHg38.over.chain.gz new_snp_col.json")
+        print("USAGE: python3.13 liftOverJSONSNPChip.py <INPUT_JSON_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
+        print("EXAMPLE: python3.13 liftOverJSONSNPChip.py ./export_snp_col.json ./hg19ToHg38.over.chain.gz new_snp_col.json")
         sys.exit(1)
 
     inputBedFileName = generateInputBed(inputJSONFile)

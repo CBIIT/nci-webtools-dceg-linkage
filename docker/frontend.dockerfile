@@ -14,6 +14,8 @@ RUN dnf -y update \
    && dnf -y install nodejs \
    && dnf clean all
 
+       # Restrict Python 3.9 to root only (security mitigation)
+RUN chmod 700 /usr/bin/python3.9 
 # Update npm at system prefix (/usr) so bundled dependencies under
 # /usr/lib/node_modules/npm (including tar) are also updated.
 RUN set -eux; \
@@ -22,7 +24,7 @@ RUN set -eux; \
    rm -rf /usr/lib/node_modules/npm/node_modules/tar; \
    cp -a /usr/lib/node_modules/tar /usr/lib/node_modules/npm/node_modules/tar;
 
-RUN rm -f /usr/bin/python3.9 || true
+#RUN rm -f /usr/bin/python3.9 || true
 
 RUN mkdir -p /app/client
 

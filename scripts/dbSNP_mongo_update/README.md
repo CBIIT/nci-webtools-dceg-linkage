@@ -57,7 +57,7 @@ Includes script `rsjson_process_merges.py` which looks up each merged RSID found
 
 - `rsjson_process_merges.py` outputs .json file `merged_filtered_complete.json`
 
-`python3 rsjson_process_merges.py merged_filtered.json`
+`python3.13 rsjson_process_merges.py merged_filtered.json`
 
 Each row of output file `merged_filtered_complete.json` contains a variant JSON object with keys: RS id, chromosome, position_grch37, position_grch38, type (snv, delins, etc), and function (annotation). This file can be imported into MongoDB via mongoimport.
 

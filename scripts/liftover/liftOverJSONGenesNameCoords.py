@@ -95,8 +95,8 @@ def main():
         chainFile = sys.argv[2]
         outputJSONFile = sys.argv[3]
     except:
-        print("USAGE: python3 liftOverJSONGenesNameCoords.py <INPUT_JSON_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
-        print("EXAMPLE: python3 liftOverJSONGenesNameCoords.py ./export_genes_name_coords.json ./hg19ToHg38.over.chain.gz new_genes_name_coords.json")
+        print("USAGE: python3.13 liftOverJSONGenesNameCoords.py <INPUT_JSON_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
+        print("EXAMPLE: python3.13 liftOverJSONGenesNameCoords.py ./export_genes_name_coords.json ./hg19ToHg38.over.chain.gz new_genes_name_coords.json")
         sys.exit(1)
 
     inputBedFileName = generateInputBed(inputJSONFile)

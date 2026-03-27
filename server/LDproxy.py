@@ -181,7 +181,7 @@ def calculate_proxy(
                 str(subprocess_id),
             ]
         )
-        commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
+        commands.append("python3.13 LDproxy_sub.py " + getWindowVariantsArgs)
 
     logger.debug(f"Executing {len(commands)} subprocesses for LD calculation")
     processes = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]

@@ -526,7 +526,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
     for subprocess_id in range(num_subprocesses):
         subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
-        commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+        commands.append("python3.13 LDassoc_sub.py " + subprocessArgs)
         logger.debug(f"Subprocess {subprocess_id}: {len(assoc_coords_subset_chunks[subprocess_id])} coordinates")
     
     subprocess_start_time = time.time()
