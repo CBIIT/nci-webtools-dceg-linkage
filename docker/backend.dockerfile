@@ -48,7 +48,7 @@ RUN ln -sf /usr/bin/python3.13 /usr/bin/python3 \
     && ln -sf /usr/bin/python3.13 /usr/bin/python \
     && python3 --version
 
-# Upgrade pip, setuptools/wheel using Python 3.13.10
+# Upgrade setuptools/wheel using Python 3.13.10
 RUN python3 -m pip install --upgrade "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
@@ -95,7 +95,6 @@ COPY server/requirements.txt .
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
 RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
-# Install remaining requirements (excluding pybedtools and pysam which are already installed)
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /var/cache/fontconfig \

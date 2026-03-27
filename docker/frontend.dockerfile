@@ -1,7 +1,5 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-ENV PIP_BREAK_SYSTEM_PACKAGES=1
-
 RUN dnf -y update \
    && dnf -y install \
    curl-minimal \
