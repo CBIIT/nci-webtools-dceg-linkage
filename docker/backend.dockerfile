@@ -45,7 +45,7 @@ RUN dnf -y update && \
 
 RUN chmod 700 /usr/bin/python3.9
     # Upgrade setuptools/wheel using Python 3.13.10
-RUN python3.13 -m pip install --upgrade "setuptools>=78.1.1" wheel
+RUN python3.13 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
