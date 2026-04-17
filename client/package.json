@@ -18,7 +18,7 @@
     "bootstrap-icons": "^1.13.1",
     "clsx": "^2.1.1",
     "html2canvas": "^1.4.1",
-    "next": "16.1.7",
+    "next": "16.2.4",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.0.0",
@@ -33,7 +33,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.7",
+    "eslint-config-next": "16.2.4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "brace-expansion": ">=5.0.5",
+    "picomatch": ">=4.0.4"
   }
 }

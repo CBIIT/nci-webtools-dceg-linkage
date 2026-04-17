@@ -6,7 +6,7 @@
   "scripts": {
     "flask": "cd LDlink && export FLASK_APP=LDlink.py && export FLASK_ENV=development && python3 -m flask run",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
-    "test:e2e": "mocha -R xunit -O output=tests/e2e.xml tests/end-to-end/scripts/*test.js",
+    "test:e2e": "mocha --reporter xunit --reporter-option output=tests/e2e.xml tests/end-to-end/scripts/*test.js",
     "test:integration": "echo TODO: Implement integration tests",
     "test:unit": "echo TODO: Implement integration tests"
   },
@@ -21,13 +21,12 @@
   },
   "homepage": "https://github.com/CBIIT/nci-webtools-dceg-linkage#readme",
   "devDependencies": {
-    "@anthropic-ai/claude-code": "^1.0.83",
-    "chai": "^4.2.0",
-    "lint-staged": "^13.0.2",
-    "mocha": "^5.2.0",
-    "prettier": "^2.7.1",
-    "request": "^2.88.0",
-    "selenium-webdriver": "^4.0.0-alpha.1"
+    "@anthropic-ai/claude-code": "^2.1.112",
+    "chai": "^4.5.0",
+    "lint-staged": "^15.0.0",
+    "mocha": "^11.3.0",
+    "prettier": "^3.5.0",
+    "selenium-webdriver": "^4.27.0"
   },
   "prettier": {
     "printWidth": 120,
@@ -36,5 +35,9 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "overrides": {
+    "serialize-javascript": ">=7.0.5",
+    "diff": ">=8.0.3"
   }
 }
