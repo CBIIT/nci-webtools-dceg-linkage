@@ -14,7 +14,7 @@ RUN dnf -y update && \
 
 RUN chmod 700 /usr/bin/python3.9
 # Upgrade setuptools/wheel using Python 3.13
-RUN python3.13 -m pip install --upgrade "setuptools>=78.1.1" wheel
+RUN python3.13 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 RUN mkdir -p ${LDLINK_HOME}/ldlink-bin \
     && ln -sf /usr/bin/python3.13 ${LDLINK_HOME}/ldlink-bin/python3
@@ -26,7 +26,7 @@ RUN python3.13 -m pip install --no-cache-dir \
     pymongo==4.14.0 \
     python-dateutil==2.8.2 \
     python-dotenv==1.1.1 \
-    requests==2.32.4
+    requests==2.33.1
 
 COPY server/ .
 
