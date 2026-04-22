@@ -8,6 +8,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import CitationBox from "../../components/citationBox";
 import { submitFormData } from "./types";
 
 const Results = dynamic(() => import("./results"), {
@@ -33,6 +34,12 @@ export default function LdPop() {
               <Suspense fallback={<CalculateLoading />}>{params?.reference && <Results {...params} />}</Suspense>
             </ErrorBoundary>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+          <CitationBox />
+          <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
+              Alexander TA, Machiela MJ. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=31924160" target="_blank" rel="noopener noreferrer">LDpop: an interactive online tool to calculate and visualize geographic LD patterns.</a> BMC Bioinformatics. 2020 Jan 10.
+          </div>
         </Row>
       </Container>
     </>

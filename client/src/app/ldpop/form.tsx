@@ -23,6 +23,7 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
     pop: [],
     genome_build: "grch37",
     r2_d: "r2",
+    reference: "",
   };
   const {
     control,
@@ -78,6 +79,27 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
     queryClient.invalidateQueries({ queryKey: ["ldpop-form-data"] });
     submitForm.reset();
   }
+
+  // Automatically submit if all params except reference are available
+  useEffect(() => {
+    const hasAllParams = params && params.var1 && params.var2 && params.pop && params.r2_d && params.genome_build && !params.reference;
+    if (hasAllParams) {
+      const popArray = Array.isArray(params.pop) ? params.pop : [params.pop];
+      onSubmit({
+        var1: params.var1,
+        var2: params.var2,
+        pop: popArray.filter(Boolean).map((p: any) =>
+          typeof p === "string"
+            ? { value: p, label: p }
+            : p
+        ),
+        genome_build: params.genome_build,
+        r2_d: params.r2_d,
+        reference: params.reference ?? Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString(),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   return (
     <Form id="ldpop-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>

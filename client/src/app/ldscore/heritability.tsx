@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, Alert } from "react-bootstrap";
+import { Row, Col, Form, Button, Alert, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { fetchHeritabilityResult, upload, validateSumstats } from "@/services/queries";
@@ -14,7 +14,18 @@ import LdScoreResults from "./results";
 interface HeritabilityFormData {
   file?: File;
   pop: LdscorePopOption | null;
+  scale: "observed" | "liability";
+  samplePrev?: string;
+  popPrev?: string;
 }
+
+const defaultHeritabilityForm: HeritabilityFormData = {
+  file: undefined,
+  pop: null,
+  scale: "observed",
+  samplePrev: "0.5",
+  popPrev: "0.01",
+};
 
 export default function Heritability() {
   const queryClient = useQueryClient();
@@ -23,7 +34,6 @@ export default function Heritability() {
   const { genome_build } = useStore((state) => state);
   
   const [exampleFilename, setExampleFilename] = useState<string>("");
-  const [exampleFilepath, setExampleFilepath] = useState<string>("");
   const [uploadedFilename, setUploadedFilename] = useState<string>("");
   const [renameWarnings, setRenameWarnings] = useState<string>("");
   const [uploading, setUploading] = useState(false);
@@ -31,8 +41,10 @@ export default function Heritability() {
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
   const [reference, setReference] = useState<string>("");
-  const [fileValid, setFileValid] = useState(false);
-  const [validationError, setValidationError] = useState<string>("");
+
+  const heritabilityForm = useForm<HeritabilityFormData>({
+    defaultValues: defaultHeritabilityForm,
+  });
 
 
   const handleFileUpload = async (file: File) => {
@@ -66,35 +78,35 @@ export default function Heritability() {
         const validateData = await validateSumstats(filenameToUse, newReference);
        
         if (validateData?.fileValid?.valid) {
-          setFileValid(true);
-          setValidationError("");
+          heritabilityForm.clearErrors("file");
         } else {
-          setFileValid(false);
           const errors = validateData?.fileValid?.errors || [];
           const warnings = validateData?.fileValid?.warnings || [];
           const errorMessages = [...errors, ...warnings].join(". ");
-          setValidationError(errorMessages || "File validation failed. Please check the file format.");
+          heritabilityForm.setError("file", {
+            type: "server",
+            message: errorMessages || "File validation failed. Please check the file format.",
+          });
         }
       } else {
         setUploadedFilename("");
-        setFileValid(false);
-        setValidationError("Failed to upload file.");
+        heritabilityForm.setError("file", {
+          type: "server",
+          message: "Failed to upload file.",
+        });
       }
     } catch (e) {
       setUploadedFilename("");
-      setFileValid(false);
-      setValidationError("An error occurred during file upload.");
+      heritabilityForm.setError("file", {
+        type: "server",
+        message: "An error occurred during file upload.",
+      });
     } finally {
       setUploading(false);
     }
   };
 
-  const heritabilityForm = useForm<HeritabilityFormData>({
-    defaultValues: {
-      file: undefined,
-      pop: null
-    }
-  });
+  const selectedScale = heritabilityForm.watch("scale");
 
   const heritabilityMutation = useMutation({
     mutationFn: fetchHeritabilityResult,
@@ -125,6 +137,15 @@ export default function Heritability() {
       isExample: isExample ? "true" : "false",
       reference,
     });
+
+    if (data.scale === "liability") {
+      params.append("scale", "liability");
+      params.append("samp_prev", data.samplePrev || "");
+      params.append("pop_prev", data.popPrev || "");
+    } else {
+      params.append("scale", "observed");
+    }
+
     try {
       await fetchHeritabilityResult(params);
       setHeritabilityResultRef(reference);
@@ -136,16 +157,14 @@ export default function Heritability() {
   };
 
   const onHeritabilityReset = () => {
-    heritabilityForm.reset();
+    heritabilityForm.reset(defaultHeritabilityForm);
     setHeritabilityResultRef(null);
     setExampleFilename("");
-    setExampleFilepath("");
     setUploadedFilename("");
     setUseExample(false);
     setReference("");
-    setValidationError("");
-    setFileValid(false);
     setRenameWarnings("");
+    heritabilityForm.clearErrors("file");
   };
 
   return (
@@ -200,6 +219,7 @@ export default function Heritability() {
                       return ext === 'txt' || 'Only .txt files are allowed';
                     }
                   })}
+                  style={{ maxWidth: "400px" }}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
@@ -207,23 +227,19 @@ export default function Heritability() {
                     const file = input.files && input.files[0];
                     setHeritabilityResultRef(null);
                     if (file) {
-                      setUploading(true);
                       await handleFileUpload(file);
-                      setUploading(false);
-                      setUploadedFilename(file.name);
-                      heritabilityForm.clearErrors("file");
                     }
                   }}
                 />
               )}
-              <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically. Use: A-Z, 0-9, dots, hyphens, and underscores only.</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
                 </HoverUnderlineLink>
               </div>
-              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
+              {/* <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text> */}
             </Form.Group>
             <Form.Group controlId="useEx" className="mb-3">
               <div className="mt-2">
@@ -236,13 +252,11 @@ export default function Heritability() {
                   onChange={async (e) => {
                     setUseExample(e.target.checked);
                     setHeritabilityResultRef(null);
-                    setValidationError("");
                     if (e.target.checked) {
                       // Generate a new reference for example data
                       const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
                       setReference(newReference);
                       setExampleFilename("");
-                      setExampleFilepath("");
                       setUploadedFilename("");
                       heritabilityForm.clearErrors("file");
                       try {
@@ -250,20 +264,16 @@ export default function Heritability() {
                         if (response.ok) {
                           const data = await response.json();
                           setExampleFilename(data.filenames || "");
-                          setExampleFilepath(data.filepaths || "");
                         } else {
                           setExampleFilename("");
-                          setExampleFilepath("");
                           console.error("Failed to fetch example data");
                         }
                       } catch (error) {
                         setExampleFilename("");
-                        setExampleFilepath("");
                         console.error("Error fetching example data:", error);
                       }
                     } else {
                       setExampleFilename("");
-                      setExampleFilepath("");
                       setUploadedFilename("");
                       setReference("");
                       //heritabilityForm.setValue("pop", null);
@@ -297,6 +307,105 @@ export default function Heritability() {
           </Col>
 
           <Col s={12} sm={12} md={6} lg={4}>
+            <Form.Group controlId="scale" className="mb-3">
+              <Form.Label className="d-block">Scale</Form.Label>
+              <ButtonGroup>
+                <ToggleButton
+                  id="radio-scale-observed"
+                  title="Observed scale heritability"
+                  type="radio"
+                  variant="outline-primary"
+                  disabled={heritabilityLoading}
+                  {...heritabilityForm.register("scale")}
+                  value="observed"
+                  checked={selectedScale === "observed"}
+                  onChange={() => {
+                    heritabilityForm.setValue("scale", "observed");
+                    heritabilityForm.setValue("samplePrev", "0.5");
+                    heritabilityForm.setValue("popPrev", "0.01");
+                    heritabilityForm.clearErrors(["samplePrev", "popPrev"]);
+                  }}>
+                  Observed
+                </ToggleButton>
+                <ToggleButton
+                  id="radio-scale-liability"
+                  title="Liability scale heritability"
+                  type="radio"
+                  variant="outline-primary"
+                  disabled={heritabilityLoading}
+                  {...heritabilityForm.register("scale")}
+                  value="liability"
+                  checked={selectedScale === "liability"}
+                  onChange={() => {
+                    heritabilityForm.setValue("scale", "liability");
+                  }}>
+                  Liability
+                </ToggleButton>
+              </ButtonGroup>
+            </Form.Group>
+
+            {selectedScale === "liability" && (
+              <>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group controlId="samplePrev" className="mb-3">
+                      <Form.Label>
+                       Sample prevalence
+                      </Form.Label>
+                      <Form.Control
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        max={1}
+                        disabled={heritabilityLoading}
+                        style={{ maxWidth: "160px" }}
+                        placeholder="0.5"
+                        {...heritabilityForm.register("samplePrev", {
+                          required: "Sample prevalence is required for liability scale",
+                          validate: (value) => {
+                            const num = Number(value);
+                            if (Number.isNaN(num)) return "Sample prevalence must be numeric";
+                            return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
+                          },
+                        })}
+                         title="Percentage (enter as 0–1)"
+                      />
+                      <Form.Text className="text-danger">{heritabilityForm.formState.errors?.samplePrev?.message}</Form.Text>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group controlId="popPrev" className="mb-3">
+                      <Form.Label>
+                        Population prevalence
+                      
+                      </Form.Label>
+                      <Form.Control
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        max={1}
+                        disabled={heritabilityLoading}
+                        style={{ maxWidth: "160px" }}
+                        placeholder="0.01"
+                        {...heritabilityForm.register("popPrev", {
+                          required: "Population prevalence is required for liability scale",
+                          validate: (value) => {
+                            const num = Number(value);
+                            if (Number.isNaN(num)) return "Population prevalence must be numeric";
+                            return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
+                          },
+                        })}
+                         title="Percentage (enter as 0–1)"
+                      />
+                      <Form.Text className="text-danger">{heritabilityForm.formState.errors?.popPrev?.message}</Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Col>
+
+          <Col s={12} sm={12} md={6} lg={2}>
             <Form.Group controlId="pop" className="mb-3">
               <Form.Label>Population</Form.Label>
               <LdscorePopSelect name="pop" control={heritabilityForm.control} isLoading={heritabilityLoading} rules={{ required: "Population is required" }} />
@@ -304,8 +413,7 @@ export default function Heritability() {
             </Form.Group>
           </Col>
 
-          <Col />
-         <Col s={12} sm={12} md={5} lg={3} style={{ minWidth: "180px" }}>
+         <Col s={12} sm={12} md={12} lg={2}>
             <div className="text-end">
               <Button type="reset" variant="outline-danger" className="me-1" disabled={heritabilityLoading}>
                 Reset
@@ -343,10 +451,10 @@ export default function Heritability() {
         </div>
       )}
 
-      {!fileValid && validationError && (
+        {heritabilityForm.formState.errors?.file?.type === "server" && heritabilityForm.formState.errors?.file?.message && (
           <Alert variant="danger" className="mt-2">
               The uploaded file has the following issues:<br />
-              {validationError}
+            {heritabilityForm.formState.errors.file.message}
           </Alert>
       )}
 

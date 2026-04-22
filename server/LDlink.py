@@ -179,6 +179,127 @@ def sendJSON(inputString):
     return current_app.response_class(out_json, mimetype="application/json")
 
 
+def _parse_probability_value(raw_value, field_name):
+    try:
+        parsed_value = float(str(raw_value).strip())
+    except (TypeError, ValueError):
+        raise ValueError(f"Invalid {field_name}: value must be a number between 0 and 1 (exclusive).")
+
+    if not 0 < parsed_value < 1:
+        raise ValueError(f"Invalid {field_name}: value must be between 0 and 1 (exclusive).")
+
+    return format(parsed_value, ".15g")
+
+
+def _parse_probability_pair(raw_value, field_name):
+    parts = [part.strip() for part in str(raw_value).split(",")]
+    if len(parts) != 2 or any(part == "" for part in parts):
+        raise ValueError(
+            f"Invalid {field_name}: for liability scale in LDcorrelation, provide two comma-separated values between 0 and 1."
+        )
+
+    normalized_parts = []
+    for index, value in enumerate(parts):
+        normalized_parts.append(_parse_probability_value(value, f"{field_name}[{index + 1}]"))
+    return ",".join(normalized_parts)
+
+
+def _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=False):
+    normalized_scale = str(scale or "observed").strip().lower()
+    if normalized_scale not in {"observed", "liability"}:
+        raise ValueError("Invalid scale: allowed values are 'observed' or 'liability'.")
+
+    if normalized_scale != "liability":
+        return normalized_scale, "", ""
+
+    normalized_samp_prev = str(samp_prev).strip()
+    normalized_pop_prev = str(pop_prev).strip()
+    if not normalized_samp_prev or not normalized_pop_prev:
+        if require_pair:
+            raise ValueError(
+                "When scale=liability for LDcorrelation, both samp_prev and pop_prev are required as two comma-separated values between 0 and 1."
+            )
+        raise ValueError(
+            "When scale=liability for LDherit, both samp_prev and pop_prev are required as values between 0 and 1."
+        )
+
+    if require_pair:
+        normalized_samp_prev = _parse_probability_pair(normalized_samp_prev, "samp_prev")
+        normalized_pop_prev = _parse_probability_pair(normalized_pop_prev, "pop_prev")
+    else:
+        normalized_samp_prev = _parse_probability_value(normalized_samp_prev, "samp_prev")
+        normalized_pop_prev = _parse_probability_value(normalized_pop_prev, "pop_prev")
+
+    return normalized_scale, normalized_samp_prev, normalized_pop_prev
+
+
+LDSCORE_EXAMPLE_DIR = "/data/ldscore"
+
+
+def _resolve_ldscore_example_path(file_name):
+    normalized_name = secure_filename(str(file_name or "").strip())
+    if not normalized_name:
+        raise ValueError("Invalid example filename.")
+
+    source_path = safe_join(LDSCORE_EXAMPLE_DIR, normalized_name)
+    if source_path is None:
+        raise ValueError("Invalid example filename.")
+
+    real_source_path = os.path.realpath(source_path)
+    real_example_dir = os.path.realpath(LDSCORE_EXAMPLE_DIR)
+    if os.path.commonpath([real_example_dir, real_source_path]) != real_example_dir:
+        raise ValueError("Invalid example filename.")
+
+    if not os.path.isfile(real_source_path):
+        raise FileNotFoundError(f"Example file '{normalized_name}' was not found.")
+
+    return normalized_name, real_source_path
+
+
+def _resolve_upload_dir(reference, create_dir=False):
+    normalized_reference = secure_filename(str(reference or "").strip())
+    if not normalized_reference:
+        raise ValueError("Missing or invalid reference parameter.")
+
+    upload_root = os.path.realpath(app.config["UPLOAD_DIR"])
+    resolved_dir = safe_join(upload_root, normalized_reference)
+    if resolved_dir is None:
+        raise ValueError("Invalid reference parameter.")
+
+    resolved_dir = os.path.realpath(resolved_dir)
+    if os.path.commonpath([upload_root, resolved_dir]) != upload_root:
+        raise ValueError("Invalid reference parameter.")
+
+    if create_dir:
+        os.makedirs(resolved_dir, exist_ok=True)
+
+    return normalized_reference, resolved_dir
+
+
+def _resolve_upload_file_path(filename, reference=None, create_dir=False):
+    normalized_filename = secure_filename(str(filename or "").strip())
+    if not normalized_filename:
+        raise ValueError("Invalid filename parameter.")
+
+    upload_root = os.path.realpath(app.config["UPLOAD_DIR"])
+    if reference:
+        _, resolved_dir = _resolve_upload_dir(reference, create_dir=create_dir)
+    else:
+        resolved_dir = upload_root
+        if create_dir:
+            os.makedirs(resolved_dir, exist_ok=True)
+
+    resolved_file_path = safe_join(resolved_dir, normalized_filename)
+    if resolved_file_path is None:
+        raise ValueError("Invalid filename parameter.")
+
+    resolved_file_path = os.path.realpath(resolved_file_path)
+    if os.path.commonpath([upload_root, resolved_file_path]) != upload_root:
+        raise ValueError("Invalid filename parameter.")
+
+    return normalized_filename, resolved_file_path, resolved_dir
+
+
 # Read headers from uploaded data files for LDassoc
 def read_csv_headers(example_filepath):
     final_headers = []
@@ -796,13 +917,11 @@ def validate_sumstats():
         app.logger.warning("Validation request missing filename")
         return jsonify({"fileValid": False, "error": "Missing filename parameter"})
     
-    filename = secure_filename(filename)
-    
-    # Determine file path based on reference
-    if reference:
-        file_path = os.path.join(app.config["UPLOAD_DIR"], reference, filename)
-    else:
-        file_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+    try:
+        filename, file_path, _ = _resolve_upload_file_path(filename, reference)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid sumstats validation input: {validation_error}")
+        return jsonify({"fileValid": False, "error": str(validation_error)})
     
     app.logger.debug(f"Validating sumstats file: {file_path}")
     
@@ -845,17 +964,21 @@ def validate_bfile():
         return jsonify({"fileValid": False, "error": "Missing filename parameter"})
     
     filename = secure_filename(filename)
+    if not filename:
+        app.logger.warning("Validation request filename invalid after sanitization")
+        return jsonify({"fileValid": False, "error": "Invalid filename parameter"})
+
     # Remove only the bfile extension (.bed, .bim, or .fam) if provided
     if filename.endswith(('.bed', '.bim', '.fam')):
         fileroot = filename[:-4]  # Remove last 4 characters (.bed/.bim/.fam)
     else:
         fileroot = filename
-    
-    # Determine file path based on reference
-    if reference:
-        bfile_path = os.path.join(app.config["UPLOAD_DIR"], reference, fileroot)
-    else:
-        bfile_path = os.path.join(app.config["UPLOAD_DIR"], fileroot)
+
+    try:
+        _, bfile_path, _ = _resolve_upload_file_path(fileroot, reference)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid bfile validation input: {validation_error}")
+        return jsonify({"fileValid": False, "error": str(validation_error)})
     
     app.logger.debug(f"Validating bfile: {bfile_path}")
     
@@ -863,7 +986,13 @@ def validate_bfile():
     required_extensions = [".bed", ".bim", ".fam"]
     missing_files = []
     for ext in required_extensions:
-        if not os.path.exists(bfile_path + ext):
+        try:
+            _, component_path, _ = _resolve_upload_file_path(f"{fileroot}{ext}", reference)
+        except ValueError as validation_error:
+            app.logger.warning(f"Invalid bfile component path: {validation_error}")
+            return jsonify({"fileValid": False, "error": str(validation_error)})
+
+        if not os.path.exists(component_path):
             missing_files.append(fileroot + ext)
     
     if missing_files:
@@ -1172,12 +1301,19 @@ def ldscore():
     ldwindow = request.args.get("ldwindow", "1")
     windUnit = request.args.get("windUnit", "cm")
     isExample = request.args.get("isExample", False)
-    reference = request.args.get("reference", False)
+    reference = request.args.get("reference", "")
+    if not str(reference).strip():
+        reference = str(random.randint(0, 1000000))
     app.logger.debug(
         f"LDscore params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, ldwindow: {ldwindow}, windUnit: {windUnit}, isExample: {isExample}"
     )
 
-    fileDir = f"/data/tmp/uploads/{reference}/"
+    try:
+        reference, fileDir = _resolve_upload_dir(reference)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDscore reference: {validation_error}")
+        return sendTraceback(str(validation_error))
+
     inputfilename = "22"
     # print(filename)
     if filename:
@@ -1206,16 +1342,25 @@ def ldscore():
 
             #app.logger.info(file_chromo)
             if fname:
-                # Create the reference subfolder if it doesn't exist
-                os.makedirs(fileDir, exist_ok=True)
-                new_file_path = os.path.join(fileDir, fname)
+                try:
+                    safe_fname, new_file_path, _ = _resolve_upload_file_path(fname, reference, create_dir=True)
+                except ValueError as validation_error:
+                    app.logger.warning(f"Invalid LDscore filename: {validation_error}")
+                    return sendTraceback(str(validation_error))
                 
                 if str(isExample).lower() == "true":
-                    # For example files, copy from /data/ldscore/ to reference folder
-                    pattern = os.path.join("/data/ldscore/", f"{fname}")
-                    app.logger.info(f"Copying example file from {pattern} to {new_file_path}")
-                    shutil.copyfile(pattern, new_file_path)
-                    app.logger.info(f"Copied example file {fname} to {new_file_path}")
+                    # For example files, only allow files under the fixed example directory
+                    try:
+                        safe_fname, source_path = _resolve_ldscore_example_path(safe_fname)
+                        app.logger.info(f"Copying example file from {source_path} to {new_file_path}")
+                        shutil.copyfile(source_path, new_file_path)
+                        app.logger.info(f"Copied example file {safe_fname} to {new_file_path}")
+                    except (ValueError, FileNotFoundError) as copy_error:
+                        app.logger.warning(f"Invalid LDscore example file request: {copy_error}")
+                        return sendTraceback(str(copy_error))
+                    except OSError as copy_error:
+                        app.logger.error(f"Failed to copy LDscore example file: {copy_error}")
+                        return sendTraceback("Unable to copy requested example file.")
                 else:
                     # For uploaded files, they are already in the reference folder from upload endpoint
                     # Just verify the file exists
@@ -1381,29 +1526,53 @@ def ldherit():
     genome_build = request.args.get("genome_build", "grch37")
     filename = request.args.get("filename", False)
     isexample = request.args.get("isExample", False)
-    reference = request.args.get("reference", False)
+    reference = request.args.get("reference", "")
+    if not str(reference).strip():
+        reference =  str(random.randint(0, 1000000))
+    scale = request.args.get("scale", "observed")
+    samp_prev = request.args.get("samp_prev", "")
+    pop_prev = request.args.get("pop_prev", "")
+    try:
+        scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDherit prevalence input: {validation_error}")
+        return sendTraceback(str(validation_error))
     app.logger.debug(
-        f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+        f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
     )
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
-    fileDir = f"/data/tmp/uploads/{reference}/"
+    try:
+        reference, fileDir = _resolve_upload_dir(reference)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDherit reference: {validation_error}")
+        return sendTraceback(str(validation_error))
+
     app.logger.debug(f"LDherit processing filename: {filename}")
     # Handle file copying based on example vs uploaded
     if filename:
         filename = secure_filename(filename)
-        # Create the reference subfolder if it doesn't exist
-        os.makedirs(fileDir, exist_ok=True)
-        new_file_path = os.path.join(fileDir, filename)
+        try:
+            filename, new_file_path, _ = _resolve_upload_file_path(filename, reference, create_dir=True)
+        except ValueError as validation_error:
+            app.logger.warning(f"Invalid LDherit filename: {validation_error}")
+            return sendTraceback(str(validation_error))
         
         if str(isexample).lower() == "true":
-            # For example files, copy from /data/ldscore/ to reference folder
-            pattern = os.path.join("/data/ldscore/", f"{filename}")
-            app.logger.info(f"Copying example file from {pattern} to {new_file_path}")
-            shutil.copyfile(pattern, new_file_path)
-            app.logger.info(f"Copied example file {filename} to {new_file_path}")
+            # For example files, only allow files under the fixed example directory
+            try:
+                safe_filename, source_path = _resolve_ldscore_example_path(filename)
+                app.logger.info(f"Copying example file from {source_path} to {new_file_path}")
+                shutil.copyfile(source_path, new_file_path)
+                app.logger.info(f"Copied example file {safe_filename} to {new_file_path}")
+            except (ValueError, FileNotFoundError) as copy_error:
+                app.logger.warning(f"Invalid LDherit example file request: {copy_error}")
+                return sendTraceback(str(copy_error))
+            except OSError as copy_error:
+                app.logger.error(f"Failed to copy LDherit example file: {copy_error}")
+                return sendTraceback("Unable to copy requested example file.")
         else:
             # For uploaded files, they are already in the reference folder from upload endpoint
             # Just verify the file exists
@@ -1417,7 +1586,7 @@ def ldherit():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(filename, fileDir, pop, isexample)
+        result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1465,27 +1634,58 @@ def ldheritAPI():
         return jsonify({"error": "No file part"}), 400
 
     file = request.files["file"]
-    fileDir = f"/data/tmp/uploads"
+    reference = request.args.get("reference", "")
+    if not str(reference).strip():
+        reference = str(random.randint(0, 1000000))
+
+    try:
+        reference, fileDir = _resolve_upload_dir(reference, create_dir=True)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDherit API reference: {validation_error}")
+        return jsonify({"error": str(validation_error)}), 400
+
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    if file:
-        # Save the file to a desired location
-        file.save(f"{fileDir}/{file.filename}")
+    uploaded_filename = secure_filename(file.filename)
+    if not uploaded_filename:
+        return jsonify({"error": "Invalid filename"}), 400
+
+    try:
+        _, saved_file_path, _ = _resolve_upload_file_path(uploaded_filename, reference, create_dir=True)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDherit API filename: {validation_error}")
+        return jsonify({"error": str(validation_error)}), 400
+
+    file.save(saved_file_path)
 
     pop = request.args.get("pop", False)
     genome_build = request.args.get("genome_build", "grch37")
-    filename = request.args.get("filename", False)
+    requested_filename = request.args.get("filename", False)
     isexample = request.args.get("isExample", False)
+    scale = request.args.get("scale", "observed")
+    samp_prev = request.args.get("samp_prev", "")
+    pop_prev = request.args.get("pop_prev", "")
+    filename = uploaded_filename
+
+    if requested_filename:
+        sanitized_requested_filename = secure_filename(str(requested_filename))
+        if sanitized_requested_filename and sanitized_requested_filename != uploaded_filename:
+            app.logger.warning(
+                f"LDherit API filename mismatch: request filename '{sanitized_requested_filename}' differs from uploaded filename '{uploaded_filename}'. Using uploaded filename."
+            )
+
+    try:
+        scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDherit API prevalence input: {validation_error}")
+        return sendTraceback(str(validation_error))
 
     start_time = time.time()
 
     app.logger.debug(
-        f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+        f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
     )
-    if filename:
-        filename = secure_filename(filename)
-        fileroot, ext = os.path.splitext(filename)
 
     app.logger.debug(f"LDherit API processing filename: {filename}")
     try:
@@ -1494,7 +1694,7 @@ def ldheritAPI():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(filename, pop, isexample)
+        result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
 
         # Pretty-print the JSON output
         summary_index = result.find("Total Observed scale")
@@ -1503,20 +1703,12 @@ def ldheritAPI():
         else:
             filtered_result = result
 
-        # Delete the uploaded files
-        for file_path in saved_files.values():
-            try:
-                os.remove(file_path)
-                print(f"Deleted file: {file_path}")
-            except Exception as e:
-                print(f"Error deleting file {file_path}: {e}")
-
-        # Delete the uploaded files
+        # Delete uploaded file after processing
         try:
-            os.remove(file)
-            app.logger.info(f"Deleted file: {file}")
+            os.remove(saved_file_path)
+            app.logger.info(f"Deleted file: {saved_file_path}")
         except Exception as e:
-            app.logger.error(f"Error deleting file {file}: {e}")
+            app.logger.error(f"Error deleting file {saved_file_path}: {e}")
         return filtered_result
 
     except requests.RequestException as e:
@@ -1544,30 +1736,53 @@ def ldcorrelation():
     filename = request.args.get("filename", False)
     filename2 = request.args.get("filename2", False)
     isexample = request.args.get("isExample", False)
-    reference = request.args.get("reference", False)
+    reference = request.args.get("reference", "")
+    if not str(reference).strip():
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+    scale = request.args.get("scale", "observed")
+    samp_prev = request.args.get("samp_prev", "")
+    pop_prev = request.args.get("pop_prev", "")
+    try:
+        scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=True)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDcorrelation prevalence input: {validation_error}")
+        return sendTraceback(str(validation_error))
     app.logger.debug(
-        f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}"
+        f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}, scale: {scale}"
     )
     if filename:
         filename = secure_filename(filename)
-        fileroot, ext = os.path.splitext(filename)
+    if filename2:
+        filename2 = secure_filename(filename2)
 
-    fileDir = f"/data/tmp/uploads/{reference}/"
+    try:
+        reference, fileDir = _resolve_upload_dir(reference)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LDcorrelation reference: {validation_error}")
+        return sendTraceback(str(validation_error))
     
     # Handle file copying based on example vs uploaded
     for fname in [filename, filename2]:
         if fname:
-            fname = secure_filename(fname)
-            # Create the reference subfolder if it doesn't exist
-            os.makedirs(fileDir, exist_ok=True)
-            new_file_path = os.path.join(fileDir, fname)
+            try:
+                safe_fname, new_file_path, _ = _resolve_upload_file_path(fname, reference, create_dir=True)
+            except ValueError as validation_error:
+                app.logger.warning(f"Invalid LDcorrelation filename: {validation_error}")
+                return sendTraceback(str(validation_error))
             
             if str(isexample).lower() == "true":
-                # For example files, copy from /data/ldscore/ to reference folder
-                pattern = os.path.join("/data/ldscore/", f"{fname}")
-                app.logger.info(f"Copying example file from {pattern} to {new_file_path}")
-                shutil.copyfile(pattern, new_file_path)
-                app.logger.info(f"Copied example file {fname} to {new_file_path}")
+                # For example files, only allow files under the fixed example directory
+                try:
+                    safe_fname, source_path = _resolve_ldscore_example_path(safe_fname)
+                    app.logger.info(f"Copying example file from {source_path} to {new_file_path}")
+                    shutil.copyfile(source_path, new_file_path)
+                    app.logger.info(f"Copied example file {safe_fname} to {new_file_path}")
+                except (ValueError, FileNotFoundError) as copy_error:
+                    app.logger.warning(f"Invalid LDcorrelation example file request: {copy_error}")
+                    return sendTraceback(str(copy_error))
+                except OSError as copy_error:
+                    app.logger.error(f"Failed to copy LDcorrelation example file: {copy_error}")
+                    return sendTraceback("Unable to copy requested example file.")
             else:
                 # For uploaded files, they are already in the reference folder from upload endpoint
                 # Just verify the file exists
@@ -1577,7 +1792,16 @@ def ldcorrelation():
                     app.logger.error(f"Uploaded file not found at {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
-        result = run_correlation_command(filename, filename2, fileDir, pop, isexample)
+        result = run_correlation_command(
+            filename,
+            filename2,
+            fileDir,
+            pop,
+            isexample,
+            scale=scale,
+            samp_prev=samp_prev,
+            pop_prev=pop_prev,
+        )
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1589,6 +1813,8 @@ def ldcorrelation():
         else:
             # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
+            if summary_index == -1:
+                summary_index = result.find("Total Liability scale")
             if summary_index != -1:
                 filtered_result = result[summary_index:]
             else:

@@ -1,5 +1,4 @@
 const path = require('path');
-const request = require('request');
 const should = require('chai').should();
 const { expect } = require('chai');
 const { Builder, By, Key, until } = require('selenium-webdriver');
