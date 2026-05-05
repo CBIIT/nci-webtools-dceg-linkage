@@ -206,7 +206,7 @@ export default function HelpPage() {
             </p>
             <p>
               <a id="haplotype"></a>
-              <strong>Haplotype</strong> is a cluster of genetic variants that are inherited together. Humans are
+              <strong>Haplotype</strong>{" "}is a cluster of genetic variants that are inherited together. Humans are
               diploid; having maternal and paternal copies of each autosomal chromosome. Each chromosomal copy is
               organized into segments of high linkage disequilibrium, called haplotype &quot;blocks&quot;. Due to unique
               population histories and differences in variant allele frequencies, haplotype structure tends to be
@@ -411,7 +411,7 @@ export default function HelpPage() {
             </p>
             <p>
               <a id="D_prime"></a>
-              <strong>D prime (D&apos;)</strong> - an indicator of allelic segregation for two genetic variants. D&apos;
+              <strong>D prime (D&apos;)</strong>{" "}- an indicator of allelic segregation for two genetic variants. D&apos;
               values range from 0 to 1 with higher values indicating tight linkage of alleles. A D&apos; value of 0
               indicates no linkage of alleles. A D&apos; value of 1 indicates at least one expected haplotype
               combination is not observed.
