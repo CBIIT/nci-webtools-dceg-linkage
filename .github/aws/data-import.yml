@@ -1,0 +1,121 @@
+family: "${DATA_IMPORT_ECS_TASK}"
+networkMode: awsvpc
+cpu: "${API_ECS_CPU_UNITS}"
+memory: "${API_ECS_MEMORY_UNITS}"
+executionRoleArn: "${API_ROLE_ARN}"
+taskRoleArn: "${API_ROLE_ARN}"
+requiresCompatibilities:
+  - FARGATE
+volumes:
+  - name: data
+    efsVolumeConfiguration:
+      fileSystemId: "${EFS_FILESYSTEM_ID}"
+      authorizationConfig:
+        accessPointId: "${EFS_ACCESS_POINT_ID}"
+        iam: ENABLED
+      transitEncryption: ENABLED
+containerDefinitions:
+  - name: logs
+    image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
+    firelensConfiguration:
+      type: fluentbit
+      options:
+        enable-ecs-log-metadata: "true"
+    memoryReservation: 50
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: "/analysistools/${TIER}/${APP}/data-import"
+        awslogs-region: "${AWS_REGION}"
+        awslogs-stream-prefix: logs
+
+  - name: data-import
+    image: "${DATA_IMPORT_IMAGE_LATEST}"
+    environment:
+      - name: ENV
+        value: "${TIER}"
+      - name: TZ
+        value: "${TZ}"
+    secrets:
+      - name: BASE_URL
+        valueFrom: "/analysistools/${TIER}/${APP}/web/base_url"
+      - name: LOG_LEVEL
+        valueFrom: "/analysistools/${TIER}/${APP}/log_level"
+      - name: NUM_SUBPROCESSES
+        valueFrom: "/analysistools/${TIER}/${APP}/num_subprocesses"
+      - name: DBSNP_VERSION
+        valueFrom: "/analysistools/${TIER}/${APP}/dbsnp_version"
+      - name: S3_BUCKET
+        valueFrom: "/analysistools/${TIER}/${APP}/s3_bucket"
+      - name: S3_BUCKET_DATA_DIR
+        valueFrom: "/analysistools/${TIER}/${APP}/s3_bucket_data_dir"
+      - name: DATA_DIR
+        valueFrom: "/analysistools/${TIER}/${APP}/data_dir"
+      - name: TMP_DIR
+        valueFrom: "/analysistools/${TIER}/${APP}/tmp_dir"
+      - name: LDASSOC_EXAMPLE_DIR
+        valueFrom: "/analysistools/${TIER}/${APP}/ldassoc_example_dir"
+      - name: POPULATION_SAMPLES_DIR
+        valueFrom: "/analysistools/${TIER}/${APP}/population_samples_dir"
+      - name: GENOTYPES_DIR
+        valueFrom: "/analysistools/${TIER}/${APP}/genotypes_dir"
+      - name: LDTRAIT_SRC
+        valueFrom: "/analysistools/${TIER}/${APP}/ldtrait_src"
+      - name: MONGODB_HOST
+        valueFrom: "/analysistools/${TIER}/${APP}/mongodb_host"
+      - name: MONGODB_PORT
+        valueFrom: "/analysistools/${TIER}/${APP}/mongodb_port"
+      - name: MONGODB_DATABASE
+        valueFrom: "/analysistools/${TIER}/${APP}/mongodb_database"
+      - name: MONGODB_USERNAME
+        valueFrom: "/analysistools/${TIER}/${APP}/mongodb_username"
+      - name: MONGODB_PASSWORD
+        valueFrom: "/analysistools/${TIER}/${APP}/mongodb_password"
+      - name: REQUIRE_TOKEN
+        valueFrom: "/analysistools/${TIER}/${APP}/require_token"
+      - name: TOKEN_EXPIRATION
+        valueFrom: "/analysistools/${TIER}/${APP}/token_expiration"
+      - name: TOKEN_EXPIRATION_DAYS
+        valueFrom: "/analysistools/${TIER}/${APP}/token_expiration_days"
+      - name: TOKEN_LOCK_TIMEOUT
+        valueFrom: "/analysistools/${TIER}/${APP}/token_lock_timeout"
+      - name: RESTRICT_CONCURRENCY
+        valueFrom: "/analysistools/${TIER}/${APP}/restrict_concurrency"
+      - name: EMAIL_SMTP_HOST
+        valueFrom: "/analysistools/${TIER}/${APP}/email_smtp_host"
+      - name: EMAIL_ADMIN
+        valueFrom: "/analysistools/${TIER}/${APP}/email_admin"
+      - name: EMAIL_SUPERUSER
+        valueFrom: "/analysistools/${TIER}/${APP}/email_superuser"
+    mountPoints:
+      - sourceVolume: data
+        containerPath: "/data"
+        readOnly: false
+    logConfiguration:
+      logDriver: awsfirelens
+      options:
+        Name: datadog
+        tls: "on"
+        tls.verify: "off"
+        dd_service: "${TIER}-${APP}-data-import"
+        dd_source: "/analysistools/${TIER}/${APP}/data-import"
+        dd_tags: "project:${APP} tier:${TIER}"
+        provider: ecs
+      secretOptions:
+        - name: Host
+          valueFrom: "/analysistools/${TIER}/datadog/log_endpoint_host"
+        - name: apikey
+          valueFrom: "/analysistools/${TIER}/datadog/api_key"
+tags:
+  - key: Project
+    value: "${APP}"
+  - key: ApplicationName
+    value: "${APP}"
+  - key: ResourceName
+    value: "${TIER}-${APP}-data-import-ecs-task"
+  - key: ResourceFunction
+    value: compute
+  - key: EnvironmentTier
+    value: "${ENVIRONMENT_TIER}"
+  - key: Creator
+    value: CF

@@ -1,0 +1,117 @@
+family: "${WEB_ECS_TASK}"
+networkMode: awsvpc
+cpu: "${WEB_ECS_CPU_UNITS}"
+memory: "${WEB_ECS_MEMORY_UNITS}"
+executionRoleArn: "${WEB_ROLE_ARN}"
+taskRoleArn: "${WEB_ROLE_ARN}"
+requiresCompatibilities:
+  - FARGATE
+containerDefinitions:
+  - name: logs
+    image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
+    firelensConfiguration:
+      type: fluentbit
+      options:
+        enable-ecs-log-metadata: "true"
+    memoryReservation: 50
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: "/analysistools/${TIER}/${APP}/web"
+        awslogs-region: "${AWS_REGION}"
+        awslogs-stream-prefix: logs
+
+  - name: web
+    image: "${FRONTEND_IMAGE_LATEST}"
+    portMappings:
+      - protocol: tcp
+        containerPort: 80
+    environment:
+      - name: API_HOST
+        value: "https://${API_APPLICATION_HOST}"
+      - name: TZ
+        value: "${TZ}"
+      - name: DD_ENV
+        value: "${TIER}"
+      - name: DD_SERVICE
+        value: "${TIER}-${APP}-web"
+      - name: DD_VERSION
+        value: "${APP_GIT_TAG}"
+
+    # logConfiguration:
+    #   logDriver: awslogs
+    #   options:
+    #     awslogs-group: "/analysistools/${TIER}/${APP}/web"
+    #     awslogs-region: "${AWS_REGION}"
+    #     awslogs-stream-prefix: web
+    logConfiguration:
+      logDriver: awsfirelens
+      options:
+        Name: datadog
+        tls: "on"
+        tls.verify: "off"
+        dd_service: "${TIER}-${APP}-web"
+        dd_source: "httpd"
+        dd_tags: "project:${APP},tier:${TIER},env:${TIER}"
+        provider: ecs
+      secretOptions:
+        - name: Host
+          valueFrom: "/analysistools/${TIER}/datadog/log_endpoint_host"
+        - name: apikey
+          valueFrom: "/analysistools/${TIER}/datadog/api_key"
+    dockerLabels:
+      com.datadoghq.tags.env: "${TIER}"
+      com.datadoghq.tags.service: "${TIER}-${APP}-web"
+      com.datadoghq.tags.version: "${APP_GIT_TAG}"
+      com.datadoghq.ad.logs: '[{"source": "nextjs", "service": "${TIER}-${APP}-web"}]'
+
+  - name: datadog-agent
+    image: "public.ecr.aws/datadog/agent:latest"
+    essential: true
+    cpu: 256
+    memory: 512
+    portMappings:
+      - protocol: tcp
+        containerPort: 8126
+    environment:
+      - name: TZ
+        value: "${TZ}"
+      - name: DD_HOSTNAME
+        value: default
+      - name: DD_TAGS
+        value: "team:analysis-tools project:${APP} tier:${TIER}"
+      - name: DD_SITE
+        value: ddog-gov.com
+      - name: DD_LOGS_ENABLED
+        value: "true"
+      - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+        value: "true"
+      - name: ECS_FARGATE
+        value: "true"
+      - name: DD_APM_ENABLED
+        value: "true"
+      - name: DD_APM_NON_LOCAL_TRAFFIC
+        value: "true"
+    secrets:
+      - name: DD_API_KEY
+        valueFrom: "/analysistools/${TIER}/datadog/api_key"
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: "/analysistools/${TIER}/${APP}/web"
+        awslogs-region: "${AWS_REGION}"
+        awslogs-stream-prefix: datadog-agent
+
+tags:
+  - key: Project
+    value: "${APP}"
+  - key: ApplicationName
+    value: "${APP}"
+  - key: ResourceName
+    value: "${TIER}-${APP}-web-ecs-task"
+  - key: ResourceFunction
+    value: compute
+  - key: EnvironmentTier
+    value: "${ENVIRONMENT_TIER}"
+  - key: Creator
+    value: CF

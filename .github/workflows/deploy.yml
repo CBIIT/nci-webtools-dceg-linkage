@@ -1,0 +1,277 @@
+name: Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: "Deploy environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - qa
+          - stage
+          - prod
+      rebuild_frontend_image:
+        description: "Build and push the frontend image"
+        required: true
+        default: true
+        type: boolean
+      rebuild_backend_image:
+        description: "Build and push the backend image"
+        required: true
+        default: true
+        type: boolean
+      rebuild_data_import_image:
+        description: "Build and push the data-import image"
+        required: true
+        default: true
+        type: boolean
+      no_cache:
+        description: "Build Docker images without cache"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-fargate-app:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.tier }}
+    env:
+      APP: ldlink
+      TZ: America/New_York
+      AWS_REGION: us-east-1
+      TASK_DEFINITION_TEMPLATE_PATH: .github/aws
+      WEB_DESIRED_COUNT: 1
+      API_DESIRED_COUNT: 2
+      TIER: ${{ inputs.tier }}
+      IMAGE_TIER: ${{ contains(fromJson('["dev","qa"]'), inputs.tier) && 'development' || 'release' }}
+      CICD_ROLE_ARN: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/power-user-github-actions-cicd
+      APP_GIT_TAG: ""
+      IMAGE_REPOSITORY: ""
+      FRONTEND_IMAGE: ""
+      FRONTEND_IMAGE_LATEST: ""
+      BACKEND_IMAGE: ""
+      BACKEND_IMAGE_LATEST: ""
+      DATA_IMPORT_IMAGE: ""
+      DATA_IMPORT_IMAGE_LATEST: ""
+      PARAMETER_PATH: ""
+      ENVIRONMENT_TIER: ""
+      API_APPLICATION_HOST: ""
+      API_ECS_CLUSTER: ""
+      API_ECS_SERVICE: ""
+      API_ECS_TASK: ""
+      API_ECS_CPU_UNITS: ""
+      API_ECS_MEMORY_UNITS: ""
+      API_ROLE_ARN: ""
+      WEB_ECS_CLUSTER: ""
+      WEB_ECS_SERVICE: ""
+      WEB_ECS_TASK: ""
+      WEB_ECS_CPU_UNITS: ""
+      WEB_ECS_MEMORY_UNITS: ""
+      WEB_ROLE_ARN: ""
+      DATA_IMPORT_ECS_TASK: ""
+      EFS_FILESYSTEM_ID: ""
+      EFS_ACCESS_POINT_ID: ""
+      GOOGLE_MAPS_API_KEY: ""
+
+    steps:
+      - uses: "actions/checkout@v6.0.1"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.1
+        with:
+          role-to-assume: ${{ env.CICD_ROLE_ARN }}
+          role-session-name: ${{ env.TIER }}-${{ env.APP }}-deploy-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set deployment metadata
+        run: |
+          set -euo pipefail
+
+          APP_GIT_TAG=$(printf '%s' "${GITHUB_REF_NAME:-unknown-ref}" | sed 's/[^A-Za-z0-9._-]/-/g')
+          TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+          IMAGE_REPOSITORY="${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/${APP}"
+
+          {
+            echo "APP_GIT_TAG=${APP_GIT_TAG}"
+            echo "IMAGE_REPOSITORY=${IMAGE_REPOSITORY}"
+            echo "FRONTEND_IMAGE=${IMAGE_REPOSITORY}:${IMAGE_TIER}-frontend-${APP_GIT_TAG}-${TIMESTAMP}"
+            echo "FRONTEND_IMAGE_LATEST=${IMAGE_REPOSITORY}:${IMAGE_TIER}-frontend-latest"
+            echo "BACKEND_IMAGE=${IMAGE_REPOSITORY}:${IMAGE_TIER}-backend-${APP_GIT_TAG}-${TIMESTAMP}"
+            echo "BACKEND_IMAGE_LATEST=${IMAGE_REPOSITORY}:${IMAGE_TIER}-backend-latest"
+            echo "DATA_IMPORT_IMAGE=${IMAGE_REPOSITORY}:${IMAGE_TIER}-data-import-${APP_GIT_TAG}-${TIMESTAMP}"
+            echo "DATA_IMPORT_IMAGE_LATEST=${IMAGE_REPOSITORY}:${IMAGE_TIER}-data-import-latest"
+            echo "PARAMETER_PATH=/analysistools/${TIER}/${APP}"
+            echo "ENVIRONMENT_TIER=${TIER^^}"
+          } >> "$GITHUB_ENV"
+
+      - name: Retrieve SSM parameters
+        run: |
+          set -euo pipefail
+
+          write_parameter() {
+            local ssm_name="$1"
+            local env_name="$2"
+            local value
+
+            value=$(aws ssm get-parameter \
+              --name "${PARAMETER_PATH}/${ssm_name}" \
+              --with-decryption \
+              --query 'Parameter.Value' \
+              --output text)
+
+            printf '%s=%s\n' "$env_name" "$value" >> "$GITHUB_ENV"
+          }
+
+          parameters=(
+            "api/application_host API_APPLICATION_HOST"
+            "api/ecs_cluster API_ECS_CLUSTER"
+            "api/ecs_service API_ECS_SERVICE"
+            "api/ecs_task API_ECS_TASK"
+            "api/ecs_cpu_units API_ECS_CPU_UNITS"
+            "api/ecs_memory_units API_ECS_MEMORY_UNITS"
+            "api/role_arn API_ROLE_ARN"
+            "web/ecs_cluster WEB_ECS_CLUSTER"
+            "web/ecs_service WEB_ECS_SERVICE"
+            "web/ecs_task WEB_ECS_TASK"
+            "web/ecs_cpu_units WEB_ECS_CPU_UNITS"
+            "web/ecs_memory_units WEB_ECS_MEMORY_UNITS"
+            "web/role_arn WEB_ROLE_ARN"
+            "data-import/ecs_task DATA_IMPORT_ECS_TASK"
+            "efs_filesystem_id EFS_FILESYSTEM_ID"
+            "efs_access_point_id EFS_ACCESS_POINT_ID"
+            "google_maps_api_key GOOGLE_MAPS_API_KEY"
+          )
+
+          for parameter in "${parameters[@]}"; do
+            read -r ssm_name env_name <<<"${parameter}"
+            write_parameter "$ssm_name" "$env_name"
+          done
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2.0.1
+        with:
+          mask-password: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.12.0
+
+      - name: Build backend image
+        if: ${{ inputs.rebuild_backend_image }}
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: docker/backend.dockerfile
+          pull: true
+          push: true
+          no-cache: ${{ inputs.no_cache }}
+          tags: |
+            ${{ env.BACKEND_IMAGE }}
+            ${{ env.BACKEND_IMAGE_LATEST }}
+          cache-from: type=registry,ref=${{ env.BACKEND_IMAGE_LATEST }}
+          cache-to: type=inline
+
+      - name: Build frontend image
+        if: ${{ inputs.rebuild_frontend_image }}
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: docker/frontend.dockerfile
+          pull: true
+          push: true
+          no-cache: ${{ inputs.no_cache }}
+          build-args: |
+            GOOGLE_MAPS_API_KEY=${{ env.GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_API_BASE_URL=https://${{ env.API_APPLICATION_HOST }}
+            NEXT_PUBLIC_BASE_URL=${{ env.API_APPLICATION_HOST }}
+            NEXT_PUBLIC_VERSION=${{ env.APP_GIT_TAG }}
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}
+            ${{ env.FRONTEND_IMAGE_LATEST }}
+          cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE_LATEST }}
+          cache-to: type=inline
+
+      - name: Build data-import image
+        if: ${{ inputs.rebuild_data_import_image }}
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: docker/data-import.dockerfile
+          pull: true
+          push: true
+          no-cache: ${{ inputs.no_cache }}
+          tags: |
+            ${{ env.DATA_IMPORT_IMAGE }}
+            ${{ env.DATA_IMPORT_IMAGE_LATEST }}
+          cache-from: type=registry,ref=${{ env.DATA_IMPORT_IMAGE_LATEST }}
+          cache-to: type=inline
+
+      - name: Render task definitions
+        run: |
+          set -euo pipefail
+
+          RENDERED_TASK_DIR="$PWD/rendered-task-definitions"
+          mkdir -p "$RENDERED_TASK_DIR"
+
+          render_template() {
+            local template_name="$1"
+            local variable_list="$2"
+
+            envsubst "$variable_list" \
+              < "$TASK_DEFINITION_TEMPLATE_PATH/$template_name" \
+              > "$RENDERED_TASK_DIR/$template_name"
+          }
+
+          render_template "web.yml" '$WEB_ECS_TASK $WEB_ECS_CPU_UNITS $WEB_ECS_MEMORY_UNITS $WEB_ROLE_ARN $FRONTEND_IMAGE_LATEST $API_APPLICATION_HOST $TZ $TIER $APP $AWS_REGION $APP_GIT_TAG $ENVIRONMENT_TIER'
+          render_template "api.yml" '$API_ECS_TASK $API_ECS_CPU_UNITS $API_ECS_MEMORY_UNITS $API_ROLE_ARN $EFS_FILESYSTEM_ID $EFS_ACCESS_POINT_ID $BACKEND_IMAGE_LATEST $TZ $TIER $APP $AWS_REGION $APP_GIT_TAG $ENVIRONMENT_TIER'
+          render_template "data-import.yml" '$DATA_IMPORT_ECS_TASK $API_ECS_CPU_UNITS $API_ECS_MEMORY_UNITS $API_ROLE_ARN $EFS_FILESYSTEM_ID $EFS_ACCESS_POINT_ID $DATA_IMPORT_IMAGE_LATEST $TZ $TIER $APP $AWS_REGION $ENVIRONMENT_TIER'
+
+      - name: Register task definitions
+        run: |
+          set -euo pipefail
+
+          RENDERED_TASK_DIR="$PWD/rendered-task-definitions"
+
+          for task_definition in web.yml api.yml data-import.yml; do
+            aws ecs register-task-definition \
+              --cli-input-yaml "file://$RENDERED_TASK_DIR/$task_definition"
+          done
+
+      - name: Update ECS services
+        run: |
+          set -euo pipefail
+
+          aws ecs update-service \
+            --cluster "$WEB_ECS_CLUSTER" \
+            --service "$WEB_ECS_SERVICE" \
+            --task-definition "$WEB_ECS_TASK" \
+            --desired-count "$WEB_DESIRED_COUNT" \
+            --propagate-tags TASK_DEFINITION \
+            --force-new-deployment
+
+          aws ecs update-service \
+            --cluster "$API_ECS_CLUSTER" \
+            --service "$API_ECS_SERVICE" \
+            --task-definition "$API_ECS_TASK" \
+            --desired-count "$API_DESIRED_COUNT" \
+            --propagate-tags TASK_DEFINITION \
+            --force-new-deployment
+
+      - name: Remove old task definitions
+        run: |
+          set -euo pipefail
+
+          for family in "$WEB_ECS_TASK" "$API_ECS_TASK" "$DATA_IMPORT_ECS_TASK"; do
+            aws ecs list-task-definitions \
+              --family-prefix "$family" \
+              --sort DESC \
+              --query 'taskDefinitionArns[3:]' \
+              --output text \
+              | xargs -n1 -r aws ecs deregister-task-definition --task-definition
+          done
