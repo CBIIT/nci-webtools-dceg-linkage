@@ -119,9 +119,9 @@ containerDefinitions:
           valueFrom: "/analysistools/${TIER}/datadog/api_key"
     dockerLabels:
       com.datadoghq.tags.env: "${TIER}"
-      com.datadoghq.tags.service: "${TIER}-${APP}-web"
+      com.datadoghq.tags.service: "${TIER}-${APP}-api"
       com.datadoghq.tags.version: "${APP_GIT_TAG}"
-      com.datadoghq.ad.logs: '[{"source": "nextjs", "service": "${TIER}-${APP}-web"}]'
+      com.datadoghq.ad.logs: '[{"source": "httpd", "service": "${TIER}-${APP}-api"}]'
 
 
   - name: datadog
