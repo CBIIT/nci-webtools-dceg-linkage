@@ -20,6 +20,11 @@ const ldscorePopOptions: LdscorePopOption[] = [
 ];
 
 export default function LdscorePopSelect({ name, control, rules, isLoading }: { name: string; control: any; rules?: any; isLoading?: boolean }) {
+  const customStyles = {
+    menu: (provided: any) => ({ ...provided, zIndex: 9999 }),
+    menuPortal: (provided: any) => ({ ...provided, zIndex: 9999 }),
+  };
+
   return (
     <Controller
       name={name}
@@ -36,6 +41,9 @@ export default function LdscorePopSelect({ name, control, rules, isLoading }: { 
             classNamePrefix="react-select"
             placeholder="Select..."
             isDisabled={isLoading}
+            styles={customStyles}
+            menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+            menuPosition="fixed"
           />
         </div>
       )}

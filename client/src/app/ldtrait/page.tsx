@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import CitationBox from "../../components/citationBox";
 import { submitFormData } from "./types";
 
 const Results = dynamic(() => import("./results"), {
@@ -56,6 +57,12 @@ export default function LdTrait() {
               GWAS Catalog last updated on <span id="ldtrait-timestamp">{formatTimestamp()}</span>
             </i>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+          <CitationBox />
+          <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
+              Shu-Hong Lin, Derek W. Brown, Mitchell J. Machiela <a href="https://doi.org/10.1158/0008-5472.can-20-0985" target="_blank" rel="noopener noreferrer">LDtrait: An Online Tool for Identifying Published Phenotype Associations in Linkage Disequilibrium</a> Cancer Research. 2020 Aug 14.
+          </div>
         </Row>
       </Container>
     </>

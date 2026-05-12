@@ -4,6 +4,7 @@ import requests
 import os
 import sys
 import json
+import zipfile
 from pymongo import ASCENDING
 from timeit import default_timer as timer
 from LDutilites import get_config
@@ -11,6 +12,7 @@ from LDcommon import connectMongoDBReadOnly
 
 start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
+filename_download = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d')  + ".zip"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
@@ -25,14 +27,38 @@ if not os.path.exists(tmp_dir):
 
 # download daily update of GWAS Catalog
 def downloadGWASCatalog():
-    if (os.path.isfile(tmp_dir + filename)):
+    tsv_path = tmp_dir + filename
+    zip_path = tmp_dir + filename_download
+
+    if (os.path.isfile(tsv_path)):
         print("Latest GWAS catalog already downloaded, deleting existing...")
-        os.remove(tmp_dir + filename)
+        os.remove(tsv_path)
+
+    if (os.path.isfile(zip_path)):
+        os.remove(zip_path)
+
     r = requests.get(ldtrait_src, allow_redirects=True)
     if r.status_code != 200:
         raise RuntimeError(f"GWAS Catalog source unavailable (HTTP {r.status_code}); aborting update.")
-    with open(tmp_dir + filename, 'wb') as f:
+
+    with open(zip_path, 'wb') as f:
         f.write(r.content)
+
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_file:
+            tsv_members = [member for member in zip_file.namelist() if member.lower().endswith('.tsv')]
+            if len(tsv_members) == 0:
+                raise RuntimeError("GWAS archive does not contain a TSV file; aborting update.")
+            tsv_member = tsv_members[0]
+            print("Extracting TSV from GWAS archive:", tsv_member)
+            with zip_file.open(tsv_member) as zipped_tsv, open(tsv_path, 'wb') as extracted_tsv:
+                extracted_tsv.write(zipped_tsv.read())
+    except zipfile.BadZipFile:
+        raise RuntimeError("GWAS source is not a valid ZIP archive; aborting update.")
+    finally:
+        if (os.path.isfile(zip_path)):
+            os.remove(zip_path)
+
     return filename
 
 def main():
@@ -42,7 +68,6 @@ def main():
 
     db = connectMongoDBReadOnly()
     dbsnp = db.dbsnp
-    print(db)
     # delete old error SNPs file if there is one
     if (os.path.isfile(tmp_dir + errFilename)):
         print("Deleting existing error SNPs file...")

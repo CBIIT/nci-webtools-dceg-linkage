@@ -9,6 +9,7 @@ import LDExpressForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
 import { SubmitFormData } from "./types";
+import CitationBox from "../../components/citationBox";
 
 const LdExpressResults = dynamic(() => import("./results"), {
   ssr: false,
@@ -34,6 +35,12 @@ export default function LdExpress() {
             </ErrorBoundary>
             <i>GTEx v8</i>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+          <CitationBox />
+            <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
+              Shu-Hong Lin, Rohit Thakur, Mitchell J. Machiela <a href="https://doi.org/10.1186/s12859-021-04531-8" target="_blank" rel="noopener noreferrer">LDexpress: an online tool for integrating population-specific linkage disequilibrium patterns with tissue-specific expression data</a> BMC Bioinformatics. 2021 Dec 20.
+          </div>
         </Row>
       </Container>
     </>

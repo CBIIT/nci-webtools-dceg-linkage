@@ -5,6 +5,7 @@ import ToolBanner from "@/components/toolBanner";
 import Heritability from "./heritability";
 import Correlation from "./correlation";
 import LDScore from "./ldscore";
+import CitationBox from "@/components/citationBox";
 import "./style.css";
 
 export default function LdScore() {
@@ -54,15 +55,12 @@ export default function LdScore() {
             </Tab.Container>
           </Col>
         </Row>
-      
-      <Row className="border rounded bg-white my-3 p-3 shadow-sm">
-        <div style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
-          Breeze C.E., Yao, X., Park, B., Kanigicherla, M., Lan, Q., Rothman, N., Teschendorff, A.E., Franceschini, N., Berndt, S.I., and Machiela, M.J. (2025). LDscore: a scalable, Python 3-powered web platform for LD score regression analysis. 2025.12.19.695639. bioRxiv <a href="https://doi.org/10.64898/2025.12.19.695639" target="_blank" style={{ whiteSpace: 'nowrap' }}>https://doi.org/10.64898/2025.12.19.695639</a>
-        </div>
-      </Row>
-  
-              
-     
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+        <CitationBox />
+          <div style={{ wordBreak: 'normal', overflowWrap: 'break-word', marginTop: '1rem' }}>
+            Breeze C.E., Yao, X., Park, B., Kanigicherla, M., Lan, Q., Rothman, N., Teschendorff, A.E., Franceschini, N., Berndt, S.I., and Machiela, M.J. (2025). LDscore: a scalable, Python 3-powered web platform for LD score regression analysis. 2025.12.19.695639. bioRxiv <a href="https://doi.org/10.64898/2025.12.19.695639" target="_blank" style={{ whiteSpace: 'nowrap' }}>https://doi.org/10.64898/2025.12.19.695639</a>
+          </div>
+        </Row>
       </Container>
     </>
   );

@@ -10,6 +10,7 @@ import SnpChipForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
 import { useStore } from "@/store";
+import CitationBox from "@/components/citationBox";
 
 const Results = dynamic(() => import("./results"), {
   ssr: false,
@@ -42,6 +43,9 @@ export default function SNPchip() {
               </Suspense>
             </ErrorBoundary>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+          <CitationBox />
         </Row>
       </Container>
     </>

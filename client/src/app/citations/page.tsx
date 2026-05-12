@@ -101,6 +101,20 @@ export default function CitationPage() {
           </a>{" "}
           <i>BMC Bioinformatics</i>. 2021 Dec 20.
         </p>
+         <p>
+          Breeze C.E., Yao, X., Park, B., Kanigicherla, M., Lan, Q., Rothman, N., Teschendorff, A.E., Franceschini, N., Berndt, S.I., and Machiela, M.J.{" "}
+          <a
+            href="https://doi.org/10.64898/2025.12.19.695639"
+            title="LDscore"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LDscore"
+          >
+            LDscore: a scalable, Python 3-powered web platform for LD score regression analysis. 2025.12.19.695639.
+          </a>{" "}
+          <i>bioRxiv</i>. 2025.
+        </p>
+
       </div>
     </div>
       

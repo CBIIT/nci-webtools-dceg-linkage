@@ -8,6 +8,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import CitationBox from "@/components/citationBox";
 import { submitFormData } from "./types";
 
 const Results = dynamic(() => import("./results"), {
@@ -33,6 +34,9 @@ export default function LdPair() {
               <Suspense fallback={<CalculateLoading />}>{params?.reference && <Results {...params} />}</Suspense>
             </ErrorBoundary>
           </Col>
+        </Row>
+        <Row className="border rounded bg-white my-3 p-3 shadow-sm">
+          <CitationBox />
         </Row>
       </Container>
     </>

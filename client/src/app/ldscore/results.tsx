@@ -5,6 +5,42 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Container, Row, Col, Alert, Spinner } from "react-bootstrap";
 
 // Helper functions for parsing and rendering results (copied from form.tsx, can be improved)
+function parseEstimateAndSE(value: string) {
+  const match = value.match(/(-?\d*\.?\d+(?:e[-+]?\d+)?)\s*\(\s*(-?\d*\.?\d+(?:e[-+]?\d+)?)\s*\)/i);
+  if (!match) return null;
+
+  const estimate = Number.parseFloat(match[1]);
+  const se = Number.parseFloat(match[2]);
+  if (!Number.isFinite(estimate) || !Number.isFinite(se)) return null;
+
+  return {
+    estimate,
+    se,
+    estimateText: match[1],
+    seText: match[2],
+  };
+}
+
+function getDecimalPlaces(numericText: string) {
+  const normalized = numericText.toLowerCase().split("e")[0];
+  const decimalIdx = normalized.indexOf(".");
+  return decimalIdx === -1 ? 0 : normalized.length - decimalIdx - 1;
+}
+
+function formatH295CI(value: string) {
+  const parsed = parseEstimateAndSE(value);
+  if (!parsed) return "";
+
+  const precision = Math.min(
+    8,
+    Math.max(getDecimalPlaces(parsed.estimateText), getDecimalPlaces(parsed.seText), 4)
+  );
+  const margin = 1.96 * parsed.se;
+  const lower = parsed.estimate - margin;
+  const upper = parsed.estimate + margin;
+  return `${lower.toFixed(precision)} - ${upper.toFixed(precision)}`;
+}
+
 function parseHeritabilityResult(result: string) {
   // Split by lines and parse each line by the first colon
   const lines = result.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
@@ -28,12 +64,29 @@ function parseHeritabilityResult(result: string) {
       }
     }
   });
+
+  const observedKey = Object.keys(parsed).find(
+    (k) => /total\s+observed\s+scale\s+h(?:2|²)/i.test(k)
+  );
+  const liabilityKey = Object.keys(parsed).find(
+    (k) => /total\s+liability\s+scale\s+h(?:2|²)/i.test(k)
+  );
+  const h2Key = liabilityKey || observedKey || '';
+  const rawH2Value = h2Key ? parsed[h2Key] : '';
+  const h2Value = formatH295CI(rawH2Value) || rawH2Value;
+  const derivedH2SE = parseEstimateAndSE(rawH2Value)?.seText || '';
+  const h2SEKey = h2Key
+    ? Object.keys(parsed).find((k) => k.toLowerCase() === `${h2Key.toLowerCase()} standard error`)
+    : '';
+
   return {
-    h2: parsed['Total Observed scale h2'] || '',
+    h2Label: liabilityKey ? 'Total Liability Scale h² (95% CI)' : 'Total Observed Scale h² (95% CI)',
+    h2: h2Value,
     lambdaGC: parsed['Lambda GC'] || '',
     meanChi2: parsed['Mean Chi^2'] || '',
     intercept: parsed['Intercept'] || '',
     ratio: parsed['Ratio'] || '',
+    h2SE: (h2SEKey ? parsed[h2SEKey] : '') || derivedH2SE,
   };
 }
 
@@ -69,6 +122,44 @@ function parseGeneticCorrelationResult(resultStr: string) {
   };
 }
 
+function isScaleH2MetricKey(key: string) {
+  return /total\s+(observed|liability)\s+scale\s+h(?:2|²)/i.test(key);
+}
+
+function isScaleGencovMetricKey(key: string) {
+  return /total\s+(observed|liability)\s+scale\s+gencov/i.test(key);
+}
+
+function isGeneticCorrelationMetricKey(key: string) {
+  return /^genetic\s+correlation$/i.test(key);
+}
+
+function is95CIMetricKey(key: string) {
+  return isScaleH2MetricKey(key) || isScaleGencovMetricKey(key) || isGeneticCorrelationMetricKey(key);
+}
+
+function format95CIMetricKey(key: string) {
+  const keyWithScale = key.replace(/\bscale\b/gi, 'Scale');
+  const normalized = isScaleH2MetricKey(keyWithScale) ? keyWithScale.replace(/h2|h²/g, 'h²') : keyWithScale;
+  
+  return /\(95%\s*CI\)/i.test(normalized) ? normalized : `${normalized} (95% CI)`;
+}
+
+function getFormattedMetricValue(key: string, value: string) {
+  return is95CIMetricKey(key) ? (formatH295CI(value) || value) : value;
+}
+
+function getStandardErrorRowForMetric(key: string, value: string): [string, string] | null {
+  const se = parseEstimateAndSE(value)?.seText || '';
+  if (!se) return null;
+
+  if (isScaleH2MetricKey(key)) return ['h2 Standard Error', se];
+  if (isScaleGencovMetricKey(key)) return ['Gencov Standard Error', se];
+  if (isGeneticCorrelationMetricKey(key)) return ['Genetic Correlation Standard Error', se];
+
+  return null;
+}
+
 function TableContainer({ children }: { children: React.ReactNode }) {
   return (
     <div className="table-responsive" style={{ maxWidth: 600, margin: '0 auto', overflowX: 'auto' }}>
@@ -84,8 +175,8 @@ function renderKeyValueTable(section: string) {
   
   // Helper function to format key text with superscripts
   const formatKeyText = (key: string) => {
-    if (key.includes('Total Observed scale h2') || key.includes('Total Observed scale h²')) {
-      return key.replace(/h2|h²/g, 'h²');
+    if (is95CIMetricKey(key)) {
+      return format95CIMetricKey(key);
     }
     if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {
       return key.replace(/Chi\^2|Chi²/g, 'Chi²');
@@ -97,7 +188,11 @@ function renderKeyValueTable(section: string) {
     let found = false;
     const colonPairs = line.matchAll(/([\w\s²\*\-0-9\^]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
     for (const pair of colonPairs) {
-      kvPairs.push([pair[1].trim(), pair[2].trim()]);
+      const key = pair[1].trim();
+      const value = pair[2].trim();
+      kvPairs.push([key, getFormattedMetricValue(key, value)]);
+      const seRow = getStandardErrorRowForMetric(key, value);
+      if (seRow) kvPairs.push(seRow);
       found = true;
     }
     if (!found) {
@@ -160,7 +255,8 @@ function renderSummaryTable(section: string) {
 function HeritabilityResultTable({ result }: { result: string }) {
   const parsed = parseHeritabilityResult(result);
   const rows = [
-    ['Total Observed scale h²', parsed.h2],
+    [parsed.h2Label, parsed.h2],
+    ['h2 Standard Error', parsed.h2SE],
     ['Lambda GC', parsed.lambdaGC],
     ['Mean Chi²', parsed.meanChi2],
     ['Intercept', parsed.intercept],
@@ -219,7 +315,8 @@ function CollapsibleRawPanel({ result, title }: { result: string; title: string 
 function formatHeritabilityTableText(result: string) {
   const parsed = parseHeritabilityResult(result);
   const rows = [
-    ['Total Observed scale h²', parsed.h2],
+    [parsed.h2Label, parsed.h2],
+    ['h2 standard error', parsed.h2SE],
     ['Lambda GC', parsed.lambdaGC],
     ['Mean Chi²', parsed.meanChi2],
     ['Intercept', parsed.intercept],
@@ -267,8 +364,8 @@ function formatKeyValueSection(section: string) {
   
   // Helper function to format key text with superscripts for download
   const formatKeyTextForDownload = (key: string) => {
-    if (key.includes('Total Observed scale h2') || key.includes('Total Observed scale h²')) {
-      return key.replace(/h2|h²/g, 'h²');
+    if (is95CIMetricKey(key)) {
+      return format95CIMetricKey(key);
     }
     if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {
       return key.replace(/Chi\^2|Chi²/g, 'Chi²');
@@ -286,7 +383,10 @@ function formatKeyValueSection(section: string) {
     const idx = line.indexOf(':');
     if (idx !== -1) {
       lastKey = line.slice(0, idx).trim();
-      kvPairs.push([lastKey, line.slice(idx + 1).trim()]);
+      const value = line.slice(idx + 1).trim();
+      kvPairs.push([lastKey, getFormattedMetricValue(lastKey, value)]);
+      const seRow = getStandardErrorRowForMetric(lastKey, value);
+      if (seRow) kvPairs.push(seRow);
     } else if (lastKey) {
       // If the line contains 'Ratio' (with or without <, >, =), split it out as a new row
       const ratioMatch = line.match(/(Ratio\s*[<>=]?.*)/i);

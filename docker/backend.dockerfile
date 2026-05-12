@@ -1,15 +1,24 @@
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
-# Install Python 3.11 explicitly and required build/runtime deps
+ENV HTSLIB_VERSION=1.21
+ENV PHANTOMJS_VERSION=2.1.1
+ENV GECKODRIVER_VERSION=0.36.0
+ENV MOZ_HEADLESS=1
+ENV DISPLAY=:99
+
+ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
+ENV LDLINK_HOME=/opt/ldlink
+ENV LDLINK_HEALTHCHECK_PORT=8080
+ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
+ENV PYTHONPATH=${LDLINK_HOME}
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Install required build/runtime dependencies
 RUN dnf -y update && \
     dnf -y install \
-    python3.11 \
-    python3.11-devel \
-    python3.11-pip \
-    python3.11-setuptools \
-    python3.11-wheel \
     bzip2 \
     bzip2-devel \
+    curl-minimal \
     fontconfig \
     gcc \
     g++ \
@@ -18,8 +27,14 @@ RUN dnf -y update && \
     httpd \
     httpd-devel \
     libcurl-devel \
+    libffi-devel \
     ncurses-devel \
     openssl-devel \
+    python3.13 \
+    python3.13-devel \
+    python3.13-pip \
+    readline-devel \
+    sqlite-devel \
     tar \
     xz-devel \
     zlib-devel \
@@ -28,16 +43,9 @@ RUN dnf -y update && \
     make \
     && dnf clean all
 
-# Restrict Python 3.9 to root only (security mitigation)
 RUN chmod 700 /usr/bin/python3.9
-
-# Create python symlinks and upgrade pip/setuptools/wheel using Python 3.11
-RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
-    ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    python3 -m pip install --upgrade pip==22.3.1 setuptools wheel
-
-# install htslib
-ENV HTSLIB_VERSION=1.21
+    # Upgrade setuptools/wheel using Python 3.13.10
+RUN python3.13 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \
@@ -48,10 +56,7 @@ RUN cd /tmp \
     && popd \
     && rm -rf htslib-${HTSLIB_VERSION}
 
-# install phantomjs
-ENV PHANTOMJS_VERSION=2.1.1
-
-# workaround for phantomjs, use --ignore-ssl-errors=true/yes --web-security=false/no to ignore ssl errors
+# Work around PhantomJS/OpenSSL config incompatibility on AL2023.
 ENV OPENSSL_CONF=/dev/null
 
 #RUN cd /tmp \
@@ -63,11 +68,6 @@ RUN cd /tmp \
     && tar -xjf phantomjs.tar.bz2 \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
     && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64 phantomjs.tar.bz2
-
-# install geckodriver
-ENV GECKODRIVER_VERSION=0.36.0
-ENV MOZ_HEADLESS=1
-ENV DISPLAY=:99
 
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
@@ -85,40 +85,23 @@ RUN ARCH=$(uname -m) && \
     ln -s /usr/local/bin/geckodriver /usr/bin/geckodriver && \
     rm geckodriver.tar.gz
 
-ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
+RUN mkdir -p ${LDLINK_HOME}/apache-bin \
+    && ln -sf /usr/bin/python3.13 ${LDLINK_HOME}/apache-bin/python3
 
-ENV LDLINK_HOME=/opt/ldlink
-
-ENV LDLINK_HEALTHCHECK_PORT=8080
-
-ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
-
-ENV PYTHONPATH=${LDLINK_HOME}:${PYTHONPATH}
-
-RUN mkdir -p ${LDLINK_HOME}
 
 WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
 
-# Install setuptools and wheel first for building packages
-RUN python3 -m pip install --no-cache-dir setuptools wheel
-
 # Install pybedtools and pysam separately with --no-build-isolation to use system setuptools
-RUN python3 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.9.1 pysam==0.19.1
+RUN python3.13 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
-# Install remaining requirements (excluding pybedtools and pysam which are already installed)
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
-
-# Copy and install ldsc package from vendor folder
-COPY vendor/ldsc /tmp/ldsc
-RUN cd /tmp/ldsc && python3 -m pip install --no-cache-dir --no-build-isolation . && rm -rf /tmp/ldsc
+RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig
 
 COPY server/ .
-
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
@@ -130,8 +113,8 @@ EXPOSE 80
 
 EXPOSE 8080
 
-CMD flask --app bokehExport run & \
-    mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
+CMD PATH=${LDLINK_HOME}/apache-bin:$PATH flask --app bokehExport run & \
+    PATH=${LDLINK_HOME}/apache-bin:$PATH mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --httpd-executable=/usr/sbin/httpd \
     --modules-directory /etc/httpd/modules/ \
     --include-file /etc/httpd/conf.d/wsgi.conf \
