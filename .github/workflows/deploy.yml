@@ -81,10 +81,10 @@ jobs:
       GOOGLE_MAPS_API_KEY: ""
 
     steps:
-      - uses: "actions/checkout@v6.0.1"
+      - uses: "actions/checkout@v6.0.2"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5.1.1
+        uses: aws-actions/configure-aws-credentials@v6.0.0
         with:
           role-to-assume: ${{ env.CICD_ROLE_ARN }}
           role-session-name: ${{ env.TIER }}-${{ env.APP }}-deploy-${{ github.run_id }}
@@ -155,16 +155,20 @@ jobs:
           done
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2.0.1
+        uses: aws-actions/amazon-ecr-login@v2.1.0
         with:
           mask-password: true
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.12.0
+        uses: docker/setup-buildx-action@v4.0.0
+
+      - name: Create and use a new builder instance
+        run: |
+          docker buildx create --name mybuilder --use
 
       - name: Build backend image
         if: ${{ inputs.rebuild_backend_image }}
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v7.0.0
         with:
           context: .
           file: docker/backend.dockerfile

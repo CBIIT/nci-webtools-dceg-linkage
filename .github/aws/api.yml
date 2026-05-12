@@ -103,33 +103,28 @@ containerDefinitions:
         containerPath: "/data"
         readOnly: false
     logConfiguration:
-      logDriver: awslogs
+      logDriver: awsfirelens
       options:
-        awslogs-group: "/analysistools/${TIER}/${APP}/api"
-        awslogs-region: "${AWS_REGION}"
-        awslogs-stream-prefix: api
-    # logConfiguration:
-    #   logDriver: awsfirelens
-    #   options:
-    #     Name: datadog
-    #     tls: "on"
-    #     tls.verify: "off"
-    #     dd_service: "${TIER}-${APP}-api"
-    #     dd_source: "/analysistools/${TIER}/${APP}/api"
-    #     dd_tags: "project:${APP},tier:${TIER},env:${TIER}"
-    #     provider: ecs
-    #   secretOptions:
-    #     - name: Host
-    #       valueFrom: "/analysistools/${TIER}/datadog/log_endpoint_host"
-    #     - name: apikey
-    #       valueFrom: "/analysistools/${TIER}/datadog/api_key"
-    # dockerLabels:
-    #   com.datadoghq.tags.env: "${TIER}"
-    #   com.datadoghq.tags.service: "${TIER}-${APP}-api"
-    #   com.datadoghq.tags.version: "${APP_GIT_TAG}"
-    #   com.datadoghq.ad.logs: '[{"source": "apache", "service": "${TIER}-${APP}-api"}]'
+        Name: datadog
+        tls: "on"
+        tls.verify: "off"
+        dd_service: "${TIER}-${APP}-api"
+        dd_source: "httpd"
+        dd_tags: "project:${APP},tier:${TIER},env:${TIER}"
+        provider: ecs
+      secretOptions:
+        - name: Host
+          valueFrom: "/analysistools/${TIER}/datadog/log_endpoint_host"
+        - name: apikey
+          valueFrom: "/analysistools/${TIER}/datadog/api_key"
+    dockerLabels:
+      com.datadoghq.tags.env: "${TIER}"
+      com.datadoghq.tags.service: "${TIER}-${APP}-web"
+      com.datadoghq.tags.version: "${APP_GIT_TAG}"
+      com.datadoghq.ad.logs: '[{"source": "nextjs", "service": "${TIER}-${APP}-web"}]'
 
-  - name: datadog-agent
+
+  - name: datadog
     image: "public.ecr.aws/datadog/agent:latest"
     essential: true
     cpu: 256
