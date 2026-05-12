@@ -98,7 +98,7 @@ containerDefinitions:
         tls: "on"
         tls.verify: "off"
         dd_service: "${TIER}-${APP}-data-import"
-        dd_source: "/analysistools/${TIER}/${APP}/data-import"
+        dd_source: "httpd"
         dd_tags: "project:${APP} tier:${TIER}"
         provider: ecs
       secretOptions:
