@@ -15,19 +15,19 @@ volumes:
         iam: ENABLED
       transitEncryption: ENABLED
 containerDefinitions:
-  # - name: logs
-  #   image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
-  #   firelensConfiguration:
-  #     type: fluentbit
-  #     options:
-  #       enable-ecs-log-metadata: "true"
-  #   memoryReservation: 50
-  #   logConfiguration:
-  #     logDriver: awslogs
-  #     options:
-  #       awslogs-group: "/analysistools/${TIER}/${APP}/api"
-  #       awslogs-region: "${AWS_REGION}"
-  #       awslogs-stream-prefix: logs
+  - name: logs
+    image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
+    firelensConfiguration:
+      type: fluentbit
+      options:
+        enable-ecs-log-metadata: "true"
+    memoryReservation: 50
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: "/analysistools/${TIER}/${APP}/api"
+        awslogs-region: "${AWS_REGION}"
+        awslogs-stream-prefix: logs
 
   - name: api
     image: "${BACKEND_IMAGE_LATEST}"
