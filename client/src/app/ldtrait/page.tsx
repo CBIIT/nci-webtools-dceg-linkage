@@ -61,7 +61,7 @@ export default function LdTrait() {
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <CitationBox />
           <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
-              Shu-Hong Lin, Derek W. Brown, Mitchell J. Machiela <a href="https://doi.org/10.1158/0008-5472.can-20-0985" target="_blank" rel="noopener noreferrer">LDtrait: An Online Tool for Identifying Published Phenotype Associations in Linkage Disequilibrium</a> Cancer Research. 2020 Aug 14.
+              Shu-Hong Lin, Derek W. Brown, Mitchell J. Machiela <a href="https://doi.org/10.1158/0008-5472.can-20-0985" target="_blank" rel="noopener noreferrer">LDtrait: An Online Tool for Identifying Published Phenotype Associations in Linkage Disequilibrium</a> <i>Cancer Research</i>. 2020 Aug 14.
           </div>
         </Row>
       </Container>
