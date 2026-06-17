@@ -192,9 +192,14 @@ def getTokenRuntimeLast24Hours(token):
     ]
 
     result = list(logs.aggregate(pipeline))
+    total_ms = 0
     if len(result) == 0:
-        return 0
-    return int(result[0].get("total_duration_ms", 0))
+        total_ms = 0
+    else:
+        total_ms = int(result[0].get("total_duration_ms", 0))
+    
+    print(f"[getTokenRuntimeLast24Hours] token={token} window_start={window_start} total_ms={total_ms}")
+    return total_ms
 
 # sets blocked attribute of user to 1=true
 def blockUser(email, url_root):
@@ -219,18 +224,25 @@ def blockToken(token, url_root):
     record = users.find_one({"token": token})
 
     if record is None:
+        print(f"[blockToken] Token not found in api_users: {token}")
         return None
 
+    email = record.get("email")
     if int(record.get("blocked", 0)) == 1:
+        print(f"[blockToken] Token already blocked: {token} (email={email})")
         return {
             "message": "Token is already blocked."
         }
 
-    users.find_one_and_update({"token": token}, { "$set": {"blocked": 1}})
+    update_result = users.find_one_and_update({"token": token}, { "$set": {"blocked": 1}})
+    print(f"[blockToken] Updated token to blocked: token={token} email={email} update_result={update_result is not None}")
 
-    email = record.get("email")
     if email:
-        emailUserBlocked(email, email_account, url_root)
+        try:
+            emailUserBlocked(email, email_account, url_root)
+            print(f"[blockToken] Sent blocked email to: {email}")
+        except Exception as e:
+            print(f"[blockToken] Failed to send email to {email}: {e}")
 
     return {
         "message": "Token has been blocked due to runtime limit policy."
