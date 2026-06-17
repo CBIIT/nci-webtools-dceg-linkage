@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const HEADER_ALLOWLIST = ["accept", "accept-language", "content-type", "cookie", "user-agent", "x-request-id"];
-const TEMP_INTERNAL_AUTH_TOKEN = "ldlink-temp-test-token-v1";
 
 function getBackendBaseUrl(): string {
   return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:80";
@@ -76,7 +75,13 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
     return NextResponse.json({ error: "Missing or invalid 'target' parameter." }, { status: 400 });
   }
 
-  const internalAuthToken = process.env.LDLINK_INTERNAL_AUTH_TOKEN?.trim() || TEMP_INTERNAL_AUTH_TOKEN;
+  const internalAuthToken = process.env.LDLINK_INTERNAL_AUTH_TOKEN?.trim();
+  if (!internalAuthToken) {
+    return NextResponse.json(
+      { error: "Internal auth token is not configured for web proxy." },
+      { status: 500 }
+    );
+  }
 
   const headers = buildForwardHeaders(request, internalAuthToken);
   const method = request.method.toUpperCase();
