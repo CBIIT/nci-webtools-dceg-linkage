@@ -85,7 +85,7 @@ export default function LdScoreForm() {
       const formData = new FormData();
       formData.append("ldscoreFile", file);
       try {
-        const response = await fetch("/LDlinkRestWeb/upload", {
+        const response = await fetch("/api/ldlink-web/upload", {
           method: "POST",
           body: formData,
         });

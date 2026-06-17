@@ -53,6 +53,25 @@ import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
 
+
+WEB_COMPUTE_ENDPOINTS = {
+    "ldassoc",
+    "ldexpress",
+    "ldexpressget",
+    "ldhap",
+    "ldmatrix",
+    "ldpair",
+    "ldpop",
+    "ldproxy",
+    "ldscore",
+    "ldherit",
+    "ldcorrelation",
+    "ldtrait",
+    "ldtraitget",
+    "snpchip",
+    "snpclip",
+}
+
 # from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
 
@@ -177,6 +196,51 @@ def sendTraceback(error, showTraceback=False):
 def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype="application/json")
+
+
+def _is_ldlinkrestweb_compute_request(path):
+    web_prefix = "/LDlinkRestWeb/"
+    if not path.startswith(web_prefix):
+        return False
+
+    endpoint = path[len(web_prefix) :].split("/", 1)[0]
+    return endpoint in WEB_COMPUTE_ENDPOINTS
+
+
+@app.before_request
+def log_only_internal_auth_guard():
+    if request.method == "OPTIONS":
+        return None
+
+    if not _is_ldlinkrestweb_compute_request(request.path):
+        return None
+
+    expected_internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
+    provided_internal_token = request.headers.get("X-Internal-Auth", "").strip()
+    trusted_caller_marker = request.headers.get("X-LDlink-BFF", "").strip()
+    request_source = request.remote_addr or "unknown"
+
+    if not expected_internal_token:
+        app.logger.warning(
+            f"Internal auth token is not configured; skipping log-only trust validation for {request.path} from {request_source}."
+        )
+        return None
+
+    if not provided_internal_token:
+        app.logger.warning(
+            f"Missing X-Internal-Auth on LDlinkRestWeb compute request (log-only mode) for {request.path} from {request_source}."
+        )
+    elif provided_internal_token != expected_internal_token:
+        app.logger.warning(
+            f"Invalid X-Internal-Auth on LDlinkRestWeb compute request (log-only mode) for {request.path} from {request_source}."
+        )
+
+    if trusted_caller_marker != "1":
+        app.logger.warning(
+            f"Missing trusted caller marker X-LDlink-BFF on LDlinkRestWeb compute request (log-only mode) for {request.path} from {request_source}."
+        )
+
+    return None
 
 
 def _parse_probability_value(raw_value, field_name):
