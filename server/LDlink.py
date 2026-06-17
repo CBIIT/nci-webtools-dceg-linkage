@@ -385,7 +385,7 @@ def requires_token(f):
                         )
                 total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
                 request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
-                runtime_limit_ms_24h = 10000
+                runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
                 
                 app.logger.info(
                     "Runtime budget check: token=%s total_runtime_ms_24h=%d limit_ms_24h=%d comparison_result=%s",

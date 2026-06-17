@@ -13,6 +13,20 @@ from LDcommon import connectMongoDBReadOnly,getEmail,get_config
 # blocked users attribute: 0=false, 1=true
 
 config = get_config()
+RUNTIME_BLOCK_REASON = "runtime_limit"
+RUNTIME_BLOCK_COOLDOWN_HOURS = 12
+
+
+def _parse_datetime(value):
+    if isinstance(value, datetime.datetime):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().replace("Z", "+00:00")
+        try:
+            return datetime.datetime.fromisoformat(normalized)
+        except ValueError:
+            return None
+    return None
 
 # connect to email account
 def smtp_connect(email_account):
@@ -209,7 +223,10 @@ def blockUser(email, url_root):
     }
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
-    update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
+    update_operation = users.find_one_and_update(
+        {"email": email},
+        {"$set": {"blocked": 1, "blocked_reason": "admin_manual", "blocked_at": getDatetime(), "blocked_until": None}}
+    )
     if update_operation is None:
         return None
     emailUserBlocked(email, email_account, url_root)
@@ -234,7 +251,17 @@ def blockToken(token, url_root):
             "message": "Token is already blocked."
         }
 
-    update_result = users.find_one_and_update({"token": token}, { "$set": {"blocked": 1}})
+    blocked_at = getDatetime()
+    blocked_until = blocked_at + datetime.timedelta(hours=RUNTIME_BLOCK_COOLDOWN_HOURS)
+    update_result = users.find_one_and_update(
+        {"token": token},
+        {"$set": {
+            "blocked": 1,
+            "blocked_reason": RUNTIME_BLOCK_REASON,
+            "blocked_at": blocked_at,
+            "blocked_until": blocked_until,
+        }}
+    )
     print(f"[blockToken] Updated token to blocked: token={token} email={email} update_result={update_result is not None}")
 
     if email:
@@ -256,7 +283,10 @@ def unblockUser(email):
     }
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
-    update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
+    update_operation = users.find_one_and_update(
+        {"email": email},
+        {"$set": {"blocked": 0, "blocked_reason": None, "blocked_at": None, "blocked_until": None}}
+    )
     if update_operation is None:
         return None
     emailUserUnblocked(email, email_account)
@@ -365,10 +395,32 @@ def checkBlocked(token):
     if record is None:
         return False
     else:
-        if int(record["blocked"]) == 1:
-            return True
-        else:
+        if int(record.get("blocked", 0)) != 1:
             return False
+
+        # Only runtime-limit blocks auto-expire. Other block reasons stay blocked.
+        if record.get("blocked_reason") == RUNTIME_BLOCK_REASON:
+            now = getDatetime()
+            blocked_until = record.get("blocked_until")
+
+            if blocked_until is None:
+                blocked_at = record.get("blocked_at")
+                if blocked_at is not None:
+                    blocked_at = _parse_datetime(blocked_at)
+                    if blocked_at is not None:
+                        blocked_until = blocked_at + datetime.timedelta(hours=RUNTIME_BLOCK_COOLDOWN_HOURS)
+
+            if blocked_until is not None:
+                blocked_until = _parse_datetime(blocked_until)
+                if blocked_until is not None and now >= blocked_until:
+                    users.find_one_and_update(
+                        {"token": token},
+                        {"$set": {"blocked": 0, "blocked_reason": None, "blocked_at": None, "blocked_until": None}}
+                    )
+                    print(f"[checkBlocked] Auto-unblocked runtime-limited token after cooldown: {token}")
+                    return False
+
+        return True
 
 # check if token is locked (1=locked, 0=not locked, -1=never locked). returns true (1) if token is locked
 def checkLocked(token):
