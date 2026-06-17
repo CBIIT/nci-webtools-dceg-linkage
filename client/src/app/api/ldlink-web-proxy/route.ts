@@ -54,7 +54,21 @@ function buildForwardHeaders(request: NextRequest): Headers {
     headers.set("X-Internal-Auth", internalAuthToken);
   }
 
+  // Request uncompressed upstream responses to avoid encoding/header mismatch.
+  headers.set("accept-encoding", "identity");
   headers.set("X-LDlink-BFF", "1");
+  return headers;
+}
+
+function buildClientHeaders(upstreamHeaders: Headers): Headers {
+  const headers = new Headers(upstreamHeaders);
+
+  // These hop-by-hop/size/encoding headers can mismatch when proxied streams are transformed.
+  headers.delete("content-encoding");
+  headers.delete("content-length");
+  headers.delete("transfer-encoding");
+  headers.delete("connection");
+
   return headers;
 }
 
@@ -82,7 +96,7 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
     return new Response(upstream.body, {
       status: upstream.status,
       statusText: upstream.statusText,
-      headers: upstream.headers,
+      headers: buildClientHeaders(upstream.headers),
     });
   } catch (error) {
     const details = error instanceof Error ? error.message : "Unknown upstream fetch error";
