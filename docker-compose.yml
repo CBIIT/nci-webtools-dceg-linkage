@@ -25,6 +25,8 @@ services:
         NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ""
     ports:
       - "3000:80"
+    env_file:
+      - server/.env
     networks:
       - my_network
 

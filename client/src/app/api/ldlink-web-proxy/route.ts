@@ -39,7 +39,7 @@ function buildTargetUrl(request: NextRequest): string | null {
   return `${backendBaseUrl}/LDlinkRestWeb/${target}${query ? `?${query}` : ""}`;
 }
 
-function buildForwardHeaders(request: NextRequest): Headers {
+function buildForwardHeaders(request: NextRequest, internalAuthToken: string): Headers {
   const headers = new Headers();
 
   for (const headerName of HEADER_ALLOWLIST) {
@@ -49,10 +49,7 @@ function buildForwardHeaders(request: NextRequest): Headers {
     }
   }
 
-  const internalAuthToken = process.env.LDLINK_INTERNAL_AUTH_TOKEN || "";
-  if (internalAuthToken) {
-    headers.set("X-Internal-Auth", internalAuthToken);
-  }
+  headers.set("X-Internal-Auth", internalAuthToken);
 
   // Request uncompressed upstream responses to avoid encoding/header mismatch.
   headers.set("accept-encoding", "identity");
@@ -78,7 +75,15 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
     return NextResponse.json({ error: "Missing or invalid 'target' parameter." }, { status: 400 });
   }
 
-  const headers = buildForwardHeaders(request);
+  const internalAuthToken = process.env.LDLINK_INTERNAL_AUTH_TOKEN?.trim();
+  if (!internalAuthToken) {
+    return NextResponse.json(
+      { error: "Internal auth token is not configured for web proxy." },
+      { status: 500 }
+    );
+  }
+
+  const headers = buildForwardHeaders(request, internalAuthToken);
   const method = request.method.toUpperCase();
 
   const init: RequestInit = {
