@@ -31,12 +31,14 @@ from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import (
     register_user,
     checkToken,
+    getTokenRuntimeLast24Hours,
     checkApiServer2Auth,
     checkBlocked,
     checkLocked,
     toggleLocked,
     logAccess,
     emailJustification,
+    blockToken,
     blockUser,
     unblockUser,
     getStats,
@@ -381,11 +383,31 @@ def requires_token(f):
                         return sendTraceback(
                             "Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov"
                         )
+                total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
+                request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
+                runtime_limit_ms_24h = 10000
+
+                if total_runtime_ms_24h > runtime_limit_ms_24h:
+                    blockToken(token, url_root)
+                    app.logger.warning(
+                        "Blocked token due to runtime limit. module=%s runtime_ms_24h=%d limit_ms_24h=%d",
+                        getModule(request.full_path),
+                        total_runtime_ms_24h,
+                        runtime_limit_ms_24h,
+                    )
+                    return sendTraceback(
+                        "Your API token has been blocked because runtime usage exceeded the 24-hour test limit. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
+                    )
                 # Check if token has been authorized to access api server 2
                 # if ("LDlinkRest2" in request.full_path):
                 #    if not checkApiServer2Auth(token):
                 #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
+                app.logger.info(
+                    "Token runtime 24h check for %s: %.2f minutes",
+                    module,
+                    total_runtime_ms_24h / 60000.0,
+                )
                 request_started_at = time.time()
                 try:
                     return f(*args, **kwargs)

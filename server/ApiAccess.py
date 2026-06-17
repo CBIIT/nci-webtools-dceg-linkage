@@ -168,6 +168,34 @@ def logAccess(token, module, duration_ms=None):
     logs = db.api_log
     logs.insert_one(log).inserted_id
 
+
+# sum token runtime from api_log over a rolling 24-hour window
+def getTokenRuntimeLast24Hours(token):
+    db = connectMongoDBReadOnly(False,True,True)
+    logs = db.api_log
+    window_start = getDatetime() - datetime.timedelta(hours=24)
+
+    pipeline = [
+        {
+            "$match": {
+                "token": token,
+                "accessed": {"$gte": window_start},
+                "duration_ms": {"$exists": True}
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "total_duration_ms": {"$sum": "$duration_ms"}
+            }
+        }
+    ]
+
+    result = list(logs.aggregate(pipeline))
+    if len(result) == 0:
+        return 0
+    return int(result[0].get("total_duration_ms", 0))
+
 # sets blocked attribute of user to 1=true
 def blockUser(email, url_root):
     email_account = getEmail()
@@ -181,6 +209,32 @@ def blockUser(email, url_root):
         return None
     emailUserBlocked(email, email_account, url_root)
     return out_json
+
+
+# sets blocked attribute of token owner to 1=true
+def blockToken(token, url_root):
+    email_account = getEmail()
+    db = connectMongoDBReadOnly(False,True)
+    users = db.api_users
+    record = users.find_one({"token": token})
+
+    if record is None:
+        return None
+
+    if int(record.get("blocked", 0)) == 1:
+        return {
+            "message": "Token is already blocked."
+        }
+
+    users.find_one_and_update({"token": token}, { "$set": {"blocked": 1}})
+
+    email = record.get("email")
+    if email:
+        emailUserBlocked(email, email_account, url_root)
+
+    return {
+        "message": "Token has been blocked due to runtime limit policy."
+    }
 
 # sets blocked attribute of user to 0=false
 def unblockUser(email):
