@@ -208,7 +208,7 @@ def _is_ldlinkrestweb_compute_request(path):
 
 
 @app.before_request
-def log_only_internal_auth_guard():
+def internal_auth_guard():
     if request.method == "OPTIONS":
         return None
 
@@ -221,24 +221,35 @@ def log_only_internal_auth_guard():
     request_source = request.remote_addr or "unknown"
 
     if not expected_internal_token:
-        app.logger.warning(
-            f"Internal auth token is not configured; skipping log-only trust validation for {request.path} from {request_source}."
+        app.logger.error(
+            f"Internal auth token is not configured; blocking LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-        return None
+        response = sendTraceback("Internal auth is not configured for LDlinkRestWeb compute routes.")
+        response.status_code = 500
+        return response
 
     if not provided_internal_token:
         app.logger.warning(
-            f"Missing X-Internal-Auth on LDlinkRestWeb compute request (log-only mode) for {request.path} from {request_source}."
+            f"Missing X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-    elif provided_internal_token != expected_internal_token:
+        response = sendTraceback("Forbidden: internal authentication header is required.")
+        response.status_code = 403
+        return response
+    if provided_internal_token != expected_internal_token:
         app.logger.warning(
-            f"Invalid X-Internal-Auth on LDlinkRestWeb compute request (log-only mode) for {request.path} from {request_source}."
+            f"Invalid X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
+        response = sendTraceback("Forbidden: internal authentication header is invalid.")
+        response.status_code = 403
+        return response
 
     if trusted_caller_marker != "1":
         app.logger.warning(
-            f"Missing trusted caller marker X-LDlink-BFF on LDlinkRestWeb compute request (log-only mode) for {request.path} from {request_source}."
+            f"Missing trusted caller marker X-LDlink-BFF on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
+        response = sendTraceback("Forbidden: trusted caller marker is required.")
+        response.status_code = 403
+        return response
 
     return None
 
