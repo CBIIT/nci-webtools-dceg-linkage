@@ -380,12 +380,20 @@ def requires_token(f):
                 #    if not checkApiServer2Auth(token):
                 #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
-                logAccess(token, module)
-                return f(*args, **kwargs)
+                request_started_at = time.time()
+                try:
+                    return f(*args, **kwargs)
+                finally:
+                    duration_ms = round((time.time() - request_started_at) * 1000)
+                    logAccess(token, module, duration_ms)
             token = "NA"
             module = getModule(request.full_path)
-            logAccess(token, module)
-            return f(*args, **kwargs)
+            request_started_at = time.time()
+            try:
+                return f(*args, **kwargs)
+            finally:
+                duration_ms = round((time.time() - request_started_at) * 1000)
+                logAccess(token, module, duration_ms)
         return f(*args, **kwargs)
 
     return decorated_function

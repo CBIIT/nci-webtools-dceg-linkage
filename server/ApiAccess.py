@@ -154,7 +154,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
     users.insert_one(user).inserted_id
 
 # log token's api call to api_log table
-def logAccess(token, module):
+def logAccess(token, module, duration_ms=None):
     db = connectMongoDBReadOnly(False,True,True)
     accessed = getDatetime()
     
@@ -163,6 +163,8 @@ def logAccess(token, module):
         "module": module,
         "accessed": accessed
     }
+    if duration_ms is not None:
+        log["duration_ms"] = int(duration_ms)
     logs = db.api_log
     logs.insert_one(log).inserted_id
 
