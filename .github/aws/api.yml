@@ -92,6 +92,8 @@ containerDefinitions:
         valueFrom: "/analysistools/${TIER}/${APP}/token_lock_timeout"
       - name: RESTRICT_CONCURRENCY
         valueFrom: "/analysistools/${TIER}/${APP}/restrict_concurrency"
+      - name: LDLINK_INTERNAL_AUTH_TOKEN
+        valueFrom: "/analysistools/${TIER}/${APP}/ldlink_internal_auth_token"
       - name: EMAIL_SMTP_HOST
         valueFrom: "/analysistools/${TIER}/${APP}/email_smtp_host"
       - name: EMAIL_ADMIN
