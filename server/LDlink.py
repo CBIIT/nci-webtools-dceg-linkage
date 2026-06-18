@@ -373,10 +373,16 @@ def requires_token(f):
                         + "?tab=apiaccess"
                     )
                 # Check if token is blocked
-                if checkBlocked(token):
-                    return sendTraceback(
-                        "Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
-                    )
+                is_blocked, blocked_reason = checkBlocked(token)
+                if is_blocked:
+                    if blocked_reason == "runtime_limit":
+                        return sendTraceback(
+                            "Your API token has been blocked because runtime usage exceeded the 24-hour test limit. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
+                        )
+                    else:
+                        return sendTraceback(
+                            "Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
+                        )
                 # Check if token is locked (exclude check on api server 2)
                 if "LDlinkRest" in request.full_path:
                     if checkLocked(token):

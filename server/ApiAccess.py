@@ -404,19 +404,23 @@ def getToken(email):
     else:
         return record["token"]
 
-# check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
+# check if token is blocked (1=blocked, 0=not blocked). returns (is_blocked, reason) tuple
+# is_blocked: True if token is currently blocked, False otherwise
+# reason: 'runtime_limit' or other reason string if blocked, None if not blocked
 def checkBlocked(token):
     db = connectMongoDBReadOnly(False,True,True)
     users = db.api_users
     record = users.find_one({"token": token})
     if record is None:
-        return False
+        return (False, None)
     else:
         if int(record.get("blocked", 0)) != 1:
-            return False
+            return (False, None)
+
+        blocked_reason = record.get("blocked_reason", "unknown")
 
         # Only runtime-limit blocks auto-expire. Other block reasons stay blocked.
-        if record.get("blocked_reason") == RUNTIME_BLOCK_REASON:
+        if blocked_reason == RUNTIME_BLOCK_REASON:
             now = getDatetime()
             blocked_until = record.get("blocked_until")
 
@@ -443,9 +447,9 @@ def checkBlocked(token):
                         }
                     )
                     print(f"[checkBlocked] Auto-unblocked runtime-limited token after cooldown: {token}")
-                    return False
+                    return (False, None)
 
-        return True
+        return (True, blocked_reason)
 
 # check if token is locked (1=locked, 0=not locked, -1=never locked). returns true (1) if token is locked
 def checkLocked(token):
