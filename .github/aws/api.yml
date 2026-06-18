@@ -94,6 +94,8 @@ containerDefinitions:
         valueFrom: "/analysistools/${TIER}/${APP}/restrict_concurrency"
       - name: RUNTIME_LIMIT_MS_24H
         valueFrom: "/analysistools/${TIER}/${APP}/runtime_limit_ms_24h"
+      - name: RUNTIME_BLOCK_COOLDOWN_MINUTES
+        valueFrom: "/analysistools/${TIER}/${APP}/runtime_block_cooldown_minutes"
       - name: EMAIL_SMTP_HOST
         valueFrom: "/analysistools/${TIER}/${APP}/email_smtp_host"
       - name: EMAIL_ADMIN

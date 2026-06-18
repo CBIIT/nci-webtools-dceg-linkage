@@ -14,16 +14,21 @@ from LDcommon import connectMongoDBReadOnly,getEmail,get_config
 
 config = get_config()
 RUNTIME_BLOCK_REASON = "runtime_limit"
-RUNTIME_BLOCK_COOLDOWN_HOURS = 12
+RUNTIME_BLOCK_COOLDOWN_MINUTES = int(config.get("runtime_block_cooldown_minutes", 120))
 
 
 def _parse_datetime(value):
     if isinstance(value, datetime.datetime):
+        if value.tzinfo is not None:
+            return value.astimezone(datetime.timezone.utc).replace(tzinfo=None)
         return value
     if isinstance(value, str):
         normalized = value.strip().replace("Z", "+00:00")
         try:
-            return datetime.datetime.fromisoformat(normalized)
+            parsed = datetime.datetime.fromisoformat(normalized)
+            if parsed.tzinfo is not None:
+                return parsed.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+            return parsed
         except ValueError:
             return None
     return None
@@ -187,13 +192,22 @@ def logAccess(token, module, duration_ms=None):
 def getTokenRuntimeLast24Hours(token):
     db = connectMongoDBReadOnly(False,True,True)
     logs = db.api_log
+    users = db.api_users
     window_start = getDatetime() - datetime.timedelta(hours=24)
+    effective_window_start = window_start
+
+    user_record = users.find_one({"token": token}, {"runtime_budget_reset_at": 1})
+    runtime_budget_reset_at = None
+    if user_record is not None:
+        runtime_budget_reset_at = _parse_datetime(user_record.get("runtime_budget_reset_at"))
+        if runtime_budget_reset_at is not None and runtime_budget_reset_at > effective_window_start:
+            effective_window_start = runtime_budget_reset_at
 
     pipeline = [
         {
             "$match": {
                 "token": token,
-                "accessed": {"$gte": window_start},
+                "accessed": {"$gte": effective_window_start},
                 "duration_ms": {"$exists": True}
             }
         },
@@ -212,7 +226,10 @@ def getTokenRuntimeLast24Hours(token):
     else:
         total_ms = int(result[0].get("total_duration_ms", 0))
     
-    print(f"[getTokenRuntimeLast24Hours] token={token} window_start={window_start} total_ms={total_ms}")
+    print(
+        f"[getTokenRuntimeLast24Hours] token={token} window_start={window_start} "
+        f"effective_window_start={effective_window_start} runtime_budget_reset_at={runtime_budget_reset_at} total_ms={total_ms}"
+    )
     return total_ms
 
 # sets blocked attribute of user to 1=true
@@ -252,7 +269,7 @@ def blockToken(token, url_root):
         }
 
     blocked_at = getDatetime()
-    blocked_until = blocked_at + datetime.timedelta(hours=RUNTIME_BLOCK_COOLDOWN_HOURS)
+    blocked_until = blocked_at + datetime.timedelta(minutes=RUNTIME_BLOCK_COOLDOWN_MINUTES)
     update_result = users.find_one_and_update(
         {"token": token},
         {"$set": {
@@ -408,14 +425,22 @@ def checkBlocked(token):
                 if blocked_at is not None:
                     blocked_at = _parse_datetime(blocked_at)
                     if blocked_at is not None:
-                        blocked_until = blocked_at + datetime.timedelta(hours=RUNTIME_BLOCK_COOLDOWN_HOURS)
+                        blocked_until = blocked_at + datetime.timedelta(minutes=RUNTIME_BLOCK_COOLDOWN_MINUTES)
 
             if blocked_until is not None:
                 blocked_until = _parse_datetime(blocked_until)
                 if blocked_until is not None and now >= blocked_until:
                     users.find_one_and_update(
                         {"token": token},
-                        {"$set": {"blocked": 0, "blocked_reason": None, "blocked_at": None, "blocked_until": None}}
+                        {
+                            "$set": {
+                                "blocked": 0,
+                                "blocked_reason": None,
+                                "blocked_at": None,
+                                "blocked_until": None,
+                                "runtime_budget_reset_at": now,
+                            }
+                        }
                     )
                     print(f"[checkBlocked] Auto-unblocked runtime-limited token after cooldown: {token}")
                     return False

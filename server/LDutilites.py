@@ -39,6 +39,10 @@ def get_config():
     config['restrict_concurrency'] = environ.get('RESTRICT_CONCURRENCY') == 'YES'
     config['token_lock_timeout'] = int(environ.get('TOKEN_LOCK_TIMEOUT', 900))
     config['runtime_limit_ms_24h'] = int(environ.get('RUNTIME_LIMIT_MS_24H', 86400000))
+    runtime_block_cooldown_minutes = environ.get('RUNTIME_BLOCK_COOLDOWN_MINUTES')
+    if runtime_block_cooldown_minutes is None:
+        runtime_block_cooldown_minutes = int(environ.get('RUNTIME_BLOCK_COOLDOWN_HOURS', 12)) * 60
+    config['runtime_block_cooldown_minutes'] = int(runtime_block_cooldown_minutes)
 
     config['email_smtp_host'] = environ.get('EMAIL_SMTP_HOST')
     config['email_admin'] = environ.get('EMAIL_ADMIN')
