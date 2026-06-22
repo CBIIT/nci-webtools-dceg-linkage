@@ -40,8 +40,6 @@ containerDefinitions:
     secrets:
       - name: LDLINK_INTERNAL_AUTH_TOKEN
         valueFrom: "/analysistools/${TIER}/${APP}/ldlink_internal_auth_token"
-      - name: LDLINK_WEB_JWT_SECRET
-        valueFrom: "/analysistools/${TIER}/${APP}/ldlink_web_jwt_secret"
     logConfiguration:
       logDriver: awsfirelens
       options:

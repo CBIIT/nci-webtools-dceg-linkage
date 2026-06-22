@@ -2,51 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 const HEADER_ALLOWLIST = ["accept", "accept-language", "content-type", "cookie", "user-agent", "x-request-id"];
 
-function decodeBase64Url(value: string): Uint8Array {
-  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized + "=".repeat((4 - (normalized.length % 4 || 4)) % 4);
-  return Uint8Array.from(Buffer.from(padded, "base64"));
-}
-
-function decodeJwtJsonPart(value: string): Record<string, unknown> | null {
-  try {
-    const bytes = decodeBase64Url(value);
-    const json = Buffer.from(bytes).toString("utf8");
-    const parsed = JSON.parse(json);
-    if (parsed && typeof parsed === "object") {
-      return parsed as Record<string, unknown>;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function getRequestJwt(request: NextRequest): string {
-  const authorization = request.headers.get("authorization") || "";
-  if (authorization.toLowerCase().startsWith("bearer ")) {
-    const bearerToken = authorization.slice(7).trim();
-    if (bearerToken) {
-      return bearerToken;
-    }
-  }
-
-  const cookieName = process.env.LDLINK_WEB_AUTH_COOKIE_NAME?.trim();
-  if (cookieName) {
-    const cookieToken = request.cookies.get(cookieName)?.value?.trim() || "";
-    if (cookieToken) {
-      return cookieToken;
-    }
-  }
-
-  return "";
-}
-
-function isUserJwtEnforced(): boolean {
-  const raw = process.env.LDLINK_WEB_ENFORCE_USER_JWT?.trim().toLowerCase();
-  return raw === "1" || raw === "true" || raw === "yes";
-}
-
 function isValidSameOriginUrl(urlValue: string, expectedOrigin: string): boolean {
   try {
     return new URL(urlValue).origin === expectedOrigin;
@@ -71,66 +26,6 @@ function isBrowserLikeRequest(request: NextRequest): boolean {
   const hasBrowserFetchSignals = secFetchSite === "same-origin" && (secFetchMode === "cors" || secFetchMode === "same-origin" || secFetchMode === "navigate");
 
   return hasSameOriginSource && hasBrowserFetchSignals;
-}
-
-async function validateJwt(token: string, secret: string): Promise<boolean> {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) {
-      return false;
-    }
-
-    const [encodedHeader, encodedPayload, encodedSignature] = parts;
-    const header = decodeJwtJsonPart(encodedHeader);
-    const payload = decodeJwtJsonPart(encodedPayload);
-
-    if (!header || !payload) {
-      return false;
-    }
-
-    if (header.alg !== "HS256") {
-      return false;
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const exp = typeof payload.exp === "number" ? payload.exp : null;
-    const nbf = typeof payload.nbf === "number" ? payload.nbf : null;
-    const iat = typeof payload.iat === "number" ? payload.iat : null;
-
-    if (exp !== null && now >= exp) {
-      return false;
-    }
-
-    if (nbf !== null && now < nbf) {
-      return false;
-    }
-
-    if (iat !== null && iat > now + 60) {
-      return false;
-    }
-
-    const key = await crypto.subtle.importKey(
-      "raw",
-      new TextEncoder().encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"]
-    );
-
-    const signingInput = `${encodedHeader}.${encodedPayload}`;
-    const signature = decodeBase64Url(encodedSignature);
-    const signatureBytes: BufferSource = signature as unknown as BufferSource;
-    const signingBytes: BufferSource = new TextEncoder().encode(signingInput) as unknown as BufferSource;
-
-    return await crypto.subtle.verify(
-      "HMAC",
-      key,
-      signatureBytes,
-      signingBytes
-    );
-  } catch {
-    return false;
-  }
 }
 
 function getBackendBaseUrl(): string {
@@ -200,33 +95,6 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
       { error: "Forbidden. Browser-origin request is required." },
       { status: 403 }
     );
-  }
-
-  const enforceUserJwt = isUserJwtEnforced();
-  if (enforceUserJwt) {
-    const userJwtSecret = process.env.LDLINK_WEB_JWT_SECRET?.trim();
-    if (!userJwtSecret) {
-      return NextResponse.json(
-        { error: "Web auth JWT secret is not configured for web proxy." },
-        { status: 500 }
-      );
-    }
-
-    const userJwt = getRequestJwt(request);
-    if (!userJwt) {
-      return NextResponse.json(
-        { error: "Unauthorized. Valid user JWT is required." },
-        { status: 401 }
-      );
-    }
-
-    const isValidJwt = await validateJwt(userJwt, userJwtSecret);
-    if (!isValidJwt) {
-      return NextResponse.json(
-        { error: "Forbidden. User JWT validation failed." },
-        { status: 403 }
-      );
-    }
   }
 
   const targetUrl = buildTargetUrl(request);
