@@ -42,6 +42,11 @@ function getRequestJwt(request: NextRequest): string {
   return "";
 }
 
+function isUserJwtEnforced(): boolean {
+  const raw = process.env.LDLINK_WEB_ENFORCE_USER_JWT?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes";
+}
+
 async function validateJwt(token: string, secret: string): Promise<boolean> {
   try {
     const parts = token.split(".");
@@ -164,28 +169,31 @@ function buildClientHeaders(upstreamHeaders: Headers): Headers {
 }
 
 async function proxyRequest(request: NextRequest): Promise<Response> {
-  const userJwtSecret = process.env.LDLINK_WEB_JWT_SECRET?.trim();
-  if (!userJwtSecret) {
-    return NextResponse.json(
-      { error: "Web auth JWT secret is not configured for web proxy." },
-      { status: 500 }
-    );
-  }
+  const enforceUserJwt = isUserJwtEnforced();
+  if (enforceUserJwt) {
+    const userJwtSecret = process.env.LDLINK_WEB_JWT_SECRET?.trim();
+    if (!userJwtSecret) {
+      return NextResponse.json(
+        { error: "Web auth JWT secret is not configured for web proxy." },
+        { status: 500 }
+      );
+    }
 
-  const userJwt = getRequestJwt(request);
-  if (!userJwt) {
-    return NextResponse.json(
-      { error: "Unauthorized. Valid user JWT is required." },
-      { status: 401 }
-    );
-  }
+    const userJwt = getRequestJwt(request);
+    if (!userJwt) {
+      return NextResponse.json(
+        { error: "Unauthorized. Valid user JWT is required." },
+        { status: 401 }
+      );
+    }
 
-  const isValidJwt = await validateJwt(userJwt, userJwtSecret);
-  if (!isValidJwt) {
-    return NextResponse.json(
-      { error: "Forbidden. User JWT validation failed." },
-      { status: 403 }
-    );
+    const isValidJwt = await validateJwt(userJwt, userJwtSecret);
+    if (!isValidJwt) {
+      return NextResponse.json(
+        { error: "Forbidden. User JWT validation failed." },
+        { status: 403 }
+      );
+    }
   }
 
   const targetUrl = buildTargetUrl(request);
