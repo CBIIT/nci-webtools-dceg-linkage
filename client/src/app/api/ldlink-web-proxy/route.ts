@@ -47,6 +47,32 @@ function isUserJwtEnforced(): boolean {
   return raw === "1" || raw === "true" || raw === "yes";
 }
 
+function isValidSameOriginUrl(urlValue: string, expectedOrigin: string): boolean {
+  try {
+    return new URL(urlValue).origin === expectedOrigin;
+  } catch {
+    return false;
+  }
+}
+
+function isBrowserLikeRequest(request: NextRequest): boolean {
+  const host = request.headers.get("host") || "";
+  const expectedOrigin = `${request.nextUrl.protocol}//${host}`;
+
+  const origin = request.headers.get("origin") || "";
+  const referer = request.headers.get("referer") || "";
+  const secFetchSite = (request.headers.get("sec-fetch-site") || "").toLowerCase();
+  const secFetchMode = (request.headers.get("sec-fetch-mode") || "").toLowerCase();
+
+  const hasSameOriginOrigin = origin ? origin === expectedOrigin : false;
+  const hasSameOriginReferer = referer ? isValidSameOriginUrl(referer, expectedOrigin) : false;
+  const hasSameOriginSource = hasSameOriginOrigin || hasSameOriginReferer;
+
+  const hasBrowserFetchSignals = secFetchSite === "same-origin" && (secFetchMode === "cors" || secFetchMode === "same-origin" || secFetchMode === "navigate");
+
+  return hasSameOriginSource && hasBrowserFetchSignals;
+}
+
 async function validateJwt(token: string, secret: string): Promise<boolean> {
   try {
     const parts = token.split(".");
@@ -169,6 +195,13 @@ function buildClientHeaders(upstreamHeaders: Headers): Headers {
 }
 
 async function proxyRequest(request: NextRequest): Promise<Response> {
+  if (!isBrowserLikeRequest(request)) {
+    return NextResponse.json(
+      { error: "Forbidden. Browser-origin request is required." },
+      { status: 403 }
+    );
+  }
+
   const enforceUserJwt = isUserJwtEnforced();
   if (enforceUserJwt) {
     const userJwtSecret = process.env.LDLINK_WEB_JWT_SECRET?.trim();
