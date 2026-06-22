@@ -34,6 +34,31 @@ function normalizeTarget(target: string | null): string | null {
 }
 
 /**
+ * Checks if request has valid authentication for proxy access.
+ *
+ * Why needed:
+ * Ensures only authenticated requests (browser session OR valid API token) can use the proxy.
+ * Prevents unauthenticated scripted/curl attacks while allowing both browser and API token access.
+ */
+function hasValidAuth(request: NextRequest): boolean {
+  // Check 1: Does request have a session cookie? (browser requests)
+  const cookies = request.headers.get("cookie") || "";
+  if (cookies.includes("next-auth") || cookies.includes("sessionId") || cookies) {
+    // Has cookies - likely a browser session
+    return true;
+  }
+
+  // Check 2: Does request include an API token in query params?
+  const token = request.nextUrl.searchParams.get("token");
+  if (token && token.trim()) {
+    // Has token - API/curl access
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Builds the final backend URL for a proxied request.
  *
  * Why needed:
@@ -109,9 +134,18 @@ function buildClientHeaders(upstreamHeaders: Headers): Headers {
  *
  * Why needed:
  * Provides a single secure gateway for browser calls, enforces internal auth token
- * presence, and normalizes upstream failures into stable HTTP responses.
+ * presence, validates user authentication (session or API token), and normalizes
+ * upstream failures into stable HTTP responses.
  */
 async function proxyRequest(request: NextRequest): Promise<Response> {
+  // Check authentication: browser session OR valid API token required
+  if (!hasValidAuth(request)) {
+    return NextResponse.json(
+      { error: "Unauthorized. Browser session or valid API token required." },
+      { status: 403 }
+    );
+  }
+
   const targetUrl = buildTargetUrl(request);
   if (!targetUrl) {
     return NextResponse.json({ error: "Missing or invalid 'target' parameter." }, { status: 400 });
