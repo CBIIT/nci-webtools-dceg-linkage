@@ -1,5 +1,6 @@
 #!flask/bin/python3
 import os
+import hmac
 import traceback
 import collections
 import argparse
@@ -217,7 +218,6 @@ def internal_auth_guard():
 
     expected_internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
     provided_internal_token = request.headers.get("X-Internal-Auth", "").strip()
-    trusted_caller_marker = request.headers.get("X-LDlink-BFF", "").strip()
     request_source = request.remote_addr or "unknown"
 
     if not expected_internal_token:
@@ -235,19 +235,11 @@ def internal_auth_guard():
         response = sendTraceback("Forbidden: internal authentication header is required.")
         response.status_code = 403
         return response
-    if provided_internal_token != expected_internal_token:
+    if not hmac.compare_digest(provided_internal_token, expected_internal_token):
         app.logger.warning(
             f"Invalid X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
         response = sendTraceback("Forbidden: internal authentication header is invalid.")
-        response.status_code = 403
-        return response
-
-    if trusted_caller_marker != "1":
-        app.logger.warning(
-            f"Missing trusted caller marker X-LDlink-BFF on LDlinkRestWeb compute request for {request.path} from {request_source}."
-        )
-        response = sendTraceback("Forbidden: trusted caller marker is required.")
         response.status_code = 403
         return response
 
