@@ -19,11 +19,6 @@ function normalizeTarget(target: string | null): string | null {
   return trimmed;
 }
 
-function hasValidAuth(request: NextRequest): boolean {
-  const token = request.nextUrl.searchParams.get("token");
-  return Boolean(token && token.trim());
-}
-
 function buildTargetUrl(request: NextRequest): string | null {
   const backendBaseUrl = getBackendBaseUrl().replace(/\/$/, "");
   const params = request.nextUrl.searchParams;
@@ -69,13 +64,6 @@ function buildClientHeaders(upstreamHeaders: Headers): Headers {
 }
 
 async function proxyRequest(request: NextRequest): Promise<Response> {
-  if (!hasValidAuth(request)) {
-    return NextResponse.json(
-      { error: "Unauthorized. Valid API token is required." },
-      { status: 403 }
-    );
-  }
-
   const targetUrl = buildTargetUrl(request);
   if (!targetUrl) {
     return NextResponse.json({ error: "Missing or invalid 'target' parameter." }, { status: 400 });
