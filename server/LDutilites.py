@@ -73,7 +73,7 @@ def unlock_stale_tokens(db, lock_timeout = 15 * 60):
                     diff = present - locked
                 else:
                     diff = present - dateutil.parser.parse(locked, ignoretz=True)
-                diffSeconds = diff.total_seconds()
+                diffSeconds = (diff.seconds % 3600)
                 # if token is locked for over 15 mins, unlock
                 if diffSeconds > lock_timeout:
                     unlockTokens.append(user["token"])
