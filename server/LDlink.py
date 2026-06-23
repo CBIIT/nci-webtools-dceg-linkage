@@ -526,14 +526,10 @@ def requires_admin_token(f):
 #     return sendJSON(out_json)
 
 
-<<<<<<< HEAD
-=======
 # Browser session initialization is handled by the Next.js BFF at /api/init-browser-session.
 # Keeping a second implementation here is redundant and can be misleading, and its cookie format
 # does not match what the BFF proxy validates.
 
-
->>>>>>> c0bbcdf201b98cfc3e0b9bf85f59f13725fbd590
 # Web route to register user's email for API token
 @app.route("/LDlinkRestWeb/apiaccess/register_web", methods=["GET"])
 def register_web():
