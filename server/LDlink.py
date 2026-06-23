@@ -525,28 +525,9 @@ def requires_admin_token(f):
 #     return sendJSON(out_json)
 
 
-# Browser session initialization endpoint (not a compute endpoint, no token required)
-@app.route("/api/init-browser-session", methods=["GET", "OPTIONS"])
-def init_browser_session():
-    """Initialize a browser session by setting a session cookie."""
-    from flask import make_response
-    
-    if request.method == "OPTIONS":
-        response = make_response("", 204)
-        response.headers["Allow"] = "GET, OPTIONS"
-        return response
-    
-    response = make_response(jsonify({"status": "ok", "message": "Browser session initialized"}))
-    session_cookie_name = os.environ.get("LDLINK_BROWSER_SESSION_COOKIE_NAME", "ldlink_browser_session")
-    response.set_cookie(
-        session_cookie_name,
-        value=str(int(time.time())) + str(random.randint(100000, 999999)),
-        max_age=86400 * 7,  # 7 days
-        httponly=True,
-        secure=True,
-        samesite="Strict"
-    )
-    return response
+# Browser session initialization is handled by the Next.js BFF at /api/init-browser-session.
+# Keeping a second implementation here is redundant and can be misleading, and its cookie format
+# does not match what the BFF proxy validates.
 
 
 # Web route to register user's email for API token
