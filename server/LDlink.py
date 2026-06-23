@@ -232,14 +232,15 @@ def internal_auth_guard():
         app.logger.warning(
             f"Missing X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-        response = sendTraceback("Forbidden: internal authentication header is required.")
+        response = sendJSON({"error": "Forbidden: internal authentication header is required."})
         response.status_code = 403
         return response
+
     if not hmac.compare_digest(provided_internal_token, expected_internal_token):
         app.logger.warning(
             f"Invalid X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-        response = sendTraceback("Forbidden: internal authentication header is invalid.")
+        response = sendJSON({"error": "Forbidden: internal authentication header is invalid."})
         response.status_code = 403
         return response
 
