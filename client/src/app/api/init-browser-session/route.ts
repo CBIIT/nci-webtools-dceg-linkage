@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const DEFAULT_COOKIE_NAME = "ldlink_browser_session";
 const COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_SECONDS * 1000;
@@ -86,16 +89,29 @@ export async function GET(request: NextRequest) {
   if (!signingSecret) {
     return NextResponse.json(
       { error: "Session signing secret is not configured." },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+        },
+      }
     );
   }
 
   const existingValue = request.cookies.get(cookieName)?.value?.trim();
   if (existingValue && isSignedSessionValueValid(existingValue, signingSecret)) {
-    return NextResponse.json({ ok: true, initialized: true, alreadyInitialized: true });
+    return NextResponse.json(
+      { ok: true, initialized: true, alreadyInitialized: true },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+        },
+      }
+    );
   }
 
   const response = NextResponse.json({ ok: true, initialized: true, alreadyInitialized: false });
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
 
   response.cookies.set(cookieName, createSignedSessionValue(signingSecret), {
     httpOnly: true,
