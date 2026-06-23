@@ -70,12 +70,7 @@ WEB_COMPUTE_ENDPOINTS = {
     "ldtrait",
     "ldtraitget",
     "snpchip",
-    "snpclip",
-    "upload",
-    "zip",
-    "validate_sumstats",
-    "validate_bfile",
-    "copy_and_download",
+    "snpclip"
 }
 
 # from flask_limiter import Limiter
