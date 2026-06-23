@@ -47,6 +47,12 @@ containerDefinitions:
         value: "${TIER}-${APP}-api"
       - name: DD_VERSION
         value: "${APP_GIT_TAG}"
+      - name: ENABLE_REDIS_CACHE
+        value: "YES"
+      - name: REDIS_HOST
+        value: "localhost"
+      - name: REDIS_PORT
+        value: "6379"
     secrets:
       - name: BASE_URL
         valueFrom: "/analysistools/${TIER}/${APP}/web/base_url"
@@ -164,6 +170,27 @@ containerDefinitions:
         awslogs-group: "/analysistools/${TIER}/${APP}/api"
         awslogs-region: "${AWS_REGION}"
         awslogs-stream-prefix: datadog-agent
+
+  - name: redis
+    image: "public.ecr.aws/docker/library/redis:7-alpine"
+    essential: false
+    cpu: 128
+    memory: 256
+    portMappings:
+      - protocol: tcp
+        containerPort: 6379
+    command:
+      - "redis-server"
+      - "--maxmemory"
+      - "200mb"
+      - "--maxmemory-policy"
+      - "allkeys-lru"
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: "/analysistools/${TIER}/${APP}/api"
+        awslogs-region: "${AWS_REGION}"
+        awslogs-stream-prefix: redis
 
 tags:
   - key: Project

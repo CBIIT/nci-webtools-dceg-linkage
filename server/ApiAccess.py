@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import json
-import os.path
+import os
 import binascii
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
 from bson import json_util
+import redis
 import UnlockStaleTokens
 from LDcommon import connectMongoDBReadOnly,getEmail,get_config
 
@@ -15,6 +16,94 @@ from LDcommon import connectMongoDBReadOnly,getEmail,get_config
 config = get_config()
 RUNTIME_BLOCK_REASON = "runtime_limit"
 RUNTIME_BLOCK_COOLDOWN_MINUTES = int(config.get("runtime_block_cooldown_minutes", 120))
+
+# ---------------------------------------------------------------------------
+# Redis connection and runtime-counter helpers
+# ---------------------------------------------------------------------------
+RUNTIME_COUNTER_TTL = 86400  # 24 hours in seconds
+
+_redis_client = None
+_redis_checked = False
+
+
+def get_redis_client():
+    """Lazy-initialize a Redis client.  Returns None when disabled or unreachable."""
+    global _redis_client, _redis_checked
+    if _redis_checked:
+        return _redis_client
+    _redis_checked = True
+
+    if os.environ.get("ENABLE_REDIS_CACHE", "YES").upper() != "YES":
+        print("[Redis] Cache disabled via ENABLE_REDIS_CACHE")
+        return None
+
+    try:
+        client = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            db=int(os.environ.get("REDIS_DB", "0")),
+            password=os.environ.get("REDIS_PASSWORD", None),
+            decode_responses=True,
+            socket_connect_timeout=2,
+            socket_timeout=2,
+        )
+        client.ping()
+        print("[Redis] Connected successfully")
+        _redis_client = client
+        return _redis_client
+    except Exception as e:
+        print(f"[Redis] Connection failed, falling back to MongoDB only: {e}")
+        return None
+
+
+def _runtime_cache_key(token):
+    return f"runtime:{token}"
+
+
+def incr_runtime_cache(token, duration_ms):
+    """INCRBY the cached runtime counter.  Sets a 24h TTL on first increment."""
+    r = get_redis_client()
+    if r is None or duration_ms is None:
+        return None
+    try:
+        key = _runtime_cache_key(token)
+        pipe = r.pipeline()
+        pipe.incrby(key, int(duration_ms))
+        pipe.ttl(key)
+        new_total, current_ttl = pipe.execute()
+        # TTL == -1 means the key has no expiry yet (newly created)
+        if current_ttl == -1:
+            r.expire(key, RUNTIME_COUNTER_TTL)
+        return new_total
+    except Exception as e:
+        print(f"[Redis] incr_runtime_cache error: {e}")
+        return None
+
+
+def get_runtime_cache(token):
+    """Read cached runtime total.  Returns (is_cached, total_ms)."""
+    r = get_redis_client()
+    if r is None:
+        return (False, 0)
+    try:
+        value = r.get(_runtime_cache_key(token))
+        if value is None:
+            return (False, 0)
+        return (True, int(value))
+    except Exception as e:
+        print(f"[Redis] get_runtime_cache error: {e}")
+        return (False, 0)
+
+
+def clear_runtime_cache(token):
+    """Delete cached runtime counter (called on unblock / budget reset)."""
+    r = get_redis_client()
+    if r is None:
+        return
+    try:
+        r.delete(_runtime_cache_key(token))
+    except Exception as e:
+        print(f"[Redis] clear_runtime_cache error: {e}")
 
 
 def _parse_datetime(value):
@@ -184,12 +273,20 @@ def logAccess(token, module, duration_ms=None):
     }
     if duration_ms is not None:
         log["duration_ms"] = int(duration_ms)
+        incr_runtime_cache(token, int(duration_ms))
     logs = db.api_log
     logs.insert_one(log).inserted_id
 
 
 # sum token runtime from api_log over a rolling 24-hour window
 def getTokenRuntimeLast24Hours(token):
+    # Fast path: read from Redis counter
+    is_cached, cached_total_ms = get_runtime_cache(token)
+    if is_cached:
+        print(f"[getTokenRuntimeLast24Hours] Redis cache hit: token={token} total_ms={cached_total_ms}")
+        return cached_total_ms
+
+    # Slow path: MongoDB aggregation (cache miss or Redis unavailable)
     db = connectMongoDBReadOnly(False,True,True)
     logs = db.api_log
     users = db.api_users
@@ -225,9 +322,18 @@ def getTokenRuntimeLast24Hours(token):
         total_ms = 0
     else:
         total_ms = int(result[0].get("total_duration_ms", 0))
-    
+
+    # Seed the Redis counter so subsequent calls use the fast path
+    r = get_redis_client()
+    if r is not None and total_ms > 0:
+        try:
+            key = _runtime_cache_key(token)
+            r.set(key, total_ms, ex=RUNTIME_COUNTER_TTL, nx=True)
+        except Exception as e:
+            print(f"[Redis] Failed to seed runtime cache: {e}")
+
     print(
-        f"[getTokenRuntimeLast24Hours] token={token} window_start={window_start} "
+        f"[getTokenRuntimeLast24Hours] MongoDB fallback: token={token} window_start={window_start} "
         f"effective_window_start={effective_window_start} runtime_budget_reset_at={runtime_budget_reset_at} total_ms={total_ms}"
     )
     return total_ms
@@ -300,12 +406,18 @@ def unblockUser(email):
     }
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
+    record = users.find_one({"email": email})
+    if record is None:
+        return None
+    token = record.get("token")
     update_operation = users.find_one_and_update(
         {"email": email},
         {"$set": {"blocked": 0, "blocked_reason": None, "blocked_at": None, "blocked_until": None}}
     )
     if update_operation is None:
         return None
+    if token:
+        clear_runtime_cache(token)
     emailUserUnblocked(email, email_account)
     return out_json
 
@@ -447,6 +559,7 @@ def checkBlocked(token):
                         }
                     )
                     print(f"[checkBlocked] Auto-unblocked runtime-limited token after cooldown: {token}")
+                    clear_runtime_cache(token)
                     return (False, None)
 
         return (True, blocked_reason)
