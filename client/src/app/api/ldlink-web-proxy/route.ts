@@ -111,15 +111,16 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
   const headers = buildForwardHeaders(request, internalAuthToken);
   const method = request.method.toUpperCase();
 
-  const init: RequestInit & { duplex?: "half" } = {
+  const init: RequestInit = {
     method,
     headers,
     redirect: "manual",
   };
 
   if (method !== "GET" && method !== "HEAD") {
-    init.body = request.body;
-    init.duplex = "half";
+    const body = await request.arrayBuffer();
+    init.body = body;
+    headers.set("content-length", String(body.byteLength));
   }
 
   try {
