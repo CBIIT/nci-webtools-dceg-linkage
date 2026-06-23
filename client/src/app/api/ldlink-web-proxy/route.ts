@@ -1,63 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import {
+  getSessionCookieName,
+  getSessionSigningSecret,
+  isSignedSessionValueValid,
+} from "@/lib/session";
 
 const HEADER_ALLOWLIST = ["accept", "accept-language", "content-type", "user-agent", "x-request-id"];
-const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-
-function getSessionSigningSecret(): string {
-  return process.env.LDLINK_INTERNAL_AUTH_TOKEN?.trim() || "";
-}
-
-function toBase64Url(input: Buffer): string {
-  return input
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
-}
-
-function signPayload(payload: string, secret: string): string {
-  return toBase64Url(createHmac("sha256", secret).update(payload).digest());
-}
-
-function safeSignatureEqual(expected: string, provided: string): boolean {
-  const expectedBuffer = Buffer.from(expected);
-  const providedBuffer = Buffer.from(provided);
-
-  if (expectedBuffer.length !== providedBuffer.length) {
-    return false;
-  }
-
-  return timingSafeEqual(expectedBuffer, providedBuffer);
-}
 
 function hasValidBrowserSession(request: NextRequest, signingSecret: string): boolean {
-  const sessionCookieName = process.env.LDLINK_BROWSER_SESSION_COOKIE_NAME?.trim() || "ldlink_browser_session";
+  const sessionCookieName = getSessionCookieName();
   const sessionCookie = request.cookies.get(sessionCookieName);
   const value = sessionCookie?.value?.trim();
   if (!value) {
     return false;
   }
 
-  const parts = value.split(".");
-  if (parts.length !== 3) {
-    return false;
-  }
-
-  const [issuedAtRaw, nonce, signature] = parts;
-  const issuedAt = Number(issuedAtRaw);
-
-  if (!Number.isFinite(issuedAt) || issuedAt <= 0 || !nonce || !signature) {
-    return false;
-  }
-
-  if (Date.now() - issuedAt > COOKIE_MAX_AGE_MS) {
-    return false;
-  }
-
-  const payload = `${issuedAtRaw}.${nonce}`;
-  const expectedSignature = signPayload(payload, signingSecret);
-  return safeSignatureEqual(expectedSignature, signature);
+  return isSignedSessionValueValid(value, signingSecret);
 }
 
 function getBackendBaseUrl(): string {
