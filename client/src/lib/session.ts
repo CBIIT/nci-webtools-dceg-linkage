@@ -53,7 +53,12 @@ export function isSignedSessionValueValid(value: string, secret: string): boolea
     return false;
   }
 
-  if (Date.now() - issuedAt > COOKIE_MAX_AGE_MS) {
+  const now = Date.now();
+  if (issuedAt > now + 5 * 60 * 1000) {
+    return false;
+  }
+
+  if (now - issuedAt > COOKIE_MAX_AGE_MS) {
     return false;
   }
 
