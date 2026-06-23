@@ -530,7 +530,6 @@ def requires_admin_token(f):
 # Keeping a second implementation here is redundant and can be misleading, and its cookie format
 # does not match what the BFF proxy validates.
 
-
 # Web route to register user's email for API token
 @app.route("/LDlinkRestWeb/apiaccess/register_web", methods=["GET"])
 def register_web():
