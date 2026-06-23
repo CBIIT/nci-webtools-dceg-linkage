@@ -224,7 +224,7 @@ def internal_auth_guard():
         app.logger.error(
             f"Internal auth token is not configured; blocking LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-        response = sendTraceback("Internal auth is not configured for LDlinkRestWeb compute routes.")
+        response = sendJSON({"error": "Internal auth is not configured for LDlinkRestWeb compute routes."})
         response.status_code = 500
         return response
 
@@ -232,14 +232,15 @@ def internal_auth_guard():
         app.logger.warning(
             f"Missing X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-        response = sendTraceback("Forbidden: internal authentication header is required.")
+        response = sendJSON({"error": "Forbidden: internal authentication header is required."})
         response.status_code = 403
         return response
+
     if not hmac.compare_digest(provided_internal_token, expected_internal_token):
         app.logger.warning(
             f"Invalid X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-        response = sendTraceback("Forbidden: internal authentication header is invalid.")
+        response = sendJSON({"error": "Forbidden: internal authentication header is invalid."})
         response.status_code = 403
         return response
 
@@ -525,6 +526,14 @@ def requires_admin_token(f):
 #     return sendJSON(out_json)
 
 
+<<<<<<< HEAD
+=======
+# Browser session initialization is handled by the Next.js BFF at /api/init-browser-session.
+# Keeping a second implementation here is redundant and can be misleading, and its cookie format
+# does not match what the BFF proxy validates.
+
+
+>>>>>>> c0bbcdf201b98cfc3e0b9bf85f59f13725fbd590
 # Web route to register user's email for API token
 @app.route("/LDlinkRestWeb/apiaccess/register_web", methods=["GET"])
 def register_web():
