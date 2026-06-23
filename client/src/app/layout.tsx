@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Script from "next/script";
 import { Suspense } from "react";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -12,7 +12,31 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import "./styles/main.scss";
 
+async function initializeBrowserSession() {
+  try {
+    // Must match backend and proxy: server/LDlink.py, route.ts
+    const sessionCookieName = process.env.NEXT_PUBLIC_LDLINK_BROWSER_SESSION_COOKIE_NAME || "ldlink_browser_session";
+    const cookies = document.cookie.split(";").map((c) => c.trim());
+    const hasSession = cookies.some((c) => c.startsWith(sessionCookieName + "="));
+
+    if (!hasSession) {
+      const response = await fetch("/api/init-browser-session", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        console.warn("Failed to initialize browser session:", response.status);
+      }
+    }
+  } catch (error) {
+    console.warn("Error initializing browser session:", error);
+  }
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    initializeBrowserSession();
+  }, []);
   const routes: Route[] = [
     { title: "Home", path: "/", subRoutes: [] },
     {

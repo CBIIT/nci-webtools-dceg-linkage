@@ -1,31 +1,63 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 const HEADER_ALLOWLIST = ["accept", "accept-language", "content-type", "cookie", "user-agent", "x-request-id"];
+const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-function isValidSameOriginUrl(urlValue: string, expectedOrigin: string): boolean {
-  try {
-    return new URL(urlValue).origin === expectedOrigin;
-  } catch {
-    return false;
-  }
+function getSessionSigningSecret(): string {
+  return process.env.LDLINK_INTERNAL_AUTH_TOKEN?.trim() || "";
 }
 
-function isBrowserLikeRequest(request: NextRequest): boolean {
-  const host = request.headers.get("host") || "";
-  const expectedOrigin = `${request.nextUrl.protocol}//${host}`;
+function toBase64Url(input: Buffer): string {
+  return input
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
 
-  const origin = request.headers.get("origin") || "";
-  const referer = request.headers.get("referer") || "";
-  const secFetchSite = (request.headers.get("sec-fetch-site") || "").toLowerCase();
-  const secFetchMode = (request.headers.get("sec-fetch-mode") || "").toLowerCase();
+function signPayload(payload: string, secret: string): string {
+  return toBase64Url(createHmac("sha256", secret).update(payload).digest());
+}
 
-  const hasSameOriginOrigin = origin ? origin === expectedOrigin : false;
-  const hasSameOriginReferer = referer ? isValidSameOriginUrl(referer, expectedOrigin) : false;
-  const hasSameOriginSource = hasSameOriginOrigin || hasSameOriginReferer;
+function safeSignatureEqual(expected: string, provided: string): boolean {
+  const expectedBuffer = Buffer.from(expected);
+  const providedBuffer = Buffer.from(provided);
 
-  const hasBrowserFetchSignals = secFetchSite === "same-origin" && (secFetchMode === "cors" || secFetchMode === "same-origin" || secFetchMode === "navigate");
+  if (expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
 
-  return hasSameOriginSource && hasBrowserFetchSignals;
+  return timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+function hasValidBrowserSession(request: NextRequest, signingSecret: string): boolean {
+  const sessionCookieName = process.env.LDLINK_BROWSER_SESSION_COOKIE_NAME?.trim() || "ldlink_browser_session";
+  const sessionCookie = request.cookies.get(sessionCookieName);
+  const value = sessionCookie?.value?.trim();
+  if (!value) {
+    return false;
+  }
+
+  const parts = value.split(".");
+  if (parts.length !== 3) {
+    return false;
+  }
+
+  const [issuedAtRaw, nonce, signature] = parts;
+  const issuedAt = Number(issuedAtRaw);
+
+  if (!Number.isFinite(issuedAt) || issuedAt <= 0 || !nonce || !signature) {
+    return false;
+  }
+
+  if (Date.now() - issuedAt > COOKIE_MAX_AGE_MS) {
+    return false;
+  }
+
+  const payload = `${issuedAtRaw}.${nonce}`;
+  const expectedSignature = signPayload(payload, signingSecret);
+  return safeSignatureEqual(expectedSignature, signature);
 }
 
 function getBackendBaseUrl(): string {
@@ -90,9 +122,17 @@ function buildClientHeaders(upstreamHeaders: Headers): Headers {
 }
 
 async function proxyRequest(request: NextRequest): Promise<Response> {
-  if (!isBrowserLikeRequest(request)) {
+  const signingSecret = getSessionSigningSecret();
+  if (!signingSecret) {
     return NextResponse.json(
-      { error: "Forbidden. Browser-origin request is required." },
+      { error: "Session signing secret is not configured for web proxy." },
+      { status: 500 }
+    );
+  }
+
+  if (!hasValidBrowserSession(request, signingSecret)) {
+    return NextResponse.json(
+      { error: "Forbidden. Valid browser session is required. Please refresh and try again." },
       { status: 403 }
     );
   }

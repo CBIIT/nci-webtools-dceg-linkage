@@ -37,6 +37,10 @@ containerDefinitions:
         value: "${TIER}-${APP}-web"
       - name: DD_VERSION
         value: "${APP_GIT_TAG}"
+      - name: LDLINK_BROWSER_SESSION_COOKIE_NAME
+        value: "ldlink_browser_session"
+      - name: NEXT_PUBLIC_LDLINK_BROWSER_SESSION_COOKIE_NAME
+        value: "ldlink_browser_session"
     secrets:
       - name: LDLINK_INTERNAL_AUTH_TOKEN
         valueFrom: "/analysistools/${TIER}/${APP}/ldlink_internal_auth_token"
