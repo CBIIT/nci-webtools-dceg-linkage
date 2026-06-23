@@ -14,11 +14,8 @@ import "./styles/main.scss";
 
 async function initializeBrowserSession() {
   try {
-<<<<<<< HEAD
     // Initialize browser session. The session cookie is httpOnly, so we cannot check for it
     // via document.cookie. The endpoint is idempotent and handles existing valid sessions.
-=======
->>>>>>> c0bbcdf201b98cfc3e0b9bf85f59f13725fbd590
     const response = await fetch("/api/init-browser-session", {
       method: "GET",
       credentials: "include",
