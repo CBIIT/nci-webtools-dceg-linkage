@@ -28,7 +28,7 @@ function normalizeTarget(target: string | null): string | null {
   }
 
   const trimmed = target.trim().replace(/^\/+/, "");
-  if (!trimmed || trimmed.includes("..")) {
+  if (!trimmed || trimmed.includes("..") || trimmed.includes("?") || trimmed.includes("#")) {
     return null;
   }
 
