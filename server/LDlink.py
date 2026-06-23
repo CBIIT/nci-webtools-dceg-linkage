@@ -224,7 +224,7 @@ def internal_auth_guard():
         app.logger.error(
             f"Internal auth token is not configured; blocking LDlinkRestWeb compute request for {request.path} from {request_source}."
         )
-        response = sendTraceback("Internal auth is not configured for LDlinkRestWeb compute routes.")
+        response = sendJSON({"error": "Internal auth is not configured for LDlinkRestWeb compute routes."})
         response.status_code = 500
         return response
 
