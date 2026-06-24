@@ -19,7 +19,7 @@ function hasValidBrowserSession(request: NextRequest, signingSecret: string): bo
 }
 
 function getBackendBaseUrl(): string {
-  return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:80";
+  return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:80";
 }
 
 function normalizeTarget(target: string | null): string | null {

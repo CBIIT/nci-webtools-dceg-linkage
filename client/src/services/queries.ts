@@ -71,15 +71,15 @@ export async function ldproxy(params: any): Promise<any> {
 }
 
 export async function fetchOutput(filename: string): Promise<any> {
-  return (await axios.get(webProxyUrl(`tmp/${filename}`))).data;
+  return (await axios.get(`/LDlinkRestWeb/tmp/${filename}`)).data;
 }
 
 export async function fetchOutputText(filename: string): Promise<any> {
-  return (await axios.get(webProxyUrl(`tmp/${filename}`), { responseType: "text" })).data;
+  return (await axios.get(`/LDlinkRestWeb/tmp/${filename}`, { responseType: "text" })).data;
 }
 
 export async function fetchOutputStatus(filename: string): Promise<any> {
-  return (await axios.get(webProxyUrl(`status/${filename}`))).data;
+  return (await axios.get(`/LDlinkRestWeb/status/${filename}`)).data;
 }
 
 export async function snpchipPlatforms(): Promise<any> {

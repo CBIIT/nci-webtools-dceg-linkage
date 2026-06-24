@@ -6,11 +6,7 @@ export const COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 export const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_SECONDS * 1000;
 
 export function getSessionCookieName(): string {
-  return (
-    process.env.LDLINK_BROWSER_SESSION_COOKIE_NAME?.trim() ||
-    process.env.NEXT_PUBLIC_LDLINK_BROWSER_SESSION_COOKIE_NAME?.trim() ||
-    DEFAULT_COOKIE_NAME
-  );
+  return DEFAULT_COOKIE_NAME;
 }
 
 export function getSessionSigningSecret(): string {
