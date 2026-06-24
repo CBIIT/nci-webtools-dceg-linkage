@@ -389,30 +389,31 @@ def requires_token(f):
                         return sendTraceback(
                             "Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov"
                         )
-                total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
-                request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
-                runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
-                
-                app.logger.info(
-                    "Runtime budget check: token=%s total_runtime_ms_24h=%d limit_ms_24h=%d comparison_result=%s",
-                    token,
-                    total_runtime_ms_24h,
-                    runtime_limit_ms_24h,
-                    "OVER_LIMIT" if total_runtime_ms_24h > runtime_limit_ms_24h else "UNDER_LIMIT"
-                )
-
-                if total_runtime_ms_24h > runtime_limit_ms_24h:
-                    app.logger.warning(
-                        "BLOCKING TOKEN: token=%s total_runtime_ms_24h=%d exceeded limit=%d module=%s",
+                if not param_list.get("disable_control", True):
+                    total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
+                    request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
+                    runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
+                    
+                    app.logger.info(
+                        "Runtime budget check: token=%s total_runtime_ms_24h=%d limit_ms_24h=%d comparison_result=%s",
                         token,
                         total_runtime_ms_24h,
                         runtime_limit_ms_24h,
-                        getModule(request.full_path),
+                        "OVER_LIMIT" if total_runtime_ms_24h > runtime_limit_ms_24h else "UNDER_LIMIT"
                     )
-                    blockToken(token, url_root)
-                    return sendTraceback(
-                        "Your API token has been blocked because runtime usage exceeded the 24-hour test limit. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
-                    )
+
+                    if total_runtime_ms_24h > runtime_limit_ms_24h:
+                        app.logger.warning(
+                            "BLOCKING TOKEN: token=%s total_runtime_ms_24h=%d exceeded limit=%d module=%s",
+                            token,
+                            total_runtime_ms_24h,
+                            runtime_limit_ms_24h,
+                            getModule(request.full_path),
+                        )
+                        blockToken(token, url_root)
+                        return sendTraceback(
+                            "Your API token has been blocked because runtime usage exceeded the 24-hour test limit. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
+                        )
                 # Check if token has been authorized to access api server 2
                 # if ("LDlinkRest2" in request.full_path):
                 #    if not checkApiServer2Auth(token):

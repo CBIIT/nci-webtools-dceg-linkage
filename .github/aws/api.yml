@@ -100,6 +100,8 @@ containerDefinitions:
         valueFrom: "/analysistools/${TIER}/${APP}/token_lock_timeout"
       - name: RESTRICT_CONCURRENCY
         valueFrom: "/analysistools/${TIER}/${APP}/restrict_concurrency"
+      - name: DISABLE_CONTROL
+        valueFrom: "/analysistools/${TIER}/${APP}/disable_control"
       - name: RUNTIME_LIMIT_MS_24H
         valueFrom: "/analysistools/${TIER}/${APP}/runtime_limit_ms_24h"
       - name: RUNTIME_BLOCK_COOLDOWN_MINUTES
