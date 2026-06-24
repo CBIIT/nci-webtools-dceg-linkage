@@ -30,4 +30,4 @@ config.yml
 .env
 **mcp.json
 *.plan.md
-ldlink-autoscaling-next-steps.*
+*steps.*
