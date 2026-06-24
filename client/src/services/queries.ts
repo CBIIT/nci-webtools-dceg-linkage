@@ -1,5 +1,12 @@
 import axios from "axios";
 
+const WEB_PROXY_ENDPOINT = "/api/ldlink-web-proxy";
+
+function webProxyUrl(target: string, queryString = ""): string {
+  const encodedTarget = encodeURIComponent(target);
+  return `${WEB_PROXY_ENDPOINT}?target=${encodedTarget}${queryString ? `&${queryString}` : ""}`;
+}
+
 // Flattens nested objects into bracket notation keys for URLSearchParams
 function flattenForParams(obj: any, prefix = ""): Record<string, any> {
   return Object.keys(obj).reduce((acc: any, key) => {
@@ -18,49 +25,49 @@ function flattenForParams(obj: any, prefix = ""): Record<string, any> {
 }
 
 export async function upload(formData: any): Promise<any> {
-  return await axios.post(`/LDlinkRestWeb/upload`, formData);
+  return await axios.post(webProxyUrl("upload"), formData);
 }
 
 export async function ldassoc(params: any): Promise<any> {
   const searchParams = new URLSearchParams(flattenForParams(params)).toString();
-  return (await axios.get(`/LDlinkRestWeb/ldassoc?${searchParams}`)).data;
+  return (await axios.get(webProxyUrl("ldassoc", searchParams))).data;
 }
 
 export async function ldassocExample(genome_build: string): Promise<any> {
-  return (await axios.get(`/LDlinkRestWeb/ldassoc_example?genome_build=${genome_build}`)).data;
+  return (await axios.get(webProxyUrl("ldassoc_example", `genome_build=${encodeURIComponent(genome_build)}`))).data;
 }
 
 export async function ldexpress(params: any): Promise<any> {
-  return (await axios.post(`/LDlinkRestWeb/ldexpress`, params)).data;
+  return (await axios.post(webProxyUrl("ldexpress"), params)).data;
 }
 
 export async function ldexpressTissues(): Promise<any> {
-  return (await axios.get(`/LDlinkRestWeb/ldexpress_tissues`)).data;
+  return (await axios.get(webProxyUrl("ldexpress_tissues"))).data;
 }
 
 export async function ldhap(params: any): Promise<any> {
   const searchParams = new URLSearchParams(params).toString();
-  return (await axios.get(`/LDlinkRestWeb/ldhap?${searchParams}`)).data;
+  return (await axios.get(webProxyUrl("ldhap", searchParams))).data;
 }
 
 export async function ldmatrix(params: any): Promise<any> {
   const searchParams = new URLSearchParams(params).toString();
-  return (await axios.get(`/LDlinkRestWeb/ldmatrix?${searchParams}`)).data;
+  return (await axios.get(webProxyUrl("ldmatrix", searchParams))).data;
 }
 
 export async function ldpair(params: any): Promise<any> {
   const searchParams = new URLSearchParams(params).toString();
-  return (await axios.get(`/LDlinkRestWeb/ldpair?${searchParams}`)).data;
+  return (await axios.get(webProxyUrl("ldpair", searchParams))).data;
 }
 
 export async function ldpop(params: any): Promise<any> {
   const searchParams = new URLSearchParams(params).toString();
-  return (await axios.get(`/LDlinkRestWeb/ldpop?${searchParams}`)).data;
+  return (await axios.get(webProxyUrl("ldpop", searchParams))).data;
 }
 
 export async function ldproxy(params: any): Promise<any> {
   const searchParams = new URLSearchParams(params).toString();
-  return (await axios.get(`/LDlinkRestWeb/ldproxy?${searchParams}`)).data;
+  return (await axios.get(webProxyUrl("ldproxy", searchParams))).data;
 }
 
 export async function fetchOutput(filename: string): Promise<any> {
@@ -76,45 +83,47 @@ export async function fetchOutputStatus(filename: string): Promise<any> {
 }
 
 export async function snpchipPlatforms(): Promise<any> {
-  return (await axios.get(`/LDlinkRestWeb/snpchip_platforms`)).data;
+  return (await axios.get(webProxyUrl("snpchip_platforms"))).data;
 }
 
 export async function snpchip(params: any): Promise<any> {
-  return (await axios.post(`/LDlinkRestWeb/snpchip`, params)).data;
+  return (await axios.post(webProxyUrl("snpchip"), params)).data;
 }
 
 export async function ldscore(params: any): Promise<any> {
-  return (await axios.post(`/LDlinkRestWeb/ldscore`, params)).data;
+  return (await axios.post(webProxyUrl("ldscore"), params)).data;
 }
 export async function snpclip(params: any): Promise<any> {
-  return (await axios.post(`/LDlinkRestWeb/snpclip`, params)).data;
+  return (await axios.post(webProxyUrl("snpclip"), params)).data;
 }
 
 export async function fetchHeritabilityResult(params: URLSearchParams): Promise<any> {
-  return (await axios.get(`/LDlinkRestWeb/ldherit?${params.toString()}`)).data;
+  return (await axios.get(webProxyUrl("ldherit", params.toString()))).data;
 }
 
 export async function fetchGeneticCorrelationResult(params: URLSearchParams): Promise<any> {
-  return (await axios.get(`/LDlinkRestWeb/ldcorrelation?${params.toString()}`)).data;
+  return (await axios.get(webProxyUrl("ldcorrelation", params.toString()))).data;
 }
 
 export async function fetchLdScoreCalculationResult(params: URLSearchParams): Promise<any> {
-  // Try /LDlinkRestWeb/ldscore first, fallback to /LDlinkRest/ldscore if needed
+  // Try BFF route first, fallback to the existing /api rewrite for LDlinkRest.
   try {
-    return (await axios.get(`/LDlinkRestWeb/ldscore?${params.toString()}`)).data;
+    return (await axios.get(webProxyUrl("ldscore", params.toString()))).data;
   } catch (err) {
-    return (await axios.get(`/LDlinkRest/ldscore?${params.toString()}`)).data;
+    return (await axios.get(`/api/ldscore?${params.toString()}`)).data;
   }
 }
 
 export async function ldtrait(params: any): Promise<any> {
-  return (await axios.post(`/LDlinkRestWeb/ldtrait`, params)).data;
+  return (await axios.post(webProxyUrl("ldtrait"), params)).data;
 }
 
 export async function validateSumstats(filename: string, reference: string): Promise<any> {
-  return (await axios.get(`/LDlinkRestWeb/validate_sumstats?filename=${filename}&reference=${reference}`)).data;
+  const query = `filename=${encodeURIComponent(filename)}&reference=${encodeURIComponent(reference)}`;
+  return (await axios.get(webProxyUrl("validate_sumstats", query))).data;
 }
 
 export async function validateBfile(filename: string, reference: string): Promise<any> {
-  return (await axios.get(`/LDlinkRestWeb/validate_bfile?filename=${encodeURIComponent(filename)}&reference=${reference}`)).data;
+  const query = `filename=${encodeURIComponent(filename)}&reference=${encodeURIComponent(reference)}`;
+  return (await axios.get(webProxyUrl("validate_bfile", query))).data;
 }

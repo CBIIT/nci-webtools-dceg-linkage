@@ -29,5 +29,6 @@ config.yml
 
 .env
 **mcp.json
+
 *.plan.md
 *steps.*
