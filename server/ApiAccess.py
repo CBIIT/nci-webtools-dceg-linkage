@@ -38,11 +38,13 @@ def get_redis_client():
         return None
 
     try:
+        use_tls = os.environ.get("REDIS_TLS", "YES").upper() == "YES"
         client = redis.Redis(
             host=os.environ.get("REDIS_HOST", "localhost"),
             port=int(os.environ.get("REDIS_PORT", "6379")),
             db=int(os.environ.get("REDIS_DB", "0")),
             password=os.environ.get("REDIS_PASSWORD", None),
+            ssl=use_tls,
             decode_responses=True,
             socket_connect_timeout=2,
             socket_timeout=2,
