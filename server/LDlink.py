@@ -525,11 +525,6 @@ def requires_admin_token(f):
 #     app.logger.info("Executed unblocked API user justification submission (%ss)" % (round(end_time - start_time, 2)))
 #     return sendJSON(out_json)
 
-
-# Browser session initialization is handled by the Next.js BFF at /api/init-browser-session.
-# Keeping a second implementation here is redundant and can be misleading, and its cookie format
-# does not match what the BFF proxy validates.
-
 # Web route to register user's email for API token
 @app.route("/LDlinkRestWeb/apiaccess/register_web", methods=["GET"])
 def register_web():

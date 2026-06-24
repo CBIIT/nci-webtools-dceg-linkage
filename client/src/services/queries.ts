@@ -106,12 +106,7 @@ export async function fetchGeneticCorrelationResult(params: URLSearchParams): Pr
 }
 
 export async function fetchLdScoreCalculationResult(params: URLSearchParams): Promise<any> {
-  // Try BFF route first, fallback to the existing /api rewrite for LDlinkRest.
-  try {
     return (await axios.get(webProxyUrl("ldscore", params.toString()))).data;
-  } catch (err) {
-    return (await axios.get(`/api/ldscore?${params.toString()}`)).data;
-  }
 }
 
 export async function ldtrait(params: any): Promise<any> {
