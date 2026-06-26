@@ -118,9 +118,15 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
   };
 
   if (method !== "GET" && method !== "HEAD") {
-    const body = await request.arrayBuffer();
-    init.body = body;
-    headers.set("content-length", String(body.byteLength));
+    // Stream the request body directly to the backend instead of buffering it
+    // with arrayBuffer(). Buffering loads the entire file (e.g. large .bed/.bim/.fam)
+    // into Node.js heap, which OOM-kills the frontend ECS container.
+    // `duplex: "half"` is required by Node.js undici fetch for ReadableStream bodies.
+    const contentLength = request.headers.get("content-length");
+    if (contentLength) {
+      headers.set("content-length", contentLength);
+    }
+    Object.assign(init, { body: request.body, duplex: "half" });
   }
 
   try {
