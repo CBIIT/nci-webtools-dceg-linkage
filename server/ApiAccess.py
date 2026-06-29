@@ -56,6 +56,7 @@ def get_redis_client():
         _redis_client = client
         return _redis_client
     except Exception as e:
+        _redis_checked = False  # allow retry on transient failures
         print(f"[Redis] Connection failed, falling back to MongoDB only: {e}")
         return None
 
@@ -390,30 +391,14 @@ def getTokenRuntimeLast24Hours(token):
     else:
         total_ms = int(result[0].get("total_duration_ms", 0))
 
-    # Seed the Redis sorted-set so subsequent calls use the fast path.
-    # Add a single synthetic entry at now_ms representing the aggregated
-    # MongoDB total.  Placing it at the current time means it ages out of
-    # the rolling window in exactly 24h — matching MongoDB's own cutoff.
-    # NX-style guard: only seed if no key exists (avoids overwriting live data).
-    r = get_redis_client()
-    if r is not None and total_ms > 0:
-        try:
-            key = _runtime_cache_key(token)
-            now_ms = int(time.time() * 1000)
-            member = f"{int(total_ms)}:{uuid.uuid4().hex}"
-            lua_seed = """
-                local key    = KEYS[1]
-                local now_ms = tonumber(ARGV[1])
-                local win_ms = tonumber(ARGV[2])
-                local member = ARGV[3]
-                if redis.call('EXISTS', key) == 0 then
-                    redis.call('ZADD', key, now_ms, member)
-                    redis.call('EXPIRE', key, math.ceil(win_ms / 1000))
-                end
-            """
-            r.eval(lua_seed, 1, key, now_ms, RUNTIME_WINDOW_MS, member)
-        except Exception as e:
-            print(f"[Redis] Failed to seed runtime cache: {e}")
+    # Do not seed Redis from the aggregated MongoDB total.  A synthetic entry
+    # scored at now_ms would keep usage from requests spread across the past
+    # 24h alive for another full window, over-counting and potentially
+    # blocking tokens prematurely.  Instead, let the cache warm organically:
+    # incr_runtime_cache() adds real per-request entries after each completed
+    # call, and once the key exists those entries correctly represent the
+    # rolling window.  Until then, this MongoDB path is the authoritative
+    # source and handles the budget check correctly.
 
     print(
         f"[getTokenRuntimeLast24Hours] MongoDB fallback: token={token} window_start={window_start} "
@@ -495,7 +480,13 @@ def unblockUser(email):
     token = record.get("token")
     update_operation = users.find_one_and_update(
         {"email": email},
-        {"$set": {"blocked": 0, "blocked_reason": None, "blocked_at": None, "blocked_until": None}}
+        {"$set": {
+            "blocked": 0,
+            "blocked_reason": None,
+            "blocked_at": None,
+            "blocked_until": None,
+            "runtime_budget_reset_at": getDatetime(),
+        }}
     )
     if update_operation is None:
         return None

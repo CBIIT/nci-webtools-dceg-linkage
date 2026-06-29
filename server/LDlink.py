@@ -1341,16 +1341,6 @@ def ldassoc():
 @app.route("/LDlinkRestWeb/ldscore", methods=["GET"])
 @requires_token
 def ldscore():
-    request_started_at = time.time()
-    token_for_log = request.args.get("token", "NA")
-    module_for_log = "LDscore"
-    is_api_request = "LDlinkRestWeb" not in request.path
-
-    def _log_ldscore_access():
-        if is_api_request:
-            duration_ms = round((time.time() - request_started_at) * 1000)
-            logAccess(token_for_log, module_for_log, duration_ms)
-
     if "LDlinkRestWeb" in request.path:
         web = True
     else:
@@ -1375,7 +1365,6 @@ def ldscore():
         reference, fileDir = _resolve_upload_dir(reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDscore reference: {validation_error}")
-        _log_ldscore_access()
         return sendTraceback(str(validation_error))
 
     inputfilename = "22"
@@ -1410,7 +1399,6 @@ def ldscore():
                     safe_fname, new_file_path, _ = _resolve_upload_file_path(fname, reference, create_dir=True)
                 except ValueError as validation_error:
                     app.logger.warning(f"Invalid LDscore filename: {validation_error}")
-                    _log_ldscore_access()
                     return sendTraceback(str(validation_error))
                 
                 if str(isExample).lower() == "true":
@@ -1422,11 +1410,9 @@ def ldscore():
                         app.logger.info(f"Copied example file {safe_fname} to {new_file_path}")
                     except (ValueError, FileNotFoundError) as copy_error:
                         app.logger.warning(f"Invalid LDscore example file request: {copy_error}")
-                        _log_ldscore_access()
                         return sendTraceback(str(copy_error))
                     except OSError as copy_error:
                         app.logger.error(f"Failed to copy LDscore example file: {copy_error}")
-                        _log_ldscore_access()
                         return sendTraceback("Unable to copy requested example file.")
                 else:
                     # For uploaded files, they are already in the reference folder from upload endpoint
@@ -1469,7 +1455,6 @@ def ldscore():
             # print(pretty_out_json)
             schedule_tmp_cleanup(reference, app.logger)
             schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
-            _log_ldscore_access()
             return filtered_result
             out_json = pretty_out_json
 
@@ -1482,7 +1467,6 @@ def ldscore():
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
     schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
-    _log_ldscore_access()
     return jsonify(out_json)
 
 
@@ -1586,16 +1570,6 @@ def ldscoreapi():
 @app.route("/LDlinkRestWeb/ldherit", methods=["GET"])
 @requires_token
 def ldherit():
-    request_started_at = time.time()
-    token_for_log = request.args.get("token", "NA")
-    module_for_log = "LDherit"
-    is_api_request = "LDlinkRestWeb" not in request.path
-
-    def _log_ldherit_access():
-        if is_api_request:
-            duration_ms = round((time.time() - request_started_at) * 1000)
-            logAccess(token_for_log, module_for_log, duration_ms)
-
     if "LDlinkRestWeb" in request.path:
         web = True
     else:
@@ -1617,7 +1591,6 @@ def ldherit():
         scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit prevalence input: {validation_error}")
-        _log_ldherit_access()
         return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
@@ -1630,7 +1603,6 @@ def ldherit():
         reference, fileDir = _resolve_upload_dir(reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit reference: {validation_error}")
-        _log_ldherit_access()
         return sendTraceback(str(validation_error))
 
     app.logger.debug(f"LDherit processing filename: {filename}")
@@ -1641,7 +1613,6 @@ def ldherit():
             filename, new_file_path, _ = _resolve_upload_file_path(filename, reference, create_dir=True)
         except ValueError as validation_error:
             app.logger.warning(f"Invalid LDherit filename: {validation_error}")
-            _log_ldherit_access()
             return sendTraceback(str(validation_error))
         
         if str(isexample).lower() == "true":
@@ -1653,11 +1624,9 @@ def ldherit():
                 app.logger.info(f"Copied example file {safe_filename} to {new_file_path}")
             except (ValueError, FileNotFoundError) as copy_error:
                 app.logger.warning(f"Invalid LDherit example file request: {copy_error}")
-                _log_ldherit_access()
                 return sendTraceback(str(copy_error))
             except OSError as copy_error:
                 app.logger.error(f"Failed to copy LDherit example file: {copy_error}")
-                _log_ldherit_access()
                 return sendTraceback("Unable to copy requested example file.")
         else:
             # For uploaded files, they are already in the reference folder from upload endpoint
@@ -1694,7 +1663,6 @@ def ldherit():
             # print(pretty_out_json)
             schedule_tmp_cleanup(reference, app.logger)
             schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
-            _log_ldherit_access()
             return filtered_result
             out_json = pretty_out_json
 
@@ -1707,7 +1675,6 @@ def ldherit():
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
     schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
-    _log_ldherit_access()
     return jsonify(out_json)
 
 
@@ -1813,16 +1780,6 @@ def ldheritAPI():
 @app.route("/LDlinkRestWeb/ldcorrelation", methods=["GET"])
 @requires_token
 def ldcorrelation():
-    request_started_at = time.time()
-    token_for_log = request.args.get("token", "NA")
-    module_for_log = "LDcorrelation"
-    is_api_request = "LDlinkRestWeb" not in request.path
-
-    def _log_ldcorrelation_access():
-        if is_api_request:
-            duration_ms = round((time.time() - request_started_at) * 1000)
-            logAccess(token_for_log, module_for_log, duration_ms)
-
     if "LDlinkRestWeb" in request.path:
         web = True
     else:
@@ -1845,7 +1802,6 @@ def ldcorrelation():
         scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=True)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDcorrelation prevalence input: {validation_error}")
-        _log_ldcorrelation_access()
         return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}, scale: {scale}"
@@ -1859,7 +1815,6 @@ def ldcorrelation():
         reference, fileDir = _resolve_upload_dir(reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDcorrelation reference: {validation_error}")
-        _log_ldcorrelation_access()
         return sendTraceback(str(validation_error))
     
     # Handle file copying based on example vs uploaded
@@ -1869,7 +1824,6 @@ def ldcorrelation():
                 safe_fname, new_file_path, _ = _resolve_upload_file_path(fname, reference, create_dir=True)
             except ValueError as validation_error:
                 app.logger.warning(f"Invalid LDcorrelation filename: {validation_error}")
-                _log_ldcorrelation_access()
                 return sendTraceback(str(validation_error))
             
             if str(isexample).lower() == "true":
@@ -1881,11 +1835,9 @@ def ldcorrelation():
                     app.logger.info(f"Copied example file {safe_fname} to {new_file_path}")
                 except (ValueError, FileNotFoundError) as copy_error:
                     app.logger.warning(f"Invalid LDcorrelation example file request: {copy_error}")
-                    _log_ldcorrelation_access()
                     return sendTraceback(str(copy_error))
                 except OSError as copy_error:
                     app.logger.error(f"Failed to copy LDcorrelation example file: {copy_error}")
-                    _log_ldcorrelation_access()
                     return sendTraceback("Unable to copy requested example file.")
             else:
                 # For uploaded files, they are already in the reference folder from upload endpoint
@@ -1929,7 +1881,6 @@ def ldcorrelation():
             # print(pretty_out_json)
             schedule_tmp_cleanup(reference, app.logger)
             schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
-            _log_ldcorrelation_access()
             return filtered_result
             out_json = pretty_out_json
 
@@ -1942,7 +1893,6 @@ def ldcorrelation():
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
     schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
-    _log_ldcorrelation_access()
     return jsonify(out_json)
 
 
