@@ -393,7 +393,6 @@ def requires_token(f):
                     total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
                     request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
                     runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
-                    
                     app.logger.info(
                         "Runtime budget check: token=%s total_runtime_ms_24h=%d limit_ms_24h=%d comparison_result=%s",
                         token,
@@ -419,11 +418,12 @@ def requires_token(f):
                 #    if not checkApiServer2Auth(token):
                 #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
-                app.logger.info(
-                    "Token runtime 24h check for %s: %.2f minutes",
-                    module,
-                    total_runtime_ms_24h / 60000.0,
-                )
+                if not param_list.get("disable_control", True):
+                    app.logger.info(
+                        "Token runtime 24h check for %s: %.2f minutes",
+                        module,
+                        total_runtime_ms_24h / 60000.0,
+                    )
                 request_started_at = time.time()
                 try:
                     return f(*args, **kwargs)

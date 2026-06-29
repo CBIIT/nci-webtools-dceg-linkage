@@ -63,19 +63,29 @@ def _runtime_cache_key(token):
 
 
 def incr_runtime_cache(token, duration_ms):
-    """INCRBY the cached runtime counter.  Sets a 24h TTL on first increment."""
+    """INCRBY the cached runtime counter with a fixed 24h window.
+
+    Uses a Lua script so the key creation and TTL assignment are atomic:
+    the 24h window is anchored to the *first* increment (matching the
+    MongoDB aggregation window used on cache miss), not to each write.
+    """
     r = get_redis_client()
     if r is None or duration_ms is None:
         return None
     try:
         key = _runtime_cache_key(token)
-        pipe = r.pipeline()
-        pipe.incrby(key, int(duration_ms))
-        pipe.ttl(key)
-        new_total, current_ttl = pipe.execute()
-        # TTL == -1 means the key has no expiry yet (newly created)
-        if current_ttl == -1:
-            r.expire(key, RUNTIME_COUNTER_TTL)
+        # Atomic: increment and set TTL only if the key is new (no expiry yet).
+        # KEEPTTL-style: if the key already has a TTL, leave it alone so the
+        # window stays anchored to the first request in that 24h period.
+        lua_script = """
+            local new_val = redis.call('INCRBY', KEYS[1], ARGV[1])
+            local ttl = redis.call('TTL', KEYS[1])
+            if ttl == -1 then
+                redis.call('EXPIRE', KEYS[1], ARGV[2])
+            end
+            return new_val
+        """
+        new_total = r.eval(lua_script, 1, key, int(duration_ms), RUNTIME_COUNTER_TTL)
         return new_total
     except Exception as e:
         print(f"[Redis] incr_runtime_cache error: {e}")
