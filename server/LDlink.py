@@ -408,9 +408,9 @@ if not param_list.get("disable_control", False):
                             getModule(request.full_path),
                         )
                         blockToken(token, url_root)
-                        return sendTraceback(
-                            "Your API token has been blocked because runtime usage exceeded the 24-hour test limit. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
-                        )
+return sendTraceback(
+    f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. It will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
+)
                 # Check if token has been authorized to access api server 2
                 # if ("LDlinkRest2" in request.full_path):
                 #    if not checkApiServer2Auth(token):
