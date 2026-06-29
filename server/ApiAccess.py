@@ -455,7 +455,7 @@ def blockToken(token, url_root):
             "blocked_until": blocked_until,
         }}
     )
-    print(f"[blockToken] Updated token to blocked: token={token} email={email} update_result={update_result is not None}")
+    print(f"[blockToken] Updated token to blocked: email={email} update_result={update_result is not None}")
 
     if email:
         try:
