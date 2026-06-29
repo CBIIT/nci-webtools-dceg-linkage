@@ -27,13 +27,18 @@ RUNTIME_WINDOW_MS = 86400 * 1000  # 24-hour rolling window in milliseconds
 
 _redis_client = None
 _redis_checked = False
+_redis_last_failure = None
+REDIS_RETRY_INTERVAL = 60  # seconds between connection retries after failure
 
 
 def get_redis_client():
     """Lazy-initialize a Redis client.  Returns None when disabled or unreachable."""
-    global _redis_client, _redis_checked
+    global _redis_client, _redis_checked, _redis_last_failure
     if _redis_checked:
         return _redis_client
+    # If the last attempt failed recently, skip retry to avoid per-request 2s timeouts
+    if _redis_last_failure is not None and (time.time() - _redis_last_failure) < REDIS_RETRY_INTERVAL:
+        return None
     _redis_checked = True
 
     if os.environ.get("ENABLE_REDIS_CACHE", "YES").upper() != "YES":
@@ -57,7 +62,8 @@ def get_redis_client():
         _redis_client = client
         return _redis_client
     except Exception as e:
-        _redis_checked = False  # allow retry on transient failures
+        _redis_checked = False  # allow retry after cooldown
+        _redis_last_failure = time.time()
         print(f"[Redis] Connection failed, falling back to MongoDB only: {e}")
         return None
 
