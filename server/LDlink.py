@@ -416,7 +416,7 @@ def requires_token(f):
                 #    if not checkApiServer2Auth(token):
                 #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
-                if not param_list.get("disable_control", True):
+if not param_list.get("disable_control", False):
                     app.logger.info(
                         "Token runtime 24h check for %s: %.2f minutes",
                         module,
