@@ -77,10 +77,16 @@ def incr_runtime_cache(token, duration_ms):
     """Add duration_ms to the rolling 24h runtime counter for token.
 
     Uses a Redis sorted set where each entry's score is the request's Unix
-    timestamp in milliseconds.  A Lua script atomically:
+    timestamp in milliseconds, plus a companion key that tracks the running
+    total.  A Lua script atomically:
       1. Adds the new entry  (score=now_ms, member="{duration_ms}:{uuid}").
-      2. Evicts entries that fell outside the 24h rolling window.
-      3. Returns the updated rolling total.
+      2. Evicts entries that fell outside the 24h rolling window and
+         decrements the running total by the sum of evicted durations.
+      3. Increments the running total by the new duration.
+      4. Returns the updated rolling total.
+
+    Per-request cost is O(k) where k is the number of evicted entries (typically
+    0-1 per call), rather than O(n) over all entries in the window.
 
     This matches the MongoDB aggregation's ``accessed >= now - 24h`` semantics
     so the Redis fast path and the MongoDB fallback are always consistent.
@@ -90,37 +96,52 @@ def incr_runtime_cache(token, duration_ms):
         return None
     try:
         key = _runtime_cache_key(token)
+        total_key = key + ":total"
         now_ms = int(time.time() * 1000)
         # Member encodes duration first so Lua can parse it without ambiguity:
         # format is "{duration_ms}:{uuid_hex}" — take everything before the
         # first colon as the integer duration.
         member = f"{int(duration_ms)}:{uuid.uuid4().hex}"
         lua_script = """
-            local key    = KEYS[1]
-            local now_ms = tonumber(ARGV[1])
-            local win_ms = tonumber(ARGV[2])
-            local member = ARGV[3]
+            local key       = KEYS[1]
+            local total_key = KEYS[2]
+            local now_ms    = tonumber(ARGV[1])
+            local win_ms    = tonumber(ARGV[2])
+            local member    = ARGV[3]
+            local dur_ms    = tonumber(ARGV[4])
 
             -- Add this request's entry.
             redis.call('ZADD', key, now_ms, member)
 
-            -- Evict entries older than the rolling window.
-            redis.call('ZREMRANGEBYSCORE', key, '-inf',
-                       '(' .. tostring(now_ms - win_ms))
-
-            -- Sum durations of all surviving entries.
-            local entries = redis.call('ZRANGE', key, 0, -1)
-            local total = 0
-            for _, m in ipairs(entries) do
+            -- Evict entries older than the rolling window and subtract
+            -- their durations from the running total (O(k evicted)).
+            local cutoff = now_ms - win_ms
+            local evicted = redis.call('ZRANGEBYSCORE', key, '-inf',
+                                       '(' .. tostring(cutoff))
+            local evicted_total = 0
+            for _, m in ipairs(evicted) do
                 local colon = string.find(m, ':')
-                total = total + tonumber(string.sub(m, 1, colon - 1))
+                evicted_total = evicted_total + tonumber(string.sub(m, 1, colon - 1))
+            end
+            if #evicted > 0 then
+                redis.call('ZREMRANGEBYSCORE', key, '-inf',
+                           '(' .. tostring(cutoff))
             end
 
-            -- Refresh TTL so the key lives exactly one more window.
-            redis.call('EXPIRE', key, math.ceil(win_ms / 1000))
-            return total
+            -- Update running total: subtract evicted, add new duration.
+            local current = tonumber(redis.call('GET', total_key) or '0') or 0
+            local new_total = current - evicted_total + dur_ms
+            if new_total < 0 then new_total = 0 end
+            redis.call('SET', total_key, tostring(new_total))
+
+            -- Refresh TTL so both keys live exactly one more window.
+            local ttl_s = math.ceil(win_ms / 1000)
+            redis.call('EXPIRE', key, ttl_s)
+            redis.call('EXPIRE', total_key, ttl_s)
+            return new_total
         """
-        new_total = r.eval(lua_script, 1, key, now_ms, RUNTIME_WINDOW_MS, member)
+        new_total = r.eval(lua_script, 2, key, total_key,
+                           now_ms, RUNTIME_WINDOW_MS, member, int(duration_ms))
         return new_total
     except Exception as e:
         print(f"[Redis] incr_runtime_cache error: {e}")
@@ -133,36 +154,47 @@ def get_runtime_cache(token):
     Returns (True, total_ms) on cache hit, or (False, 0) when the sorted-set
     key is absent (cache miss — caller should fall back to MongoDB).
     Evicts stale entries atomically so the returned value is always current.
+    Per-request cost is O(k evicted) rather than O(n total entries).
     """
     r = get_redis_client()
     if r is None:
         return (False, 0)
     try:
         key = _runtime_cache_key(token)
+        total_key = key + ":total"
         now_ms = int(time.time() * 1000)
         lua_script = """
-            local key    = KEYS[1]
-            local now_ms = tonumber(ARGV[1])
-            local win_ms = tonumber(ARGV[2])
+            local key       = KEYS[1]
+            local total_key = KEYS[2]
+            local now_ms    = tonumber(ARGV[1])
+            local win_ms    = tonumber(ARGV[2])
 
             if redis.call('EXISTS', key) == 0 then
                 return -1  -- sentinel: cache miss
             end
 
-            -- Evict entries that have aged out of the rolling window.
-            redis.call('ZREMRANGEBYSCORE', key, '-inf',
-                       '(' .. tostring(now_ms - win_ms))
-
-            -- Sum durations of all surviving entries.
-            local entries = redis.call('ZRANGE', key, 0, -1)
-            local total = 0
-            for _, m in ipairs(entries) do
+            -- Evict entries that have aged out of the rolling window
+            -- and subtract their durations from the running total (O(k)).
+            local cutoff = now_ms - win_ms
+            local evicted = redis.call('ZRANGEBYSCORE', key, '-inf',
+                                       '(' .. tostring(cutoff))
+            local evicted_total = 0
+            for _, m in ipairs(evicted) do
                 local colon = string.find(m, ':')
-                total = total + tonumber(string.sub(m, 1, colon - 1))
+                evicted_total = evicted_total + tonumber(string.sub(m, 1, colon - 1))
             end
-            return total
+            if #evicted > 0 then
+                redis.call('ZREMRANGEBYSCORE', key, '-inf',
+                           '(' .. tostring(cutoff))
+                local current = tonumber(redis.call('GET', total_key) or '0') or 0
+                local new_total = current - evicted_total
+                if new_total < 0 then new_total = 0 end
+                redis.call('SET', total_key, tostring(new_total))
+            end
+
+            return tonumber(redis.call('GET', total_key) or '0') or 0
         """
-        result = r.eval(lua_script, 1, key, now_ms, RUNTIME_WINDOW_MS)
+        result = r.eval(lua_script, 2, key, total_key, now_ms, RUNTIME_WINDOW_MS)
         if result == -1:
             return (False, 0)
         return (True, int(result))
@@ -177,7 +209,8 @@ def clear_runtime_cache(token):
     if r is None:
         return
     try:
-        r.delete(_runtime_cache_key(token))
+        key = _runtime_cache_key(token)
+        r.delete(key, key + ":total")
     except Exception as e:
         print(f"[Redis] clear_runtime_cache error: {e}")
 
