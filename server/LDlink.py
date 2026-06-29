@@ -389,7 +389,7 @@ def requires_token(f):
                         return sendTraceback(
                             "Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov"
                         )
-                if not param_list.get("disable_control", True):
+if not param_list.get("disable_control", False):
                     total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
                     request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
                     runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
