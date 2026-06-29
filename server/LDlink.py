@@ -377,7 +377,11 @@ def requires_token(f):
                 if is_blocked:
                     if blocked_reason == "runtime_limit":
                         return sendTraceback(
-                            f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. It will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
+                            f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. "
+                            f"The following request was NOT submitted: {request.full_path}. "
+                            f"This request and all remaining requests in your queue must be resubmitted after the {param_list['runtime_block_cooldown_minutes']}-minute cooldown period. "
+                            f"Your token will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. "
+                            f"If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
                         )
                     return sendTraceback(
                         "Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
@@ -408,7 +412,11 @@ def requires_token(f):
                         )
                         blockToken(token, url_root)
                         return sendTraceback(
-                            f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. It will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
+                            f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. "
+                            f"The following request was NOT submitted: {request.full_path}. "
+                            f"This request and all remaining requests in your queue must be resubmitted after the {param_list['runtime_block_cooldown_minutes']}-minute cooldown period. "
+                            f"Your token will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. "
+                            f"If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
                         )
                 # Check if token has been authorized to access api server 2
                 # if ("LDlinkRest2" in request.full_path):
