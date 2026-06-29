@@ -41,9 +41,9 @@ def get_redis_client():
         return None
     _redis_checked = True
 
-    if os.environ.get("ENABLE_REDIS_CACHE", "YES").upper() != "YES":
-        print("[Redis] Cache disabled via ENABLE_REDIS_CACHE")
-        return None
+if os.environ.get("ENABLE_REDIS_CACHE", "NO").upper() != "YES":
+    print("[Redis] Cache disabled via ENABLE_REDIS_CACHE")
+    return None
 
     try:
         use_tls = os.environ.get("REDIS_TLS", "YES").upper() == "YES"
