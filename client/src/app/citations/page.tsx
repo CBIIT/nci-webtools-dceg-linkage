@@ -125,7 +125,7 @@ export default function CitationPage() {
           >
             FORGEdb: a tool for identifying candidate functional variants and uncovering target genes and mechanisms for complex diseases.
           </a>{" "}
-          <i>Genome Biology</i>. 2024 Jan 2.
+          <i>Genome Biology</i>. 25, 3 (2024).
         </p>
 
       </div>
