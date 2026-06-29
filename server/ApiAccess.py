@@ -409,8 +409,8 @@ def getTokenRuntimeLast24Hours(token):
     # source and handles the budget check correctly.
 
     print(
-        f"[getTokenRuntimeLast24Hours] MongoDB fallback: token={token} window_start={window_start} "
-        f"effective_window_start={effective_window_start} runtime_budget_reset_at={runtime_budget_reset_at} total_ms={total_ms}"
+        f"[getTokenRuntimeLast24Hours] MongoDB fallback: window_start={window_start} effective_window_start={effective_window_start} "
+        f"runtime_budget_reset_at={runtime_budget_reset_at} total_ms={total_ms}"
     )
     return total_ms
 
