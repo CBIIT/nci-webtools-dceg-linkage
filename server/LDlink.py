@@ -433,9 +433,12 @@ def requires_token(f):
             request_started_at = time.time()
             try:
                 return f(*args, **kwargs)
-            finally:
-                duration_ms = round((time.time() - request_started_at) * 1000)
-                logAccess(token, module, duration_ms)
+finally:
+    duration_ms = round((time.time() - request_started_at) * 1000)
+    try:
+        logAccess(token, module, duration_ms)
+    except Exception:
+        app.logger.exception("Failed to log API access")
         return f(*args, **kwargs)
 
     return decorated_function
