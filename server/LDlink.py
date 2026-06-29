@@ -1339,6 +1339,7 @@ def ldassoc():
 @app.route("/LDlinkRest/ldscore", methods=["GET"])
 # @app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route("/LDlinkRestWeb/ldscore", methods=["GET"])
+@requires_token
 def ldscore():
     request_started_at = time.time()
     token_for_log = request.args.get("token", "NA")
@@ -1583,6 +1584,7 @@ def ldscoreapi():
 # Web for LDscore
 @app.route("/LDlinkRest/ldherit", methods=["GET"])
 @app.route("/LDlinkRestWeb/ldherit", methods=["GET"])
+@requires_token
 def ldherit():
     request_started_at = time.time()
     token_for_log = request.args.get("token", "NA")
@@ -1809,6 +1811,7 @@ def ldheritAPI():
 
 @app.route("/LDlinkRest/ldcorrelation", methods=["GET"])
 @app.route("/LDlinkRestWeb/ldcorrelation", methods=["GET"])
+@requires_token
 def ldcorrelation():
     request_started_at = time.time()
     token_for_log = request.args.get("token", "NA")

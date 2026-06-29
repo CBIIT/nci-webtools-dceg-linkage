@@ -6,6 +6,8 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
+import time
+import uuid
 from bson import json_util
 import redis
 import UnlockStaleTokens
@@ -20,7 +22,7 @@ RUNTIME_BLOCK_COOLDOWN_MINUTES = int(config.get("runtime_block_cooldown_minutes"
 # ---------------------------------------------------------------------------
 # Redis connection and runtime-counter helpers
 # ---------------------------------------------------------------------------
-RUNTIME_COUNTER_TTL = 86400  # 24 hours in seconds
+RUNTIME_WINDOW_MS = 86400 * 1000  # 24-hour rolling window in milliseconds
 
 _redis_client = None
 _redis_checked = False
@@ -63,29 +65,53 @@ def _runtime_cache_key(token):
 
 
 def incr_runtime_cache(token, duration_ms):
-    """INCRBY the cached runtime counter with a fixed 24h window.
+    """Add duration_ms to the rolling 24h runtime counter for token.
 
-    Uses a Lua script so the key creation and TTL assignment are atomic:
-    the 24h window is anchored to the *first* increment (matching the
-    MongoDB aggregation window used on cache miss), not to each write.
+    Uses a Redis sorted set where each entry's score is the request's Unix
+    timestamp in milliseconds.  A Lua script atomically:
+      1. Adds the new entry  (score=now_ms, member="{duration_ms}:{uuid}").
+      2. Evicts entries that fell outside the 24h rolling window.
+      3. Returns the updated rolling total.
+
+    This matches the MongoDB aggregation's ``accessed >= now - 24h`` semantics
+    so the Redis fast path and the MongoDB fallback are always consistent.
     """
     r = get_redis_client()
     if r is None or duration_ms is None:
         return None
     try:
         key = _runtime_cache_key(token)
-        # Atomic: increment and set TTL only if the key is new (no expiry yet).
-        # KEEPTTL-style: if the key already has a TTL, leave it alone so the
-        # window stays anchored to the first request in that 24h period.
+        now_ms = int(time.time() * 1000)
+        # Member encodes duration first so Lua can parse it without ambiguity:
+        # format is "{duration_ms}:{uuid_hex}" — take everything before the
+        # first colon as the integer duration.
+        member = f"{int(duration_ms)}:{uuid.uuid4().hex}"
         lua_script = """
-            local new_val = redis.call('INCRBY', KEYS[1], ARGV[1])
-            local ttl = redis.call('TTL', KEYS[1])
-            if ttl == -1 then
-                redis.call('EXPIRE', KEYS[1], ARGV[2])
+            local key    = KEYS[1]
+            local now_ms = tonumber(ARGV[1])
+            local win_ms = tonumber(ARGV[2])
+            local member = ARGV[3]
+
+            -- Add this request's entry.
+            redis.call('ZADD', key, now_ms, member)
+
+            -- Evict entries older than the rolling window.
+            redis.call('ZREMRANGEBYSCORE', key, '-inf',
+                       '(' .. tostring(now_ms - win_ms))
+
+            -- Sum durations of all surviving entries.
+            local entries = redis.call('ZRANGE', key, 0, -1)
+            local total = 0
+            for _, m in ipairs(entries) do
+                local colon = string.find(m, ':')
+                total = total + tonumber(string.sub(m, 1, colon - 1))
             end
-            return new_val
+
+            -- Refresh TTL so the key lives exactly one more window.
+            redis.call('EXPIRE', key, math.ceil(win_ms / 1000))
+            return total
         """
-        new_total = r.eval(lua_script, 1, key, int(duration_ms), RUNTIME_COUNTER_TTL)
+        new_total = r.eval(lua_script, 1, key, now_ms, RUNTIME_WINDOW_MS, member)
         return new_total
     except Exception as e:
         print(f"[Redis] incr_runtime_cache error: {e}")
@@ -93,15 +119,44 @@ def incr_runtime_cache(token, duration_ms):
 
 
 def get_runtime_cache(token):
-    """Read cached runtime total.  Returns (is_cached, total_ms)."""
+    """Return the rolling 24h runtime total from Redis.
+
+    Returns (True, total_ms) on cache hit, or (False, 0) when the sorted-set
+    key is absent (cache miss — caller should fall back to MongoDB).
+    Evicts stale entries atomically so the returned value is always current.
+    """
     r = get_redis_client()
     if r is None:
         return (False, 0)
     try:
-        value = r.get(_runtime_cache_key(token))
-        if value is None:
+        key = _runtime_cache_key(token)
+        now_ms = int(time.time() * 1000)
+        lua_script = """
+            local key    = KEYS[1]
+            local now_ms = tonumber(ARGV[1])
+            local win_ms = tonumber(ARGV[2])
+
+            if redis.call('EXISTS', key) == 0 then
+                return -1  -- sentinel: cache miss
+            end
+
+            -- Evict entries that have aged out of the rolling window.
+            redis.call('ZREMRANGEBYSCORE', key, '-inf',
+                       '(' .. tostring(now_ms - win_ms))
+
+            -- Sum durations of all surviving entries.
+            local entries = redis.call('ZRANGE', key, 0, -1)
+            local total = 0
+            for _, m in ipairs(entries) do
+                local colon = string.find(m, ':')
+                total = total + tonumber(string.sub(m, 1, colon - 1))
+            end
+            return total
+        """
+        result = r.eval(lua_script, 1, key, now_ms, RUNTIME_WINDOW_MS)
+        if result == -1:
             return (False, 0)
-        return (True, int(value))
+        return (True, int(result))
     except Exception as e:
         print(f"[Redis] get_runtime_cache error: {e}")
         return (False, 0)
@@ -295,7 +350,7 @@ def getTokenRuntimeLast24Hours(token):
     # Fast path: read from Redis counter
     is_cached, cached_total_ms = get_runtime_cache(token)
     if is_cached:
-        print(f"[getTokenRuntimeLast24Hours] Redis cache hit: token={token} total_ms={cached_total_ms}")
+        print(f"[getTokenRuntimeLast24Hours] Redis cache hit: total_ms={cached_total_ms}")
         return cached_total_ms
 
     # Slow path: MongoDB aggregation (cache miss or Redis unavailable)
@@ -335,12 +390,28 @@ def getTokenRuntimeLast24Hours(token):
     else:
         total_ms = int(result[0].get("total_duration_ms", 0))
 
-    # Seed the Redis counter so subsequent calls use the fast path
+    # Seed the Redis sorted-set so subsequent calls use the fast path.
+    # Add a single synthetic entry at now_ms representing the aggregated
+    # MongoDB total.  Placing it at the current time means it ages out of
+    # the rolling window in exactly 24h — matching MongoDB's own cutoff.
+    # NX-style guard: only seed if no key exists (avoids overwriting live data).
     r = get_redis_client()
     if r is not None and total_ms > 0:
         try:
             key = _runtime_cache_key(token)
-            r.set(key, total_ms, ex=RUNTIME_COUNTER_TTL, nx=True)
+            now_ms = int(time.time() * 1000)
+            member = f"{int(total_ms)}:{uuid.uuid4().hex}"
+            lua_seed = """
+                local key    = KEYS[1]
+                local now_ms = tonumber(ARGV[1])
+                local win_ms = tonumber(ARGV[2])
+                local member = ARGV[3]
+                if redis.call('EXISTS', key) == 0 then
+                    redis.call('ZADD', key, now_ms, member)
+                    redis.call('EXPIRE', key, math.ceil(win_ms / 1000))
+                end
+            """
+            r.eval(lua_seed, 1, key, now_ms, RUNTIME_WINDOW_MS, member)
         except Exception as e:
             print(f"[Redis] Failed to seed runtime cache: {e}")
 
@@ -570,7 +641,7 @@ def checkBlocked(token):
                             }
                         }
                     )
-                    print(f"[checkBlocked] Auto-unblocked runtime-limited token after cooldown: {token}")
+                    print(f"[checkBlocked] Auto-unblocked runtime-limited token after cooldown")
                     clear_runtime_cache(token)
                     return (False, None)
 
