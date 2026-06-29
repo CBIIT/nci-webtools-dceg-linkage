@@ -441,15 +441,14 @@ def blockToken(token, url_root):
     record = users.find_one({"token": token})
 
     if record is None:
-        print(f"[blockToken] Token not found in api_users: {token}")
+        token_id = hashlib.sha256(token.encode("utf-8")).hexdigest()[:8]
+        print(f"[blockToken] Token not found in api_users: {token_id}")
         return None
 
     email = record.get("email")
     if int(record.get("blocked", 0)) == 1:
-        print(f"[blockToken] Token already blocked: {token} (email={email})")
-        return {
-            "message": "Token is already blocked."
-        }
+        print(f"[blockToken] Token already blocked (email={email})")
+        return {"message": "Token is already blocked."}
 
     blocked_at = getDatetime()
     blocked_until = blocked_at + datetime.timedelta(minutes=RUNTIME_BLOCK_COOLDOWN_MINUTES)
