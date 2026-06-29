@@ -376,9 +376,9 @@ def requires_token(f):
                 is_blocked, blocked_reason = checkBlocked(token)
                 if is_blocked:
                     if blocked_reason == "runtime_limit":
-                        return sendTraceback(
-                            "Your API token has been blocked because runtime usage exceeded the 24-hour test limit. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
-                        )
+return sendTraceback(
+    f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. It will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
+)
                     else:
                         return sendTraceback(
                             "Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
