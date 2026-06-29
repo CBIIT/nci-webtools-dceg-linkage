@@ -403,8 +403,7 @@ def requires_token(f):
 
                     if total_runtime_ms_24h > runtime_limit_ms_24h:
                         app.logger.warning(
-                            "BLOCKING TOKEN: token=%s total_runtime_ms_24h=%d exceeded limit=%d module=%s",
-                            token,
+                            "BLOCKING TOKEN: total_runtime_ms_24h=%d exceeded limit=%d module=%s",
                             total_runtime_ms_24h,
                             runtime_limit_ms_24h,
                             getModule(request.full_path),
