@@ -349,7 +349,8 @@ def logAccess(token, module, duration_ms=None):
     }
     if duration_ms is not None:
         log["duration_ms"] = int(duration_ms)
-        incr_runtime_cache(token, int(duration_ms))
+        if token not in (None, "NA"):
+            incr_runtime_cache(token, int(duration_ms))
     logs = db.api_log
     logs.insert_one(log).inserted_id
 
