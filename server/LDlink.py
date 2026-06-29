@@ -389,7 +389,7 @@ return sendTraceback(
                         return sendTraceback(
                             "Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov"
                         )
-if not param_list.get("disable_control", False):
+                if not param_list.get("disable_control", False):
                     total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
                     request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
                     runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
@@ -408,9 +408,9 @@ if not param_list.get("disable_control", False):
                             getModule(request.full_path),
                         )
                         blockToken(token, url_root)
-return sendTraceback(
-    f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. It will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
-)
+                        return sendTraceback(
+                            f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. It will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
+                        )
                 # Check if token has been authorized to access api server 2
                 # if ("LDlinkRest2" in request.full_path):
                 #    if not checkApiServer2Auth(token):
