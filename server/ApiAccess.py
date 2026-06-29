@@ -63,7 +63,8 @@ def get_redis_client():
 
 
 def _runtime_cache_key(token):
-    return f"runtime:{token}"
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    return f"runtime:{token_hash}"
 
 
 def incr_runtime_cache(token, duration_ms):
