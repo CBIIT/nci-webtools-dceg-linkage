@@ -463,13 +463,9 @@ def blockToken(token, url_root):
     )
     print(f"[blockToken] Updated token to blocked: email={email} update_result={update_result is not None}")
 
-    if email:
-        try:
-            emailUserBlocked(email, email_account, url_root)
-            print(f"[blockToken] Sent blocked email to: {email}")
-        except Exception as e:
-            print(f"[blockToken] Failed to send email to {email}: {e}")
-
+    # Runtime-limit blocks auto-expire after cooldown; avoid sending the generic
+    # "token has been blocked" email that instructs manual unblocking.
+    # If user notification is desired, implement a dedicated runtime-limit email template.
     return {
         "message": "Token has been blocked due to runtime limit policy."
     }
