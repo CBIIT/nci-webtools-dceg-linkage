@@ -415,7 +415,7 @@ def requires_token(f):
                 #    if not checkApiServer2Auth(token):
                 #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
-if not param_list.get("disable_control", False):
+                if not param_list.get("disable_control", False):
                     app.logger.info(
                         "Token runtime 24h check for %s: %.2f minutes",
                         module,
@@ -424,24 +424,24 @@ if not param_list.get("disable_control", False):
                 request_started_at = time.time()
                 try:
                     return f(*args, **kwargs)
-finally:
-    duration_ms = round((time.time() - request_started_at) * 1000)
-    try:
-        logAccess(token, module, duration_ms)
-    except Exception:
-        app.logger.exception("Failed to log API access")
-            token = "NA"
-            module = getModule(request.full_path)
-            request_started_at = time.time()
-            try:
-                return f(*args, **kwargs)
-finally:
-    duration_ms = round((time.time() - request_started_at) * 1000)
-    try:
-        logAccess(token, module, duration_ms)
-    except Exception:
-        app.logger.exception("Failed to log API access")
-        return f(*args, **kwargs)
+                finally:
+                    duration_ms = round((time.time() - request_started_at) * 1000)
+                    try:
+                        logAccess(token, module, duration_ms)
+                    except Exception:
+                        app.logger.exception("Failed to log API access")
+            else:
+                token = "NA"
+                module = getModule(request.full_path)
+                request_started_at = time.time()
+                try:
+                    return f(*args, **kwargs)
+                finally:
+                    duration_ms = round((time.time() - request_started_at) * 1000)
+                    try:
+                        logAccess(token, module, duration_ms)
+                    except Exception:
+                        app.logger.exception("Failed to log API access")
 
     return decorated_function
 
