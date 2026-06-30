@@ -693,18 +693,36 @@ def checkLocked(token):
             return False
 
 def toggleLocked(token, lock):
-    if config['restrict_concurrency']:
-        db = connectMongoDBReadOnly(False,True,True)
-        users = db.api_users
-        record = users.find_one({"token": token})
+    if not config['restrict_concurrency']:
+        return True
 
-        # bypass lock toggle if user has -1 locked flag set (unlimited api calls)
-        if record["locked"] != -1:
-            if lock == 1:
-                calcStartTime = getDatetime()
-                users.find_one_and_update({"token": token}, { "$set": {"locked": calcStartTime}})
-            else: 
-                users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
+    db = connectMongoDBReadOnly(False,True,True)
+    users = db.api_users
+    record = users.find_one({"token": token})
+
+    if record is None:
+        return False
+
+    # bypass lock toggle if user has -1 locked flag set (unlimited api calls)
+    if record.get("locked") == -1:
+        return True
+
+    if lock == 1:
+        calcStartTime = getDatetime()
+        update_result = users.find_one_and_update(
+            {
+                "token": token,
+                "$or": [
+                    {"locked": 0},
+                    {"locked": {"$exists": False}}
+                ]
+            },
+            {"$set": {"locked": calcStartTime}}
+        )
+        return update_result is not None
+
+    users.find_one_and_update({"token": token}, {"$set": {"locked": lock}})
+    return True
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email):

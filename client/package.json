@@ -25,6 +25,7 @@
     "react-hook-form": "^7.58.1",
     "react-select": "^5.10.1",
     "sass": "^1.89.2",
+    "server-only": "^0.0.1",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
@@ -39,6 +40,7 @@
   "overrides": {
     "brace-expansion": ">=5.0.5",
     "picomatch": ">=4.0.4",
-    "postcss": ">=8.5.10"
+    "postcss": ">=8.5.10",
+    "form-data": ">=4.0.6"
   }
 }

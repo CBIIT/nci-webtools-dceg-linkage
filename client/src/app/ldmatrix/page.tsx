@@ -41,7 +41,7 @@ export default function LdAssoc() {
             <a href="https://doi.org/10.1186/s13059-023-03126-1" target="_blank" rel="noopener noreferrer">
               FORGEdb: a tool for identifying candidate functional variants and uncovering target genes and mechanisms for complex diseases.
             </a>{" "}
-            <i>Genome Biology</i>. 2024 Jan 2.
+            <i>Genome Biology</i>. 25, 3 (2024).
           </div>
         </Row>
       </Container>
