@@ -454,13 +454,15 @@ def requires_token(f):
                     return sendTraceback(
                         "Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
                     )
+                # Check if user has API server 2 authorization (concurrent + no runtime limit)
+                user_api2auth = checkApiServer2Auth(token)
                 # Check if token is locked (exclude check on api server 2)
-                if "LDlinkRest" in request.full_path:
+                if "LDlinkRest" in request.full_path and not user_api2auth:
                     if checkLocked(token):
                         return sendTraceback(
                             "Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov"
                         )
-                if not param_list.get("disable_control", False):
+                if not param_list.get("disable_control", False) and not user_api2auth:
                     total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
                     request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
                     runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
@@ -491,7 +493,7 @@ def requires_token(f):
                 #    if not checkApiServer2Auth(token):
                 #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
-                if not param_list.get("disable_control", False):
+                if not param_list.get("disable_control", False) and not user_api2auth:
                     app.logger.info(
                         "Token runtime 24h check for %s: %.2f minutes",
                         module,
