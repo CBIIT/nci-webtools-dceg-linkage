@@ -1,18 +1,235 @@
 #!/usr/bin/env python3
 import json
-import os.path
+import os
 import binascii
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
+import time
+import uuid
+import hashlib
 from bson import json_util
+import redis
 import UnlockStaleTokens
 from LDcommon import connectMongoDBReadOnly,getEmail,get_config
 
 # blocked users attribute: 0=false, 1=true
 
 config = get_config()
+RUNTIME_BLOCK_REASON = "runtime_limit"
+RUNTIME_BLOCK_COOLDOWN_MINUTES = int(config.get("runtime_block_cooldown_minutes", 120))
+
+# ---------------------------------------------------------------------------
+# Redis connection and runtime-counter helpers
+# ---------------------------------------------------------------------------
+RUNTIME_WINDOW_MS = 86400 * 1000  # 24-hour rolling window in milliseconds
+
+_redis_client = None
+_redis_checked = False
+_redis_last_failure = None
+REDIS_RETRY_INTERVAL = 60  # seconds between connection retries after failure
+
+
+def get_redis_client():
+    """Lazy-initialize a Redis client.  Returns None when disabled or unreachable."""
+    global _redis_client, _redis_checked, _redis_last_failure
+    if _redis_checked:
+        return _redis_client
+    # If the last attempt failed recently, skip retry to avoid per-request 2s timeouts
+    if _redis_last_failure is not None and (time.time() - _redis_last_failure) < REDIS_RETRY_INTERVAL:
+        return None
+    _redis_checked = True
+
+    if os.environ.get("ENABLE_REDIS_CACHE", "NO").upper() != "YES":
+        print("[Redis] Cache disabled via ENABLE_REDIS_CACHE")
+        return None
+
+    try:
+        use_tls = os.environ.get("REDIS_TLS", "YES").upper() == "YES"
+        client = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            db=int(os.environ.get("REDIS_DB", "0")),
+            password=os.environ.get("REDIS_PASSWORD", None),
+            ssl=use_tls,
+            decode_responses=True,
+            socket_connect_timeout=2,
+            socket_timeout=2,
+        )
+        client.ping()
+        print("[Redis] Connected successfully")
+        _redis_client = client
+        return _redis_client
+    except Exception as e:
+        _redis_checked = False  # allow retry after cooldown
+        _redis_last_failure = time.time()
+        print(f"[Redis] Connection failed, falling back to MongoDB only: {e}")
+        return None
+
+
+def _runtime_cache_key(token):
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    return f"runtime:{token_hash}"
+
+
+def incr_runtime_cache(token, duration_ms):
+    """Add duration_ms to the rolling 24h runtime counter for token.
+
+    Uses a Redis sorted set where each entry's score is the request's Unix
+    timestamp in milliseconds, plus a companion key that tracks the running
+    total.  A Lua script atomically:
+      1. Adds the new entry  (score=now_ms, member="{duration_ms}:{uuid}").
+      2. Evicts entries that fell outside the 24h rolling window and
+         decrements the running total by the sum of evicted durations.
+      3. Increments the running total by the new duration.
+      4. Returns the updated rolling total.
+
+    Per-request cost is O(k) where k is the number of evicted entries (typically
+    0-1 per call), rather than O(n) over all entries in the window.
+
+    This matches the MongoDB aggregation's ``accessed >= now - 24h`` semantics
+    so the Redis fast path and the MongoDB fallback are always consistent.
+    """
+    r = get_redis_client()
+    if r is None or duration_ms is None:
+        return None
+    try:
+        key = _runtime_cache_key(token)
+        total_key = key + ":total"
+        now_ms = int(time.time() * 1000)
+        # Member encodes duration first so Lua can parse it without ambiguity:
+        # format is "{duration_ms}:{uuid_hex}" — take everything before the
+        # first colon as the integer duration.
+        member = f"{int(duration_ms)}:{uuid.uuid4().hex}"
+        lua_script = """
+            local key       = KEYS[1]
+            local total_key = KEYS[2]
+            local now_ms    = tonumber(ARGV[1])
+            local win_ms    = tonumber(ARGV[2])
+            local member    = ARGV[3]
+            local dur_ms    = tonumber(ARGV[4])
+
+            -- Add this request's entry.
+            redis.call('ZADD', key, now_ms, member)
+
+            -- Evict entries older than the rolling window and subtract
+            -- their durations from the running total (O(k evicted)).
+            local cutoff = now_ms - win_ms
+            local evicted = redis.call('ZRANGEBYSCORE', key, '-inf',
+                                       '(' .. tostring(cutoff))
+            local evicted_total = 0
+            for _, m in ipairs(evicted) do
+                local colon = string.find(m, ':')
+                evicted_total = evicted_total + tonumber(string.sub(m, 1, colon - 1))
+            end
+            if #evicted > 0 then
+                redis.call('ZREMRANGEBYSCORE', key, '-inf',
+                           '(' .. tostring(cutoff))
+            end
+
+            -- Update running total: subtract evicted, add new duration.
+            local current = tonumber(redis.call('GET', total_key) or '0') or 0
+            local new_total = current - evicted_total + dur_ms
+            if new_total < 0 then new_total = 0 end
+            redis.call('SET', total_key, tostring(new_total))
+
+            -- Refresh TTL so both keys live exactly one more window.
+            local ttl_s = math.ceil(win_ms / 1000)
+            redis.call('EXPIRE', key, ttl_s)
+            redis.call('EXPIRE', total_key, ttl_s)
+            return new_total
+        """
+        new_total = r.eval(lua_script, 2, key, total_key,
+                           now_ms, RUNTIME_WINDOW_MS, member, int(duration_ms))
+        return new_total
+    except Exception as e:
+        print(f"[Redis] incr_runtime_cache error: {e}")
+        return None
+
+
+def get_runtime_cache(token):
+    """Return the rolling 24h runtime total from Redis.
+
+    Returns (True, total_ms) on cache hit, or (False, 0) when the sorted-set
+    key is absent (cache miss — caller should fall back to MongoDB).
+    Evicts stale entries atomically so the returned value is always current.
+    Per-request cost is O(k evicted) rather than O(n total entries).
+    """
+    r = get_redis_client()
+    if r is None:
+        return (False, 0)
+    try:
+        key = _runtime_cache_key(token)
+        total_key = key + ":total"
+        now_ms = int(time.time() * 1000)
+        lua_script = """
+            local key       = KEYS[1]
+            local total_key = KEYS[2]
+            local now_ms    = tonumber(ARGV[1])
+            local win_ms    = tonumber(ARGV[2])
+
+            if redis.call('EXISTS', key) == 0 then
+                return -1  -- sentinel: cache miss
+            end
+
+            -- Evict entries that have aged out of the rolling window
+            -- and subtract their durations from the running total (O(k)).
+            local cutoff = now_ms - win_ms
+            local evicted = redis.call('ZRANGEBYSCORE', key, '-inf',
+                                       '(' .. tostring(cutoff))
+            local evicted_total = 0
+            for _, m in ipairs(evicted) do
+                local colon = string.find(m, ':')
+                evicted_total = evicted_total + tonumber(string.sub(m, 1, colon - 1))
+            end
+            if #evicted > 0 then
+                redis.call('ZREMRANGEBYSCORE', key, '-inf',
+                           '(' .. tostring(cutoff))
+                local current = tonumber(redis.call('GET', total_key) or '0') or 0
+                local new_total = current - evicted_total
+                if new_total < 0 then new_total = 0 end
+                redis.call('SET', total_key, tostring(new_total))
+            end
+
+            return tonumber(redis.call('GET', total_key) or '0') or 0
+        """
+        result = r.eval(lua_script, 2, key, total_key, now_ms, RUNTIME_WINDOW_MS)
+        if result == -1:
+            return (False, 0)
+        return (True, int(result))
+    except Exception as e:
+        print(f"[Redis] get_runtime_cache error: {e}")
+        return (False, 0)
+
+
+def clear_runtime_cache(token):
+    """Delete cached runtime counter (called on unblock / budget reset)."""
+    r = get_redis_client()
+    if r is None:
+        return
+    try:
+        key = _runtime_cache_key(token)
+        r.delete(key, key + ":total")
+    except Exception as e:
+        print(f"[Redis] clear_runtime_cache error: {e}")
+
+
+def _parse_datetime(value):
+    if isinstance(value, datetime.datetime):
+        if value.tzinfo is not None:
+            return value.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().replace("Z", "+00:00")
+        try:
+            parsed = datetime.datetime.fromisoformat(normalized)
+            if parsed.tzinfo is not None:
+                return parsed.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+            return parsed
+        except ValueError:
+            return None
+    return None
 
 # connect to email account
 def smtp_connect(email_account):
@@ -154,7 +371,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
     users.insert_one(user).inserted_id
 
 # log token's api call to api_log table
-def logAccess(token, module):
+def logAccess(token, module, duration_ms=None):
     db = connectMongoDBReadOnly(False,True,True)
     accessed = getDatetime()
     
@@ -163,8 +380,73 @@ def logAccess(token, module):
         "module": module,
         "accessed": accessed
     }
+    if duration_ms is not None:
+        log["duration_ms"] = int(duration_ms)
     logs = db.api_log
     logs.insert_one(log).inserted_id
+    if duration_ms is not None and token not in (None, "NA"):
+        incr_runtime_cache(token, int(duration_ms))
+
+
+# sum token runtime from api_log over a rolling 24-hour window
+def getTokenRuntimeLast24Hours(token):
+    # Fast path: read from Redis counter
+    is_cached, cached_total_ms = get_runtime_cache(token)
+    if is_cached:
+        print(f"[getTokenRuntimeLast24Hours] Redis cache hit: total_ms={cached_total_ms}")
+        return cached_total_ms
+
+    # Slow path: MongoDB aggregation (cache miss or Redis unavailable)
+    db = connectMongoDBReadOnly(False,True,True)
+    logs = db.api_log
+    users = db.api_users
+    window_start = getDatetime() - datetime.timedelta(hours=24)
+    effective_window_start = window_start
+
+    user_record = users.find_one({"token": token}, {"runtime_budget_reset_at": 1})
+    runtime_budget_reset_at = None
+    if user_record is not None:
+        runtime_budget_reset_at = _parse_datetime(user_record.get("runtime_budget_reset_at"))
+        if runtime_budget_reset_at is not None and runtime_budget_reset_at > effective_window_start:
+            effective_window_start = runtime_budget_reset_at
+
+    pipeline = [
+        {
+            "$match": {
+                "token": token,
+                "accessed": {"$gte": effective_window_start},
+                "duration_ms": {"$exists": True}
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "total_duration_ms": {"$sum": "$duration_ms"}
+            }
+        }
+    ]
+
+    result = list(logs.aggregate(pipeline))
+    total_ms = 0
+    if len(result) == 0:
+        total_ms = 0
+    else:
+        total_ms = int(result[0].get("total_duration_ms", 0))
+
+    # Do not seed Redis from the aggregated MongoDB total.  A synthetic entry
+    # scored at now_ms would keep usage from requests spread across the past
+    # 24h alive for another full window, over-counting and potentially
+    # blocking tokens prematurely.  Instead, let the cache warm organically:
+    # incr_runtime_cache() adds real per-request entries after each completed
+    # call, and once the key exists those entries correctly represent the
+    # rolling window.  Until then, this MongoDB path is the authoritative
+    # source and handles the budget check correctly.
+
+    print(
+        f"[getTokenRuntimeLast24Hours] MongoDB fallback: window_start={window_start} effective_window_start={effective_window_start} "
+        f"runtime_budget_reset_at={runtime_budget_reset_at} total_ms={total_ms}"
+    )
+    return total_ms
 
 # sets blocked attribute of user to 1=true
 def blockUser(email, url_root):
@@ -174,11 +456,52 @@ def blockUser(email, url_root):
     }
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
-    update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
+    update_operation = users.find_one_and_update(
+        {"email": email},
+        {"$set": {"blocked": 1, "blocked_reason": "admin_manual", "blocked_at": getDatetime(), "blocked_until": None}}
+    )
     if update_operation is None:
         return None
     emailUserBlocked(email, email_account, url_root)
     return out_json
+
+
+# sets blocked attribute of token owner to 1=true
+def blockToken(token, url_root):
+    email_account = getEmail()
+    db = connectMongoDBReadOnly(False,True)
+    users = db.api_users
+    record = users.find_one({"token": token})
+
+    if record is None:
+        token_id = hashlib.sha256(token.encode("utf-8")).hexdigest()[:8]
+        print(f"[blockToken] Token not found in api_users: {token_id}")
+        return None
+
+    email = record.get("email")
+    if int(record.get("blocked", 0)) == 1:
+        print(f"[blockToken] Token already blocked (email={email})")
+        return {"message": "Token is already blocked."}
+
+    blocked_at = getDatetime()
+    blocked_until = blocked_at + datetime.timedelta(minutes=RUNTIME_BLOCK_COOLDOWN_MINUTES)
+    update_result = users.find_one_and_update(
+        {"token": token},
+        {"$set": {
+            "blocked": 1,
+            "blocked_reason": RUNTIME_BLOCK_REASON,
+            "blocked_at": blocked_at,
+            "blocked_until": blocked_until,
+        }}
+    )
+    print(f"[blockToken] Updated token to blocked: email={email} update_result={update_result is not None}")
+
+    # Runtime-limit blocks auto-expire after cooldown; avoid sending the generic
+    # "token has been blocked" email that instructs manual unblocking.
+    # If user notification is desired, implement a dedicated runtime-limit email template.
+    return {
+        "message": "Token has been blocked due to runtime limit policy."
+    }
 
 # sets blocked attribute of user to 0=false
 def unblockUser(email):
@@ -188,9 +511,24 @@ def unblockUser(email):
     }
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
-    update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
+    record = users.find_one({"email": email})
+    if record is None:
+        return None
+    token = record.get("token")
+    update_operation = users.find_one_and_update(
+        {"email": email},
+        {"$set": {
+            "blocked": 0,
+            "blocked_reason": None,
+            "blocked_at": None,
+            "blocked_until": None,
+            "runtime_budget_reset_at": getDatetime(),
+        }}
+    )
     if update_operation is None:
         return None
+    if token:
+        clear_runtime_cache(token)
     emailUserUnblocked(email, email_account)
     return out_json
 
@@ -289,18 +627,53 @@ def getToken(email):
     else:
         return record["token"]
 
-# check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
+# check if token is blocked (1=blocked, 0=not blocked). returns (is_blocked, reason) tuple
+# is_blocked: True if token is currently blocked, False otherwise
+# reason: 'runtime_limit' or other reason string if blocked, None if not blocked
 def checkBlocked(token):
     db = connectMongoDBReadOnly(False,True,True)
     users = db.api_users
     record = users.find_one({"token": token})
     if record is None:
-        return False
+        return (False, None)
     else:
-        if int(record["blocked"]) == 1:
-            return True
-        else:
-            return False
+        if int(record.get("blocked", 0)) != 1:
+            return (False, None)
+
+        blocked_reason = record.get("blocked_reason", "unknown")
+
+        # Only runtime-limit blocks auto-expire. Other block reasons stay blocked.
+        if blocked_reason == RUNTIME_BLOCK_REASON:
+            now = getDatetime()
+            blocked_until = record.get("blocked_until")
+
+            if blocked_until is None:
+                blocked_at = record.get("blocked_at")
+                if blocked_at is not None:
+                    blocked_at = _parse_datetime(blocked_at)
+                    if blocked_at is not None:
+                        blocked_until = blocked_at + datetime.timedelta(minutes=RUNTIME_BLOCK_COOLDOWN_MINUTES)
+
+            if blocked_until is not None:
+                blocked_until = _parse_datetime(blocked_until)
+                if blocked_until is not None and now >= blocked_until:
+                    users.find_one_and_update(
+                        {"token": token},
+                        {
+                            "$set": {
+                                "blocked": 0,
+                                "blocked_reason": None,
+                                "blocked_at": None,
+                                "blocked_until": None,
+                                "runtime_budget_reset_at": now,
+                            }
+                        }
+                    )
+                    print(f"[checkBlocked] Auto-unblocked runtime-limited token after cooldown")
+                    clear_runtime_cache(token)
+                    return (False, None)
+
+        return (True, blocked_reason)
 
 # check if token is locked (1=locked, 0=not locked, -1=never locked). returns true (1) if token is locked
 def checkLocked(token):
@@ -320,18 +693,36 @@ def checkLocked(token):
             return False
 
 def toggleLocked(token, lock):
-    if config['restrict_concurrency']:
-        db = connectMongoDBReadOnly(False,True,True)
-        users = db.api_users
-        record = users.find_one({"token": token})
+    if not config['restrict_concurrency']:
+        return True
 
-        # bypass lock toggle if user has -1 locked flag set (unlimited api calls)
-        if record["locked"] != -1:
-            if lock == 1:
-                calcStartTime = getDatetime()
-                users.find_one_and_update({"token": token}, { "$set": {"locked": calcStartTime}})
-            else: 
-                users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
+    db = connectMongoDBReadOnly(False,True,True)
+    users = db.api_users
+    record = users.find_one({"token": token})
+
+    if record is None:
+        return False
+
+    # bypass lock toggle if user has -1 locked flag set (unlimited api calls)
+    if record.get("locked") == -1:
+        return True
+
+    if lock == 1:
+        calcStartTime = getDatetime()
+        update_result = users.find_one_and_update(
+            {
+                "token": token,
+                "$or": [
+                    {"locked": 0},
+                    {"locked": {"$exists": False}}
+                ]
+            },
+            {"$set": {"locked": calcStartTime}}
+        )
+        return update_result is not None
+
+    users.find_one_and_update({"token": token}, {"$set": {"locked": lock}})
+    return True
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email):

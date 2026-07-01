@@ -15,7 +15,7 @@ function parseVersionAndDate(versionString: string) {
 }
 
 export default function Footer() {
-  const { version, date } = parseVersionAndDate(process.env.NEXT_PUBLIC_VERSION || "");
+  const { version, date } = parseVersionAndDate(process.env.NEXT_PUBLIC_VERSION || "7.3.0");
   return (
     <>
       <footer id="footer" className="flex-grow-0">
@@ -42,7 +42,7 @@ export default function Footer() {
                   </li>
                 </ul>
                 <ul className="list-unstyled mb-0 mt-3">
-                  <li>Version: 7.1.0</li>
+                  <li>Version: {version}</li>
                   {/* <li>Last Updated: {date}</li> */}
                 </ul>
               </div>

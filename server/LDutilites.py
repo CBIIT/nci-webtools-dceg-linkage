@@ -38,6 +38,12 @@ def get_config():
     config['token_expiration_days'] = int(environ.get('TOKEN_EXPIRATION_DAYS'))
     config['restrict_concurrency'] = environ.get('RESTRICT_CONCURRENCY') == 'YES'
     config['token_lock_timeout'] = int(environ.get('TOKEN_LOCK_TIMEOUT', 900))
+    config['disable_control'] = environ.get('DISABLE_CONTROL', 'NO') == 'YES'
+    config['runtime_limit_ms_24h'] = int(environ.get('RUNTIME_LIMIT_MS_24H', 86400000))
+    runtime_block_cooldown_minutes = environ.get('RUNTIME_BLOCK_COOLDOWN_MINUTES')
+    if runtime_block_cooldown_minutes is None:
+        runtime_block_cooldown_minutes = int(environ.get('RUNTIME_BLOCK_COOLDOWN_HOURS', 12)) * 60
+    config['runtime_block_cooldown_minutes'] = int(runtime_block_cooldown_minutes)
 
     config['email_smtp_host'] = environ.get('EMAIL_SMTP_HOST')
     config['email_admin'] = environ.get('EMAIL_ADMIN')
@@ -73,7 +79,7 @@ def unlock_stale_tokens(db, lock_timeout = 15 * 60):
                     diff = present - locked
                 else:
                     diff = present - dateutil.parser.parse(locked, ignoretz=True)
-                diffSeconds = (diff.seconds % 3600)
+                diffSeconds = diff.total_seconds()
                 # if token is locked for over 15 mins, unlock
                 if diffSeconds > lock_timeout:
                     unlockTokens.append(user["token"])

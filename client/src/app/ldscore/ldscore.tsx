@@ -84,28 +84,20 @@ export default function LDScore() {
         const response = await upload(formData);
         if (response && response.status === 200) {
           const data = response.data;
-          // If server returned a renamed mapping, surface it as a user warning
-          if (data && data.renamed) {
-            if (Array.isArray(data.renamed) && data.renamed.length > 0) {
-              const mapping = data.renamed[0];
-              if(mapping.original !== mapping.sanitized)
-                setRenameWarnings(`File was renamed to ${mapping.sanitized}`);
-              uploadedFileNames.push(mapping.sanitized);
-          // Keep the specific type tracking for the submission logic
-              if (ext === 'bed') setUploadedBed(mapping.sanitized);
-              if (ext === 'bim') setUploadedBim(mapping.sanitized);
-              if (ext === 'fam') setUploadedFam(mapping.sanitized);
+          // Default to the browser filename; override with the server-sanitized
+          // name if the backend reported a rename (same pattern as heritability.tsx).
+          let savedName = file.name;
+          if (data?.renamed && Array.isArray(data.renamed) && data.renamed.length > 0) {
+            const mapping = data.renamed[0];
+            if (mapping.original !== mapping.sanitized) {
+              setRenameWarnings(`File was renamed to ${mapping.sanitized}`);
             }
-         
+            savedName = mapping.sanitized;
           }
-          else{
-            uploadedFileNames.push(file.name);
-            // Keep the specific type tracking for the submission logic
-            if (ext === 'bed') setUploadedBed(file.name);
-            if (ext === 'bim') setUploadedBim(file.name);
-            if (ext === 'fam') setUploadedFam(file.name);
-          }
-        
+          uploadedFileNames.push(savedName);
+          if (ext === 'bed') setUploadedBed(savedName);
+          if (ext === 'bim') setUploadedBim(savedName);
+          if (ext === 'fam') setUploadedFam(savedName);
         }
       } catch (e) {
         // ignore individual file upload errors

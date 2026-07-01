@@ -24,7 +24,7 @@ export default function LdTrait() {
   const { data: timestampData, isLoading: timestampLoading } = useQuery({
     queryKey: ["ldtrait_timestamp"],
     queryFn: () =>
-      fetch("/LDlinkRestWeb/ldtrait_timestamp")
+      fetch("/api/ldlink-web-proxy?target=ldtrait_timestamp")
         .then((res) => res.json())
         .catch(() => null),
   });
