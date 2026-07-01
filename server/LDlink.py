@@ -466,12 +466,12 @@ def requires_token(f):
                     total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
                     request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
                     runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
-                    app.logger.info(
-                        "Runtime budget check: total_runtime_ms_24h=%d limit_ms_24h=%d comparison_result=%s",
-                        total_runtime_ms_24h,
-                        runtime_limit_ms_24h,
-                        "OVER_LIMIT" if total_runtime_ms_24h > runtime_limit_ms_24h else "UNDER_LIMIT",
-                    )
+                    #app.logger.info(
+                    #    "Runtime budget check: total_runtime_ms_24h=%d limit_ms_24h=%d comparison_result=%s",
+                    #    total_runtime_ms_24h,
+                    #    runtime_limit_ms_24h,
+                    #    "OVER_LIMIT" if total_runtime_ms_24h > runtime_limit_ms_24h else "UNDER_LIMIT",
+                    # )
 
                     if total_runtime_ms_24h > runtime_limit_ms_24h:
                         app.logger.warning(
