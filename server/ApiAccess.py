@@ -371,7 +371,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
     users.insert_one(user).inserted_id
 
 # log token's api call to api_log table
-def logAccess(token, module, duration_ms=None):
+def logAccess(token, module, duration_ms=None, skip_runtime_cache=False):
     db = connectMongoDBReadOnly(False,True,True)
     accessed = getDatetime()
     
@@ -384,7 +384,7 @@ def logAccess(token, module, duration_ms=None):
         log["duration_ms"] = int(duration_ms)
     logs = db.api_log
     logs.insert_one(log).inserted_id
-    if duration_ms is not None and token not in (None, "NA"):
+    if duration_ms is not None and token not in (None, "NA") and not skip_runtime_cache:
         incr_runtime_cache(token, int(duration_ms))
 
 
@@ -393,7 +393,7 @@ def getTokenRuntimeLast24Hours(token):
     # Fast path: read from Redis counter
     is_cached, cached_total_ms = get_runtime_cache(token)
     if is_cached:
-        print(f"[getTokenRuntimeLast24Hours] Redis cache hit: total_ms={cached_total_ms}")
+        # print(f"[getTokenRuntimeLast24Hours] Redis cache hit: total_ms={cached_total_ms}")
         return cached_total_ms
 
     # Slow path: MongoDB aggregation (cache miss or Redis unavailable)

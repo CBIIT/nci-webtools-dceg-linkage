@@ -500,12 +500,13 @@ def requires_token(f):
                         total_runtime_ms_24h / 60000.0,
                     )
                 request_started_at = time.time()
+                skip_runtime = param_list.get("disable_control", False) or user_api2auth
                 try:
                     return f(*args, **kwargs)
                 finally:
                     duration_ms = round((time.time() - request_started_at) * 1000)
                     try:
-                        logAccess(token, module, duration_ms)
+                        logAccess(token, module, duration_ms, skip_runtime_cache=skip_runtime)
                     except Exception:
                         app.logger.exception("Failed to log API access")
             else:
