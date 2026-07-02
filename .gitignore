@@ -32,3 +32,5 @@ config.yml
 
 *.plan.md
 *steps.*
+
+tests/*.*
