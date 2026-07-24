@@ -1,5 +1,6 @@
 #!flask/bin/python3
 import os
+import hmac
 import traceback
 import collections
 import argparse
@@ -31,12 +32,14 @@ from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import (
     register_user,
     checkToken,
+    getTokenRuntimeLast24Hours,
     checkApiServer2Auth,
     checkBlocked,
     checkLocked,
     toggleLocked,
     logAccess,
     emailJustification,
+    blockToken,
     blockUser,
     unblockUser,
     getStats,
@@ -52,6 +55,25 @@ from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlat
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
+
+
+WEB_COMPUTE_ENDPOINTS = {
+    "ldassoc",
+    "ldexpress",
+    "ldexpressget",
+    "ldhap",
+    "ldmatrix",
+    "ldpair",
+    "ldpop",
+    "ldproxy",
+    "ldscore",
+    "ldherit",
+    "ldcorrelation",
+    "ldtrait",
+    "ldtraitget",
+    "snpchip",
+    "snpclip"
+}
 
 # from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
@@ -177,6 +199,54 @@ def sendTraceback(error, showTraceback=False):
 def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype="application/json")
+
+
+def _is_ldlinkrestweb_compute_request(path):
+    web_prefix = "/LDlinkRestWeb/"
+    if not path.startswith(web_prefix):
+        return False
+
+    endpoint = path[len(web_prefix) :].split("/", 1)[0]
+    return endpoint in WEB_COMPUTE_ENDPOINTS
+
+
+@app.before_request
+def internal_auth_guard():
+    if request.method == "OPTIONS":
+        return None
+
+    if not _is_ldlinkrestweb_compute_request(request.path):
+        return None
+
+    expected_internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
+    provided_internal_token = request.headers.get("X-Internal-Auth", "").strip()
+    request_source = request.remote_addr or "unknown"
+
+    if not expected_internal_token:
+        app.logger.error(
+            f"Internal auth token is not configured; blocking LDlinkRestWeb compute request for {request.path} from {request_source}."
+        )
+        response = sendJSON({"error": "Internal auth is not configured for LDlinkRestWeb compute routes."})
+        response.status_code = 500
+        return response
+
+    if not provided_internal_token:
+        app.logger.warning(
+            f"Missing X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
+        )
+        response = sendJSON({"error": "Forbidden: internal authentication header is required."})
+        response.status_code = 403
+        return response
+
+    if not hmac.compare_digest(provided_internal_token, expected_internal_token):
+        app.logger.warning(
+            f"Invalid X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
+        )
+        response = sendJSON({"error": "Forbidden: internal authentication header is invalid."})
+        response.status_code = 403
+        return response
+
+    return None
 
 
 def _parse_probability_value(raw_value, field_name):
@@ -318,6 +388,12 @@ def read_csv_headers(example_filepath):
 def getModule(fullPath):
     if "ldexpress" in fullPath:
         return "LDexpress"
+    elif "ldscore" in fullPath:
+        return "LDscore"
+    elif "ldherit" in fullPath:
+        return "LDherit"
+    elif "ldcorrelation" in fullPath:
+        return "LDcorrelation"
     elif "ldhap" in fullPath:
         return "LDhap"
     elif "ldmatrix" in fullPath:
@@ -365,29 +441,98 @@ def requires_token(f):
                         + "?tab=apiaccess"
                     )
                 # Check if token is blocked
-                if checkBlocked(token):
+                is_blocked, blocked_reason = checkBlocked(token)
+                if is_blocked:
+                    if blocked_reason == "runtime_limit":
+                        return sendTraceback(
+                            f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. "
+                            f"The following request was NOT submitted: {request.full_path}. "
+                            f"This request and all remaining requests in your queue must be resubmitted after the {param_list['runtime_block_cooldown_minutes']}-minute cooldown period. "
+                            f"Your token will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. "
+                            f"If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
+                        )
                     return sendTraceback(
                         "Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov"
                     )
+                # Check if user has API server 2 authorization (concurrent + no runtime limit)
+                user_api2auth = checkApiServer2Auth(token)
                 # Check if token is locked (exclude check on api server 2)
-                if "LDlinkRest" in request.full_path:
+                if "LDlinkRest" in request.full_path and not user_api2auth:
                     if checkLocked(token):
                         return sendTraceback(
                             "Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov"
+                        )
+                if not param_list.get("disable_control", False) and not user_api2auth:
+                    total_runtime_ms_24h = getTokenRuntimeLast24Hours(token)
+                    request.environ["token_runtime_ms_24h"] = total_runtime_ms_24h
+                    runtime_limit_ms_24h = param_list["runtime_limit_ms_24h"]
+                    #app.logger.info(
+                    #    "Runtime budget check: total_runtime_ms_24h=%d limit_ms_24h=%d comparison_result=%s",
+                    #    total_runtime_ms_24h,
+                    #    runtime_limit_ms_24h,
+                    #    "OVER_LIMIT" if total_runtime_ms_24h > runtime_limit_ms_24h else "UNDER_LIMIT",
+                    # )
+
+                    if total_runtime_ms_24h > runtime_limit_ms_24h:
+                        app.logger.warning(
+                            "BLOCKING TOKEN: total_runtime_ms_24h=%d exceeded limit=%d module=%s",
+                            total_runtime_ms_24h,
+                            runtime_limit_ms_24h,
+                            getModule(request.full_path),
+                        )
+                        blockToken(token, url_root)
+                        return sendTraceback(
+                            f"Your API token has been temporarily blocked because runtime usage exceeded the 24-hour limit. "
+                            f"The following request was NOT submitted: {request.full_path}. "
+                            f"This request and all remaining requests in your queue must be resubmitted after the {param_list['runtime_block_cooldown_minutes']}-minute cooldown period. "
+                            f"Your token will be automatically unblocked after {param_list['runtime_block_cooldown_minutes']} minutes. "
+                            f"If you believe this is an error, contact: NCILDlinkWebAdmin@mail.nih.gov"
                         )
                 # Check if token has been authorized to access api server 2
                 # if ("LDlinkRest2" in request.full_path):
                 #    if not checkApiServer2Auth(token):
                 #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
-                logAccess(token, module)
-                return f(*args, **kwargs)
+                if not param_list.get("disable_control", False) and not user_api2auth:
+                    app.logger.info(
+                        "Token runtime 24h check for %s: %.2f minutes",
+                        module,
+                        total_runtime_ms_24h / 60000.0,
+                    )
+                request_started_at = time.time()
+                skip_runtime = param_list.get("disable_control", False) or user_api2auth
+                try:
+                    return f(*args, **kwargs)
+                finally:
+                    duration_ms = round((time.time() - request_started_at) * 1000)
+                    try:
+                        logAccess(token, module, duration_ms, skip_runtime_cache=skip_runtime)
+                    except Exception:
+                        app.logger.exception("Failed to log API access")
+            else:
+                token = "NA"
+                module = getModule(request.full_path)
+                request_started_at = time.time()
+                try:
+                    return f(*args, **kwargs)
+                finally:
+                    duration_ms = round((time.time() - request_started_at) * 1000)
+                    try:
+                        logAccess(token, module, duration_ms)
+                    except Exception:
+                        app.logger.exception("Failed to log API access")
+        else:
             token = "NA"
             module = getModule(request.full_path)
-            logAccess(token, module)
-            return f(*args, **kwargs)
-        return f(*args, **kwargs)
-
+            request_started_at = time.time()
+            try:
+                return f(*args, **kwargs)
+            finally:
+                duration_ms = round((time.time() - request_started_at) * 1000)
+                try:
+                    logAccess(token, module, duration_ms)
+                except Exception:
+                    app.logger.exception("Failed to log API access")
     return decorated_function
 
 
@@ -456,7 +601,6 @@ def requires_admin_token(f):
 #     end_time = time.time()
 #     app.logger.info("Executed unblocked API user justification submission (%ss)" % (round(end_time - start_time, 2)))
 #     return sendJSON(out_json)
-
 
 # Web route to register user's email for API token
 @app.route("/LDlinkRestWeb/apiaccess/register_web", methods=["GET"])
@@ -1287,6 +1431,7 @@ def ldassoc():
 @app.route("/LDlinkRest/ldscore", methods=["GET"])
 # @app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route("/LDlinkRestWeb/ldscore", methods=["GET"])
+@requires_token
 def ldscore():
     if "LDlinkRestWeb" in request.path:
         web = True
@@ -1417,6 +1562,7 @@ def ldscore():
     return jsonify(out_json)
 
 
+
 @app.route("/LDlinkRest/ldscoreapi", methods=["POST"])
 @requires_token
 def ldscoreapi():
@@ -1514,6 +1660,7 @@ def ldscoreapi():
 # Web for LDscore
 @app.route("/LDlinkRest/ldherit", methods=["GET"])
 @app.route("/LDlinkRestWeb/ldherit", methods=["GET"])
+@requires_token
 def ldherit():
     if "LDlinkRestWeb" in request.path:
         web = True
@@ -1723,6 +1870,7 @@ def ldheritAPI():
 
 @app.route("/LDlinkRest/ldcorrelation", methods=["GET"])
 @app.route("/LDlinkRestWeb/ldcorrelation", methods=["GET"])
+@requires_token
 def ldcorrelation():
     if "LDlinkRestWeb" in request.path:
         web = True
@@ -1960,7 +2108,8 @@ def ldexpress():
         )
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(
                 snplist,
                 pop,
@@ -2096,7 +2245,8 @@ def ldhap():
             f.write(snps.lower())
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             out_json = calculate_hap(snplst, pop, reference, web, genome_build)
             if "error" in json.loads(out_json):
                 toggleLocked(token, 0)
@@ -2234,7 +2384,8 @@ def ldmatrix():
             f.write(snps.lower())
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             out_script, out_div = calculate_matrix(
                 snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript
             )
@@ -2368,7 +2519,8 @@ def ldpair():
         # print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
             # if there is error, the out_json should be json format not as array
             if "error" in json.loads(out_json):
@@ -2484,7 +2636,8 @@ def ldpop():
         # print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             out_json = calculate_pop(var1, var2, pop, r2_d, web, genome_build, reference)
             if "error" in json.loads(out_json):
                 toggleLocked(token, 0)
@@ -2600,7 +2753,8 @@ def ldproxy():
         )
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             out_script, out_div = calculate_proxy(
                 var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript
             )
@@ -2770,7 +2924,8 @@ def ldtrait():
                     f.write(s.lower() + "\n")
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             app.logger.debug("begin to call trait")
             print("####################")
             print(snpfile, pop, r2_d, r2_d_threshold, reference, genome_build, window)
@@ -2950,7 +3105,8 @@ def ldtraitgwas():
                     f.write(s.lower() + "\n")
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             app.logger.debug("begin to call trait")
             print("####################")
             print(snpfile, pop, r2_d, r2_d_threshold, reference, genome_build, window)
@@ -3119,7 +3275,8 @@ def ldexpressgwas():
         )
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(
                 snplist,
                 pop,
@@ -3246,7 +3403,8 @@ def snpchip():
             f.write(snps.lower())
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             if "error" in json.loads(snp_chip) and len(json.loads(snp_chip)["error"]) > 0:
                 toggleLocked(token, 0)
@@ -3399,7 +3557,8 @@ def snpclip():
                     f.write(s.lower() + "\n")
         try:
             # lock token preventing concurrent requests
-            toggleLocked(token, 1)
+            if not toggleLocked(token, 1):
+                return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
             (snps, snp_list, details) = calculate_clip(
                 snpfile, pop, reference, web, genome_build, float(r2_threshold), float(maf_threshold)
             )

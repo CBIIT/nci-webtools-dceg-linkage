@@ -38,7 +38,14 @@ export default function LdAssoc() {
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
         <CitationBox />
           <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
-            Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" target="_blank" rel="noopener noreferrer" >LDassoc: an online tool for interactively exploring genome-wide association study results and prioritizing variants for functional investigation.</a> Bioinformatics. 2017 Sept 12.
+            Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" target="_blank" rel="noopener noreferrer" >LDassoc: an online tool for interactively exploring genome-wide association study results and prioritizing variants for functional investigation.</a> <i>Bioinformatics</i>. 2017 Sept 12.
+          </div>
+          <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
+            Breeze, C.E., Haugen, E., Gutierrez-Arcelus, M., Yao, X., Teschendorff, A., Beck, S., Dunham, I., Stamatoyannopoulos, J., Franceschini, N., Machiela, M.J., Berndt, S.I.{" "}
+            <a href="https://doi.org/10.1186/s13059-023-03126-1" target="_blank" rel="noopener noreferrer">
+              FORGEdb: a tool for identifying candidate functional variants and uncovering target genes and mechanisms for complex diseases.
+            </a>{" "}
+            <i>Genome Biology</i>. 25, 3 (2024).
           </div>
         </Row>
       </Container>

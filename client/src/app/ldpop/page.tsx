@@ -38,7 +38,7 @@ export default function LdPop() {
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <CitationBox />
           <div style={{ wordBreak: "normal", overflowWrap: "break-word", marginTop: '1rem' }}>
-              Alexander TA, Machiela MJ. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=31924160" target="_blank" rel="noopener noreferrer">LDpop: an interactive online tool to calculate and visualize geographic LD patterns.</a> BMC Bioinformatics. 2020 Jan 10.
+              Alexander TA, Machiela MJ. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=31924160" target="_blank" rel="noopener noreferrer">LDpop: an interactive online tool to calculate and visualize geographic LD patterns.</a> <i>BMC Bioinformatics</i>. 2020 Jan 10.
           </div>
         </Row>
       </Container>
