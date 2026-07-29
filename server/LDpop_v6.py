@@ -84,26 +84,21 @@ def allele_freq_per_pop(snp1, snp2, pop):
   
                           
     vcf_rs1 = vcf_dir + "ALL.chr" + snp1_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz" 
-    rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord[1], snp1_coord[2]) 
-    proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
-    vcf1 = proc1.stdout.readlines()[0].strip().split("\t")
+    proc1 = subprocess.Popen(["tabix", vcf_rs1, str(snp1_coord[1]) + ":" + str(snp1_coord[2]) + "-" + str(snp1_coord[2])], stdout=subprocess.PIPE, universal_newlines=True)
+    vcf1 = [line for line in proc1.stdout.readlines() if "END" not in line][0].strip().split("\t")
 
     vcf_rs2 = vcf_dir + "ALL.chr" + snp2_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
-    rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord[1], snp2_coord[2])
-    proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
+    proc2 = subprocess.Popen(["tabix", vcf_rs2, str(snp2_coord[1]) + ":" + str(snp2_coord[2]) + "-" + str(snp2_coord[2])], stdout=subprocess.PIPE, universal_newlines=True)
     vcf2 = proc2.stdout.readlines()[0].strip().split("\t")
     
     
 
     # Get headers
-    tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_rs1)
-    proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
-    head1 = proc1_h.stdout.readlines()[0].strip().split()
+    proc1_h = subprocess.Popen(["tabix", "-H", vcf_rs1], stdout=subprocess.PIPE, universal_newlines=True)
+    head1 = [line for line in proc1_h.stdout.readlines() if "CHROM" in line][0].strip().split()
 
-    tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_rs2)
-    proc2_h = subprocess.Popen(
-        tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
-    head2 = proc2_h.stdout.readlines()[0].strip().split()
+    proc2_h = subprocess.Popen(["tabix", "-H", vcf_rs2], stdout=subprocess.PIPE, universal_newlines=True)
+    head2 = [line for line in proc2_h.stdout.readlines() if "CHROM" in line][0].strip().split()
     
     
 

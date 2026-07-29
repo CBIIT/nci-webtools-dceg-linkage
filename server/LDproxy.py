@@ -10,6 +10,7 @@ import threading
 import traceback
 import weakref
 import httpx
+from pathlib import Path
 from LDutilites import get_config
 from multiprocessing.dummy import Pool
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
@@ -145,8 +146,9 @@ def calculate_proxy(
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print(json_output, file=out_json)
             out_json.close()
-            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+            Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+            for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
+                path.unlink(missing_ok=True)
             return ("", "")
         else:
             logger.warning(f"Query variant warning: {msg[2]}")
@@ -169,8 +171,10 @@ def calculate_proxy(
     commands = []
 
     for subprocess_id in range(num_subprocesses):
-        getWindowVariantsArgs = " ".join(
+        commands.append(
             [
+                "python3",
+                "LDproxy_sub.py",
                 str(web),
                 str(snp),
                 str(snp_coord["chromosome"]),
@@ -181,10 +185,9 @@ def calculate_proxy(
                 str(subprocess_id),
             ]
         )
-        commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
 
     logger.debug(f"Executing {len(commands)} subprocesses for LD calculation")
-    processes = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
+    processes = [subprocess.Popen(command, stdout=subprocess.PIPE) for command in commands]
     # for subp in processes:
     #    for line in subp.stdout:
     #        print(line.decode().strip())
@@ -511,7 +514,7 @@ def calculate_proxy(
 
         # Open thread for high quality image exports
         # command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window) + " " + collapseTranscript+" "+annotate
-        # subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        # subprocess.Popen(command, stdout=subprocess.PIPE)
         logger.debug("Making request to export service for high quality images")
         payload = {
             "snp": snp,

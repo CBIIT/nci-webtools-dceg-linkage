@@ -10,8 +10,9 @@ import threading
 import traceback
 import httpx
 from datetime import datetime
+from pathlib import Path
 from multiprocessing.dummy import Pool
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly, tabix
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
 from LDutilites import get_config,array_split
 
@@ -419,8 +420,13 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
             vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
             vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
             checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-            tabix_snp= export_s3_keys + " cd {3}; tabix -hD {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-            subprocess.call(tabix_snp, shell=True)
+            vcf_output = tabix(
+                "-hD",
+                vcf_file,
+                genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0],
+                cwd=data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],
+            )
+            Path(tmp_dir, "snp_no_dups_" + request + ".vcf").write_text("\n".join(line for line in vcf_output if "END" not in line))
             # Check lowest P SNP is in the 1000G population and not monoallelic
             vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
             h = 0
@@ -525,12 +531,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     logger.debug("Creating LDassoc_sub subprocesses")
 
     for subprocess_id in range(num_subprocesses):
-        subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
-        commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+        commands.append(["python3", "LDassoc_sub.py", str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
         logger.debug(f"Subprocess {subprocess_id}: {len(assoc_coords_subset_chunks[subprocess_id])} coordinates")
     
     subprocess_start_time = time.time()
-    processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
+    processes=[subprocess.Popen(command, stdout=subprocess.PIPE) for command in commands]
 
     # Collect output in parallel
     pool = Pool(len(processes))
@@ -1105,7 +1110,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
         #     # Open thread for high quality image exports
         #     print("Open thread for high quality image exports.")
         #     command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
-        #     subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        #     subprocess.Popen(command, stdout=subprocess.PIPE)
 
 
 

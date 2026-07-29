@@ -6,6 +6,7 @@ import os
 import subprocess
 import time
 from datetime import datetime
+from pathlib import Path
 from multiprocessing.dummy import Pool
 from math import log10
 from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
@@ -346,13 +347,12 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
-        commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+        commands.append(["python3", "LDassoc_sub.py", str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
     
     logger.debug(f"Starting {num_subprocesses} LDassoc_sub subprocesses for LD calculations")
     subprocess_start_time = time.time()
     
-    processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
+    processes=[subprocess.Popen(command, stdout=subprocess.PIPE) for command in commands]
 
     pool = Pool(len(processes))
     out_raw=pool.map(get_output, processes)
@@ -739,16 +739,16 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
 
         # # Export to PDF
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+        subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".pdf"])
         # # Export to PNG
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+        subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_scaled_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".png"])
         # # Export to JPEG
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+        subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_scaled_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".jpeg"])
         # # Remove individual SVG files after they are combined
-        subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
-        subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+        Path(tmp_dir, "assoc_plot_1_" + request + ".svg").unlink(missing_ok=True)
+        Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
         # Remove scaled SVG file after it is converted to png and jpeg
-        subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
+        Path(tmp_dir, "assoc_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
 
 
 
@@ -894,26 +894,28 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
 
         # Export to PDF
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+        subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".pdf"])
         # Export to PNG
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+        subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_scaled_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".png"])
         # Export to JPEG
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+        subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_scaled_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".jpeg"])
         # Remove individual SVG files after they are combined
-        subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
-        subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+        Path(tmp_dir, "assoc_plot_1_" + request + ".svg").unlink(missing_ok=True)
+        Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
         # Remove scaled SVG file after it is converted to png and jpeg
-        subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
+        Path(tmp_dir, "assoc_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
 
     reset_output()
 
     # Remove temporary files
     logger.debug("Cleaning up temporary files")
-    subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-    subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-    subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.json", shell=True)
-    subprocess.call("rm "+tmp_dir+"recomb_"+request+".json", shell=True)
-    subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
+    Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+    for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
+        path.unlink(missing_ok=True)
+    for path in Path(tmp_dir).glob("genes_*" + request + "*.json"):
+        path.unlink(missing_ok=True)
+    Path(tmp_dir, "recomb_" + request + ".json").unlink(missing_ok=True)
+    Path(tmp_dir, "assoc_args" + request + ".json").unlink(missing_ok=True)
 
     duration = round(time.time() - start_time, 2)
     logger.debug(f"Executed LDassoc_plot_sub ({duration}s)")
