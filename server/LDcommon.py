@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 from collections import OrderedDict
+from pathlib import Path
 from bson import json_util
 import boto3
 import botocore
@@ -131,26 +132,21 @@ def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, 
 def retrieveTabix1000GData(snp_pos, snp_coords, genome_build,query_dir):
     vcf_filePath,tabix_coords,query_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    export_s3_keys = retrieveAWSCredentials()
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END".format(
-        query_file, tabix_coords, query_dir)
-    # print("tabix_snps", tabix_snps)
-    vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
+    tabix_coords = re.split(r'\s+', tabix_coords.strip())
+    output = tabix("-fhD", "--separate-regions", query_file, *tabix_coords, cwd=query_dir)
+    vcf = [line for line in output if "END" not in line]
     vcf,head = get_head(vcf)
     return vcf,head
 
 def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,request,is_output):
     vcf_filePath,tabix_coords,query_file=get_vcf_snp_params([vcf_pos],[snp_coord],genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    export_s3_keys = retrieveAWSCredentials()
+    tabix_coords = re.split(r'\s+', tabix_coords.strip())
+    output = tabix("-fhD", query_file, *tabix_coords, cwd=query_dir)
+    vcf = [line for line in output if "END" not in line]
     if is_output:
-        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END > {3}".format(query_file, tabix_coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
-    else:
-        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END".format(query_file, tabix_coords, query_dir)
-
-    tabix_snps = export_s3_keys + retrieve_command
-    vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-    if is_output:
+        with open(tmp_dir+"snp_no_dups_"+request+".vcf", "w") as f:
+            f.write("\n".join(vcf))
         vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
       
     vcf,head = get_head(vcf)
@@ -394,8 +390,10 @@ def get_population(pop, request,output):
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             return(json.dumps(output, sort_keys=True, indent=2))
 
-    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
-    subprocess.call(get_pops, shell=True)
+    with Path(tmp_dir, "pops_" + request + ".txt").open("w") as output_file:
+        for pop_dir in pop_dirs:
+            with open(pop_dir) as input_file:
+                output_file.write(input_file.read())
 
     pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
     ids = [i.strip() for i in pop_list]
@@ -437,8 +435,9 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
         output["error"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
         #output["warning"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["warning"] if "warning" in output else "")
         if is_output:
-            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+            Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+            for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
+                path.unlink(missing_ok=True)
         return (None, None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
         geno = []
@@ -456,8 +455,9 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
             output["error"] = "Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
             #output["warning"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["warning"] if "warning" in output else "")
             if is_output:
-                subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-                subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+                Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+                for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
+                    path.unlink(missing_ok=True)
             return (None,None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()

@@ -19,11 +19,10 @@ def generateInputBed(inputRawFile):
     print("Generating input BED file...")
     inputBedFileName = "input." + currentDT + ".bed"
     # awk 'NR>1 {print $1, $2, $3, $14}' test/ENCFF297XMQ.tsv > test/ENCFF297XMQ_sanitized.tsv
-    # awk_cmd = shlex.split('awk \'NR>1 {print $1, $2, $3, $4"__"$14}\' %s > %s' % (inputRawFile, inputBedFileName))
-    # print("awk_cmd", awk_cmd)
-    process = subprocess.Popen('awk \'NR>1 {print $1, $2, $3, $4"__"$1":"$3"__"$14}\' %s > %s' % (inputRawFile, inputBedFileName), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    with open(inputBedFileName, "w") as inputBedFile:
+        process = subprocess.Popen(['awk', 'NR>1 {print $1, $2, $3, $4"__"$1":"$3"__"$14}', inputRawFile], stdout=inputBedFile, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
-    print(stdout.decode('utf-8'), stderr.decode('utf-8'))
+    print(stderr.decode('utf-8'))
     print("liftOver input file " + inputBedFileName + " generated...")
     return inputBedFileName
 

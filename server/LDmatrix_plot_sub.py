@@ -4,6 +4,7 @@ import json
 import math
 import os
 import subprocess
+from pathlib import Path
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import get_coords, replace_coords_rsid_list, validsnp, get_population, get_1000g_data, parse_vcf
 from LDcommon import set_alleles, get_forgeDB
@@ -980,53 +981,21 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
 
     # Export to PDF
-    subprocess.call(
-        "phantomjs ./rasterize.js "
-        + tmp_dir
-        + "matrix_plot_"
-        + request
-        + ".svg "
-        + tmp_dir
-        + "matrix_plot_"
-        + request
-        + ".pdf",
-        shell=True,
-    )
+    subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "matrix_plot_" + request + ".svg", tmp_dir + "matrix_plot_" + request + ".pdf"])
     # Export to PNG
-    subprocess.call(
-        "phantomjs ./rasterize.js "
-        + tmp_dir
-        + "matrix_plot_scaled_"
-        + request
-        + ".svg "
-        + tmp_dir
-        + "matrix_plot_"
-        + request
-        + ".png",
-        shell=True,
-    )
+    subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "matrix_plot_scaled_" + request + ".svg", tmp_dir + "matrix_plot_" + request + ".png"])
     # Export to JPEG
-    subprocess.call(
-        "phantomjs ./rasterize.js "
-        + tmp_dir
-        + "matrix_plot_scaled_"
-        + request
-        + ".svg "
-        + tmp_dir
-        + "matrix_plot_"
-        + request
-        + ".jpeg",
-        shell=True,
-    )
+    subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "matrix_plot_scaled_" + request + ".svg", tmp_dir + "matrix_plot_" + request + ".jpeg"])
     # Remove individual SVG files after they are combined
-    subprocess.call("rm " + tmp_dir + "matrix_plot_1_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "rug_1_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "connector_1_" + request + ".svg", shell=True)
+    Path(tmp_dir, "matrix_plot_1_" + request + ".svg").unlink(missing_ok=True)
+    Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
+    Path(tmp_dir, "rug_1_" + request + ".svg").unlink(missing_ok=True)
+    Path(tmp_dir, "connector_1_" + request + ".svg").unlink(missing_ok=True)
     # Remove scaled SVG file after it is converted to png and jpeg
-    subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" + request + ".svg", shell=True)
+    Path(tmp_dir, "matrix_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
     # Remove temporary file(s)
-    subprocess.call("rm " + tmp_dir + "genes_*" + request + "*.json", shell=True)
+    for path in Path(tmp_dir).glob("genes_*" + request + "*.json"):
+        path.unlink(missing_ok=True)
 
     reset_output()
 
