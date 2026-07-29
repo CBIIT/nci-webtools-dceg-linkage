@@ -10,6 +10,7 @@ import { Header, Route } from "@/components/header";
 import Footer from "@/components/footer";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "./styles/main.scss";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
