@@ -1,6 +1,8 @@
 import json
 import math
+import os
 import re
+import shlex
 import shutil
 import subprocess
 from collections import OrderedDict
@@ -99,9 +101,25 @@ def get_command_output(*cmd, **subprocess_args):
 
 def tabix(*tabix_args, **subprocess_args):
     tabix_path = shutil.which("tabix")
+    if tabix_path is None:
+        raise RuntimeError("tabix executable not found on PATH")
+
     cmd = [tabix_path, *tabix_args]
-    args = {"env": get_aws_credentials(), **subprocess_args}
-    return get_command_output(*cmd, **args)
+    env = os.environ.copy()
+    provided_env = subprocess_args.pop("env", None)
+    if provided_env:
+        env.update(provided_env)
+    env.update(get_aws_credentials())
+    subprocess_args.setdefault("stderr", subprocess.PIPE)
+
+    try:
+        return get_command_output(*cmd, env=env, **subprocess_args)
+    except subprocess.CalledProcessError as error:
+        stderr = error.stderr.decode("utf-8", errors="replace") if error.stderr else ""
+        message = f"tabix failed with exit code {error.returncode}: {shlex.join(cmd)}"
+        if stderr:
+            message = f"{message}\n{stderr.strip()}"
+        raise RuntimeError(message) from error
 
 def get_1000g_data(snp_pos, snp_coords, genome_build, query_dir):
     vcf_filepath, tabix_coords, query_file = get_vcf_snp_params(snp_pos, snp_coords, genome_build)
