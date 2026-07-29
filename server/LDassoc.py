@@ -564,6 +564,15 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
     logger.debug(f"Processed {len(out_prox)} variants with LD calculations")
 
+    if len(out_prox) == 0:
+        error_msg = "No LDassoc variants could be processed from the association file and 1000G reference panel."
+        logger.error(error_msg)
+        output["error"] = error_msg
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "")
+
     out_dist_sort=sorted(out_prox, key=operator.itemgetter(15))
     out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(16), reverse=False)
 
