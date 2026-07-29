@@ -149,4 +149,4 @@ if __name__ == '__main__':
     port = param_list.get('bokeh_export_port', 5000)
     app.logger.info(f"Bokeh export service will run on port {port}")
     app.logger.info(f"Log level: {param_list.get('log_level', 'INFO')}")
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='127.0.0.1', port=port)

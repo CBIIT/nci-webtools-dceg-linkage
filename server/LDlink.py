@@ -3480,7 +3480,7 @@ if is_main:
     # debugger = args.debug == 'True'
     hostname = gethostname()
     app.logger.info(f"LDlink server starting on {hostname} at port {port_num} with debug={args.debug}")
-    app.run(host="0.0.0.0", port=port_num, use_evalex=False)
+    app.run(host="127.0.0.1", port=port_num, use_evalex=False)
     # app.logger.disabled = True
     # application = DebuggedApplication(app, True)
     app.debug = False

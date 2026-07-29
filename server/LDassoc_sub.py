@@ -1,5 +1,6 @@
 import csv
 import logging
+import re
 import subprocess
 import sys
 import time
@@ -76,11 +77,11 @@ except Exception as e:
     logger.error(f"S3 file check failed for {vcf_query_snp_file}: {str(e)}")
     sys.exit(1)
 
-coordinates = coords.replace("_", " ")
+coordinates = re.split(r"\s+", coords.replace("_", " ").strip())
 logger.debug(
-    f"Processing coordinates: {coordinates[:100]}..."
-    if len(coordinates) > 100
-    else f"Processing coordinates: {coordinates}"
+    f"Processing {len(coordinates)} coordinates: {' '.join(coordinates)[:100]}..."
+    if len(" ".join(coordinates)) > 100
+    else f"Processing {len(coordinates)} coordinates: {' '.join(coordinates)}"
 )
 
 
@@ -189,7 +190,7 @@ try:
     output = tabix(
         "-fhD",
         vcf_query_snp_file,
-        coordinates,
+        *coordinates,
         cwd=data_dir + genotypes_dir + genome_build_vars[genome_build]["1000G_dir"],
     )
     vcf = csv.reader([line for line in output if "END" not in line], dialect="excel-tab")
