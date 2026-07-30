@@ -330,7 +330,7 @@ def _validation_error(parameter, reason):
 
 
 def _is_missing_optional(value):
-    return value is None or value is False
+    return value is None
 
 
 def _normalize_optional_string(value):
