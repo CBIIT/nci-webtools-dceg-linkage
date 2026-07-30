@@ -3,7 +3,7 @@ export type FormData = {
   pop: string[];
   genome_build: string;
   varFile: string | FileList;
-  reference?: number;
+  reference?: string;
   platforms: string[];
 };
 
@@ -17,7 +17,7 @@ export interface ResultsData {
 export interface SnpChipData {
   snps: string;
   genome_build: string;
-  reference: number;
+  reference: string;
   platforms: string[];
 }
 

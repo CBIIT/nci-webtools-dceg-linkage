@@ -8,6 +8,7 @@ import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
+import { generateReference } from "@/services/utils";
 import { useState } from "react";
 import LdScoreResults from "./results";
 import "./style.css";
@@ -193,7 +194,7 @@ export default function LdScoreForm() {
     setHeritabilityLoading(true);
     const pop = data.pop?.value ?? "";
     const genomeBuild = genome_build || "grch37";
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const isExample = !!exampleFilename;
     const filename = exampleFilename || uploadedFilename;
     const params = new URLSearchParams({
@@ -220,7 +221,7 @@ export default function LdScoreForm() {
     setGeneticLoading(true);
     const pop = data.pop?.value ?? "";
     const genomeBuild = genome_build || "grch37";
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const isExample = !!exampleFile1;
     const filename = exampleFile1 || uploadedFile1;
     const filename2 = exampleFile2 || uploadedFile2;
@@ -252,7 +253,7 @@ export default function LdScoreForm() {
     const windowUnit = ldForm.getValues("windowUnit");
     const isExample = !!exampleBed;
     const filename = `${bed};${bim};${fam}`;
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const params = new URLSearchParams({
       filename,
       ldwindow: String(window),

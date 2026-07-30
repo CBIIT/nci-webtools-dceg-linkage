@@ -8,6 +8,7 @@ import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
+import { generateReference } from "@/services/utils";
 import { useState } from "react";
 import LdScoreResults from "./results";
 
@@ -52,7 +53,7 @@ export default function Heritability() {
     setRenameWarnings("");
     
     // Generate a new reference for this upload session
-    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const newReference = generateReference();
     setReference(newReference);
     
     const formData = new FormData();
@@ -254,7 +255,7 @@ export default function Heritability() {
                     setHeritabilityResultRef(null);
                     if (e.target.checked) {
                       // Generate a new reference for example data
-                      const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                      const newReference = generateReference();
                       setReference(newReference);
                       setExampleFilename("");
                       setUploadedFilename("");

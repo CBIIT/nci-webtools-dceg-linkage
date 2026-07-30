@@ -8,7 +8,7 @@ import { ldhap } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps } from "@/services/utils";
+import { generateReference, parseSnps } from "@/services/utils";
 import MultiSnp from "@/components/form/multiSnp";
 import { FormData, LdhapFormData, Ldhap } from "./types";
 
@@ -62,7 +62,7 @@ export default function LdHapForm() {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const { varFile, ...data } = form;
     const formData: LdhapFormData = {
       ...data,

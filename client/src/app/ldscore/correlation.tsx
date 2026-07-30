@@ -8,6 +8,7 @@ import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
+import { generateReference } from "@/services/utils";
 import { useState } from "react";
 import LdScoreResults from "./results";
 
@@ -60,7 +61,7 @@ export default function Correlation() {
     setUploading(true);
     
     // Generate new reference if not already set
-    const newReference = reference || Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const newReference = reference || generateReference();
     if (!reference) {
       setReference(newReference);
     }
@@ -248,7 +249,7 @@ export default function Correlation() {
                    setGeneticCorrelationResultRef(null);
                   if (e.target.checked) {
                     // Generate new reference for example data
-                    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                    const newReference = generateReference();
                     setReference(newReference);
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
