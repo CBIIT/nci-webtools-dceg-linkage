@@ -1,13 +1,16 @@
 import { populations } from "@/components/select/pop-select";
 import { AxiosError } from "axios";
-import { v4 as uuidv4 } from "uuid";
 
 export const rsChrRegex = /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/;
 
 export const rsChrMultilineRegex = /^(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*)(?:\r?\n(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*))*$/;
 
 export function generateReference(): string {
-  return uuidv4();
+  const cryptoApi = globalThis.crypto;
+  if (!cryptoApi || typeof cryptoApi.randomUUID !== "function") {
+    throw new Error("Secure UUID generator is not available (crypto.randomUUID).");
+  }
+  return cryptoApi.randomUUID();
 }
 
 export function parseSnps(text: string): string {

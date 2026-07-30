@@ -25,7 +25,6 @@
     "react-hook-form": "^7.58.1",
     "react-select": "^5.10.1",
     "sass": "^1.89.2",
-    "uuid": "^14.0.1",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
