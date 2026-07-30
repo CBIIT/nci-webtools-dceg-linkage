@@ -1,6 +1,5 @@
 #!flask/bin/python3
 import os
-import hmac
 import re
 import traceback
 import collections
@@ -289,26 +288,6 @@ JSON_REFERENCE_ENDPOINTS = {
     "snpchip",
     "snpclip",
     "zip_files",
-}
-
-WEB_COMPUTE_ENDPOINTS = {
-    "ldassoc",
-    "ldscore",
-    "ldherit",
-    "ldcorrelation",
-    "ldexpress",
-    "ldhap",
-    "ldmatrix",
-    "ldpair",
-    "ldpop",
-    "ldproxy",
-    "ldtrait",
-    "ldtraitget",
-    "ldexpressget",
-    "snpchip",
-    "snpclip",
-    "validate_sumstats",
-    "validate_bfile",
 }
 
 
@@ -748,54 +727,6 @@ def structural_input_guard():
 
     response = _validate_zip_files()
     if response:
-        return response
-
-    return None
-
-
-def _is_ldlinkrestweb_compute_request(path):
-    web_prefix = "/LDlinkRestWeb/"
-    if not path.startswith(web_prefix):
-        return False
-
-    endpoint = path[len(web_prefix) :].split("/", 1)[0]
-    return endpoint in WEB_COMPUTE_ENDPOINTS
-
-
-@app.before_request
-def internal_auth_guard():
-    if request.method == "OPTIONS":
-        return None
-
-    if not _is_ldlinkrestweb_compute_request(request.path):
-        return None
-
-    expected_internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
-    provided_internal_token = request.headers.get("X-Internal-Auth", "").strip()
-    request_source = request.remote_addr or "unknown"
-
-    if not expected_internal_token:
-        app.logger.error(
-            f"Internal auth token is not configured; blocking LDlinkRestWeb compute request for {request.path} from {request_source}."
-        )
-        response = sendJSON({"error": "Internal auth is not configured for LDlinkRestWeb compute routes."})
-        response.status_code = 500
-        return response
-
-    if not provided_internal_token:
-        app.logger.warning(
-            f"Missing X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
-        )
-        response = sendJSON({"error": "Forbidden: internal authentication header is required."})
-        response.status_code = 403
-        return response
-
-    if not hmac.compare_digest(provided_internal_token, expected_internal_token):
-        app.logger.warning(
-            f"Invalid X-Internal-Auth on LDlinkRestWeb compute request for {request.path} from {request_source}."
-        )
-        response = sendJSON({"error": "Forbidden: internal authentication header is invalid."})
-        response.status_code = 403
         return response
 
     return None
