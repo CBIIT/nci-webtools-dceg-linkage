@@ -7,7 +7,11 @@ export const rsChrMultilineRegex = /^(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|
 
 export function generateReference(): string {
   const cryptoApi = globalThis.crypto;
-  if (typeof cryptoApi?.randomUUID === "function") {
+  if (!cryptoApi || typeof cryptoApi.getRandomValues !== "function") {
+    throw new Error("Secure random generator is not available (crypto.getRandomValues).");
+  }
+
+  if (typeof cryptoApi.randomUUID === "function") {
     return cryptoApi.randomUUID().replace(/-/g, "");
   }
 
