@@ -1,4 +1,13 @@
 export const newsData = [
+      { title: "LDlink 7.3.0 Release (07/31/2026)",
+      items: [
+      "Fixed atomic token lock acquisition to prevent concurrent race conditions",
+      "Fixed stale-lock cleanup, reliably releasing locks older than timeout",
+      "Closed LDlinkRestWeb compute bypass to prevent unauthorized access",
+      "Added runtime-based quota with auto-block/unblock to manage usage",
+      "Added Redis caching for lock-status checks and runtime counters to reduce database load",  
+     ],
+    },
       { title: "LDlink 7.1.0 Release (05/08/2026)",
       items: [
       "Added Liability Scale to LDscore's Heritability Analysis and Genetic Correlation",
