@@ -1,6 +1,7 @@
 #!flask/bin/python3
 import os
 import hmac
+import re
 import traceback
 import collections
 import argparse
@@ -201,6 +202,190 @@ def sendJSON(inputString):
     return current_app.response_class(out_json, mimetype="application/json")
 
 
+REFERENCE_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+
+QUERY_REFERENCE_ENDPOINTS = {
+    "ldassoc",
+    "ldscore",
+    "ldherit",
+    "ldheritAPI",
+    "ldcorrelation",
+    "ldproxy",
+    "ldmatrix",
+    "ldpair",
+    "ldpop",
+    "ldhap",
+    "ldexpressgwas",
+    "ldtraitgwas",
+    "validate_sumstats",
+    "validate_bfile",
+}
+
+JSON_REFERENCE_ENDPOINTS = {
+    "ldexpress",
+    "ldmatrix",
+    "ldtrait",
+    "snpchip",
+    "snpclip",
+    "zip_files",
+}
+
+
+def _validation_response(message, status_code=400):
+    response = jsonify({"error": message})
+    response.status_code = status_code
+    return response
+
+
+def _validation_error(parameter, reason):
+    marker = request.headers.get("X-QA-Marker", "")
+    marker_log = f", marker={marker}" if marker else ""
+    app.logger.warning(
+        f"Rejected structural input: method={request.method}, path={request.path}, endpoint={request.endpoint}, parameter={parameter}, reason={reason}{marker_log}"
+    )
+    return _validation_response(f"Invalid {parameter} parameter.")
+
+
+def _is_missing_optional(value):
+    return value is None or value is False
+
+
+def _validate_reference_value(parameter, value):
+    if _is_missing_optional(value):
+        return None
+
+    normalized_value = str(value).strip()
+    if not normalized_value:
+        return _validation_error(parameter, "empty reference")
+    if not REFERENCE_RE.fullmatch(normalized_value):
+        return _validation_error(parameter, "reference does not match allowlist")
+    return None
+
+
+def _validate_filename_value(parameter, value, strict=True):
+    if _is_missing_optional(value):
+        return None
+
+    filename = str(value).strip()
+    if not filename:
+        return _validation_error(parameter, "empty filename")
+    if len(filename) > 255:
+        return _validation_error(parameter, "filename exceeds maximum length")
+    if "\x00" in filename or "/" in filename or "\\" in filename or ".." in filename:
+        return _validation_error(parameter, "filename contains path traversal characters")
+
+    sanitized_filename = secure_filename(filename)
+    if not sanitized_filename:
+        return _validation_error(parameter, "filename cannot be normalized")
+    if strict and sanitized_filename != filename:
+        return _validation_error(parameter, "filename changes during normalization")
+    return None
+
+
+def _get_request_json_body():
+    raw_body = request.get_data(cache=True)
+    if not raw_body:
+        return {}
+    try:
+        data = json.loads(raw_body)
+    except (TypeError, ValueError):
+        raise ValueError("Invalid JSON input.")
+    if not isinstance(data, dict):
+        raise ValueError("Invalid JSON input.")
+    return data
+
+
+def _validate_json_reference(endpoint):
+    if endpoint not in JSON_REFERENCE_ENDPOINTS:
+        return None
+    try:
+        data = _get_request_json_body()
+    except ValueError:
+        return _validation_response("Invalid JSON input.")
+    return _validate_reference_value("reference", data.get("reference"))
+
+
+def _validate_zip_files():
+    if request.endpoint != "zip_files":
+        return None
+    try:
+        data = _get_request_json_body()
+    except ValueError:
+        return _validation_response("Invalid JSON input.")
+    filenames = data.get("files", [])
+    if not isinstance(filenames, list):
+        return _validation_error("files", "files must be an array")
+    for filename in filenames:
+        response = _validate_filename_value("files[]", filename, strict=True)
+        if response:
+            return response
+    return None
+
+
+@app.before_request
+def structural_input_guard():
+    endpoint = request.endpoint
+    if request.method == "OPTIONS" or endpoint is None:
+        return None
+
+    if _is_ldlinkrestweb_compute_request(request.path):
+        expected_internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
+        provided_internal_token = request.headers.get("X-Internal-Auth", "").strip()
+        request_source = request.remote_addr or "unknown"
+        has_valid_auth = bool(expected_internal_token and hmac.compare_digest(provided_internal_token, expected_internal_token))
+        is_legacy_loopback = not expected_internal_token and request_source in {"127.0.0.1", "::1", "localhost"}
+        if not has_valid_auth and not is_legacy_loopback:
+            return None
+
+    if endpoint in QUERY_REFERENCE_ENDPOINTS:
+        response = _validate_reference_value("reference", request.args.get("reference", None))
+        if response:
+            return response
+
+    if endpoint == "ldassoc":
+        response = _validate_filename_value("filename", request.args.get("filename", None), strict=False)
+        if response:
+            return response
+
+    if endpoint == "upload":
+        response = _validate_reference_value("reference", request.form.get("reference", None))
+        if response:
+            return response
+        for uploaded_file in request.files.values():
+            response = _validate_filename_value("filename", uploaded_file.filename, strict=False)
+            if response:
+                return response
+
+    if endpoint == "send_temp_file":
+        response = _validate_filename_value("filename", (request.view_args or {}).get("filename"), strict=True)
+        if response:
+            return response
+
+    if endpoint == "send_temp_file_reference":
+        view_args = request.view_args or {}
+        response = _validate_reference_value("reference", view_args.get("reference"))
+        if response:
+            return response
+        response = _validate_filename_value("filename", view_args.get("filename"), strict=True)
+        if response:
+            return response
+
+    if endpoint == "status":
+        response = _validate_filename_value("filename", (request.view_args or {}).get("filename"), strict=True)
+        if response:
+            return response
+
+    response = _validate_json_reference(endpoint)
+    if response:
+        return response
+
+    response = _validate_zip_files()
+    if response:
+        return response
+
+    return None
+
+
 def _is_ldlinkrestweb_compute_request(path):
     web_prefix = "/LDlinkRestWeb/"
     if not path.startswith(web_prefix):
@@ -327,8 +512,8 @@ def _resolve_ldscore_example_path(file_name):
 
 
 def _resolve_upload_dir(reference, create_dir=False):
-    normalized_reference = secure_filename(str(reference or "").strip())
-    if not normalized_reference:
+    normalized_reference = str(reference or "").strip()
+    if not normalized_reference or not REFERENCE_RE.fullmatch(normalized_reference):
         raise ValueError("Missing or invalid reference parameter.")
 
     upload_root = os.path.realpath(app.config["UPLOAD_DIR"])
@@ -918,8 +1103,9 @@ def zip_files():
     app.logger.info("Starting zip file creation")
 
     try:
-        filenames = request.json.get("files", [])
-        reference = request.json.get("reference", None)
+        data = _get_request_json_body()
+        filenames = data.get("files", [])
+        reference = data.get("reference", None)
         app.logger.debug(f"Creating zip with {len(filenames)} files, reference: {reference}")
 
         zip_filename = "files.zip"
@@ -927,9 +1113,8 @@ def zip_files():
 
         # If reference is provided, use reference subfolder for both input files and zip
         if reference:
-            uploads_dir = os.path.join(tmp_dir, "uploads", str(reference))
-            os.makedirs(uploads_dir, exist_ok=True)
-            zip_filepath = os.path.join(uploads_dir, zip_filename)
+            reference, uploads_dir = _resolve_upload_dir(reference, create_dir=True)
+            zip_filepath = safe_join(uploads_dir, zip_filename)
         else:
             uploads_dir = os.path.join(tmp_dir, "uploads")
             os.makedirs(uploads_dir, exist_ok=True)
@@ -946,30 +1131,30 @@ def zip_files():
 
         # For each file, ensure it exists in uploads_dir; if not, copy from ldscore_dir if it's an example file
         for filename in filenames:
-            upload_path = os.path.join(uploads_dir, filename)
+            safe_filename, upload_path, _ = _resolve_upload_file_path(filename, reference)
             if not os.path.exists(upload_path):
-                if filename in example_files:
-                    source_path = os.path.join(ldscore_dir, filename)
+                if safe_filename in example_files:
+                    source_path = os.path.join(ldscore_dir, safe_filename)
                     if os.path.exists(source_path):
                         # shutil.copy(source_path, upload_path)
                         app.logger.info(f"Copied example file {source_path} to {upload_path}")
                     else:
-                        app.logger.error(f"Example file {filename} not found in {ldscore_dir}")
-                        return jsonify({"error": f"Example file {filename} not found in {ldscore_dir}"}), 404
+                        app.logger.error(f"Example file {safe_filename} not found in {ldscore_dir}")
+                        return jsonify({"error": f"Example file {safe_filename} not found in {ldscore_dir}"}), 404
                 else:
-                    app.logger.error(f"File {filename} not found in uploads directory and is not an example file.")
+                    app.logger.error(f"File {safe_filename} not found in uploads directory and is not an example file.")
                     return (
                         jsonify(
-                            {"error": f"File {filename} not found in uploads directory and is not an example file."}
+                            {"error": f"File {safe_filename} not found in uploads directory and is not an example file."}
                         ),
                         404,
                     )
 
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
             for filename in filenames:
-                file_path = os.path.join(uploads_dir, filename)
+                safe_filename, file_path, _ = _resolve_upload_file_path(filename, reference)
                 zipf.write(file_path, os.path.basename(file_path))
-                app.logger.debug(f"Added file to zip: {filename}")
+                app.logger.debug(f"Added file to zip: {safe_filename}")
 
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename} in {uploads_dir}")
@@ -1012,13 +1197,10 @@ def upload():
 
                 app.logger.debug(f"Processing upload: {filename}")
 
-                os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
                 if reference:
-                    ref_dir = os.path.join(app.config["UPLOAD_DIR"], reference)
-                    os.makedirs(ref_dir, exist_ok=True)
-                    file_path = os.path.join(ref_dir, filename)
+                    _, file_path, _ = _resolve_upload_file_path(filename, reference, create_dir=True)
                 else:
-                    file_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+                    _, file_path, _ = _resolve_upload_file_path(filename, create_dir=True)
 
                 file.save(file_path)
                 uploaded_files.append(filename)
@@ -1995,7 +2177,7 @@ def ldcorrelation():
 @requires_token
 def ldexpress():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data["snps"]
     pop = data["pop"]
     tissues = data["tissues"]
@@ -2299,7 +2481,7 @@ def ldmatrix():
     # differentiate POST or GET request
     if request.method == "POST":
         # POST REQUEST
-        data = json.loads(request.stream.read())
+        data = _get_request_json_body()
         snps = data["snps"] if "snps" in data else False
         pop = data["pop"] if "pop" in data else False
         reference = data["reference"] if "reference" in data else False
@@ -2438,7 +2620,7 @@ def ldpair():
     if request.method == "POST":
         # POST REQUEST
         try:
-            data = json.loads(request.stream.read())
+            data = _get_request_json_body()
         except Exception as e:
             return sendTraceback("Invalid JSON input.")
         snp_pairs = data["snp_pairs"] if "snp_pairs" in data else []
@@ -2800,7 +2982,7 @@ def ldproxy():
 @requires_token
 def ldtrait():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data["snps"]
     pop = data["pop"]
     r2_d = data["r2_d"]
@@ -3339,7 +3521,7 @@ def ldexpressgwas():
 @requires_token
 def snpchip():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data.get("snps")
     genome_build = data.get("genome_build", "grch37")
     platforms = data.get("platforms")
@@ -3447,7 +3629,7 @@ def snpchip():
 @requires_token
 def snpclip():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data["snps"]
     pop = data["pop"]
     r2_threshold = data["r2_threshold"]

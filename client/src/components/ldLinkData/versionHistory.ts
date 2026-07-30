@@ -5,7 +5,7 @@ export type NewsEntry = {
 
 export const versionHistory: NewsEntry[] = [
   {
-    title: "LDlink 7.3.0 Release (07/08/2026)",
+    title: "LDlink 7.3.0 Release (07/31/2026)",
     items: [
       "Fixed atomic token lock acquisition to prevent concurrent race conditions",
       "Fixed stale-lock cleanup, reliably releasing locks older than timeout",
