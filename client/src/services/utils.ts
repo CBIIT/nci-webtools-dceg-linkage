@@ -5,12 +5,22 @@ export const rsChrRegex = /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+
 
 export const rsChrMultilineRegex = /^(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*)(?:\r?\n(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*))*$/;
 
+const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isValidUuidV4(value: string): boolean {
+  return uuidV4Regex.test(value.trim());
+}
+
 export function generateReference(): string {
   const cryptoApi = globalThis.crypto;
   if (!cryptoApi || typeof cryptoApi.randomUUID !== "function") {
     throw new Error("Secure UUID generator is not available (crypto.randomUUID).");
   }
-  return cryptoApi.randomUUID();
+  const reference = cryptoApi.randomUUID();
+  if (!isValidUuidV4(reference)) {
+    throw new Error("Generated reference is not a valid UUIDv4 string.");
+  }
+  return reference;
 }
 
 export function parseSnps(text: string): string {

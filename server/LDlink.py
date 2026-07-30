@@ -181,7 +181,6 @@ def sendJSON(inputString):
     return current_app.response_class(out_json, mimetype="application/json")
 
 
-REFERENCE_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 SAFE_TEXT_RE = re.compile(r"^[A-Za-z0-9_.:+,= -]{1,512}$")
 SAFE_FREE_TEXT_RE = re.compile(r"^[^\x00\r\n]{1,512}$")
 SAFE_LIST_RE = re.compile(r"^[A-Za-z0-9_.:+,= -]{1,4096}$")
@@ -330,6 +329,15 @@ def _validate_regex_value(parameter, value, pattern, reason):
     return None
 
 
+def _is_valid_uuid_reference(value):
+    normalized_value = str(value).strip()
+    try:
+        parsed_uuid = uuid.UUID(normalized_value)
+    except (TypeError, ValueError, AttributeError):
+        return False
+    return parsed_uuid.version == 4 and str(parsed_uuid) == normalized_value.lower()
+
+
 def _validate_reference_value(parameter, value):
     if _is_missing_optional(value):
         return None
@@ -337,8 +345,8 @@ def _validate_reference_value(parameter, value):
     normalized_value = str(value).strip()
     if not normalized_value:
         return _validation_error(parameter, "empty reference")
-    if not REFERENCE_RE.fullmatch(normalized_value):
-        return _validation_error(parameter, "reference does not match allowlist")
+    if not _is_valid_uuid_reference(normalized_value):
+        return _validation_error(parameter, "reference must be a canonical UUIDv4 string")
     return None
 
 
@@ -852,7 +860,7 @@ def _resolve_ldscore_example_path(file_name):
 
 def _resolve_upload_dir(reference, create_dir=False):
     normalized_reference = str(reference or "").strip()
-    if not normalized_reference or not REFERENCE_RE.fullmatch(normalized_reference):
+    if not normalized_reference or not _is_valid_uuid_reference(normalized_reference):
         raise ValueError("Missing or invalid reference parameter.")
 
     upload_root = os.path.realpath(app.config["UPLOAD_DIR"])

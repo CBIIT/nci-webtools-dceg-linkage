@@ -6,11 +6,11 @@ from LDproxy_plot_sub import calculate_proxy_svg
 from LDcommon import get_config
 import hmac
 import os
-import re
 import sys
 import traceback
 import logging
 import time
+import uuid
 
 app = Flask(__name__)
 
@@ -26,8 +26,6 @@ app.logger = logging.getLogger("bokehexport")
 app.logger.setLevel(log_level)
 app.logger.addHandler(handler)
 
-REFERENCE_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
-
 
 def _is_loopback(remote_addr):
     return remote_addr in {"127.0.0.1", "::1", "localhost"}
@@ -40,10 +38,19 @@ def _invalid_parameter_response(parameter, reason):
     return jsonify({"error": f"Invalid {parameter} parameter."}), 400
 
 
+def _is_valid_uuid_reference(value):
+    normalized_value = str(value).strip()
+    try:
+        parsed_uuid = uuid.UUID(normalized_value)
+    except (TypeError, ValueError, AttributeError):
+        return False
+    return parsed_uuid.version == 4 and str(parsed_uuid) == normalized_value.lower()
+
+
 def _validate_reference(parameter, value):
     normalized_value = str(value or "").strip()
-    if not normalized_value or not REFERENCE_RE.fullmatch(normalized_value):
-        return _invalid_parameter_response(parameter, "request identifier does not match allowlist")
+    if not normalized_value or not _is_valid_uuid_reference(normalized_value):
+        return _invalid_parameter_response(parameter, "request identifier must be a canonical UUIDv4 string")
     return None
 
 
