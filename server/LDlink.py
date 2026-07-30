@@ -7,7 +7,7 @@ import collections
 import argparse
 import json
 import time
-import random
+import uuid
 import logging
 import sys
 from threading import Thread
@@ -260,6 +260,11 @@ BOOLEAN_ENDPOINT_FIELDS = {
 
 JSON_SNP_ENDPOINTS = {"ldexpress", "ldmatrix", "ldtrait", "snpchip", "snpclip"}
 QUERY_SNP_ENDPOINTS = {"ldhap", "ldmatrix", "ldtraitgwas", "ldexpressgwas"}
+
+
+def generate_reference():
+    return uuid.uuid4().hex
+
 
 QUERY_REFERENCE_ENDPOINTS = {
     "ldassoc",
@@ -1898,7 +1903,7 @@ def ldscore():
     isExample = request.args.get("isExample", False)
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference = str(random.randint(0, 1000000))
+        reference = generate_reference()
     app.logger.debug(
         f"LDscore params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, ldwindow: {ldwindow}, windUnit: {windUnit}, isExample: {isExample}"
     )
@@ -2123,7 +2128,7 @@ def ldherit():
     isexample = request.args.get("isExample", False)
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference =  str(random.randint(0, 1000000))
+        reference = generate_reference()
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
@@ -2231,7 +2236,7 @@ def ldheritAPI():
     file = request.files["file"]
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference = str(random.randint(0, 1000000))
+        reference = generate_reference()
 
     try:
         reference, fileDir = _resolve_upload_dir(reference, create_dir=True)
@@ -2333,7 +2338,7 @@ def ldcorrelation():
     isexample = request.args.get("isExample", False)
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        reference = generate_reference()
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
@@ -2454,7 +2459,7 @@ def ldexpress():
     genome_build = data["genome_build"] if "genome_build" in data else "grch37"
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -2532,7 +2537,6 @@ def ldexpress():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
         app.logger.debug(
             "ldexpress params "
@@ -2631,7 +2635,7 @@ def ldhap():
     token = request.args.get("token", False)
     genome_build = request.args.get("genome_build", "grch37")
     web = False
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2762,7 +2766,7 @@ def ldmatrix():
     token = request.args.get("token", False)
     web = False
     if reference is False:
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        reference = generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2910,7 +2914,7 @@ def ldpair():
         # WEB REQUEST
         if request.headers.get("User-Agent"):
             web = True
-            reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+            reference = request.args.get("reference") or generate_reference()
             app.logger.debug(
                 "ldpair params "
                 + json.dumps(
@@ -2943,7 +2947,7 @@ def ldpair():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        reference = generate_reference()
         app.logger.debug(
             "ldpair params "
             + json.dumps(
@@ -3020,7 +3024,7 @@ def ldpop():
     token = request.args.get("token", False)
     genome_build = request.args.get("genome_build", "grch37")
     web = False
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3059,7 +3063,6 @@ def ldpop():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "ldpop params "
             + json.dumps(
@@ -3130,7 +3133,7 @@ def ldproxy():
     collapseTranscript = request.args.get("collapseTranscript", True)
     # annotateText = request.args.get('annotate', False)
     web = False
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3173,7 +3176,6 @@ def ldproxy():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         # print('request: ' + str(reference))
         app.logger.debug(
             "ldproxy params "
@@ -3251,7 +3253,7 @@ def ldtrait():
     genome_build = data["genome_build"] if "genome_build" in data else "grch37"
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
 
     # differentiate web or api request
@@ -3337,7 +3339,6 @@ def ldtrait():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "ldtrait params "
             + json.dumps(
@@ -3454,7 +3455,7 @@ def ldtraitgwas():
     # Optional parameters
     window = request.args.get("window", "500000").replace(",", "")
 
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
 
     # Run calculate_trait in a separate thread
     # differentiate web or api request
@@ -3517,7 +3518,6 @@ def ldtraitgwas():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "ldtrait params "
             + json.dumps(
@@ -3635,7 +3635,7 @@ def ldexpressgwas():
     )
     window = request.args.get("window", "500000")
     genome_build = request.args.get("genome_build", "grch37")
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3691,7 +3691,6 @@ def ldexpressgwas():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
         app.logger.debug(
             "ldexpress params "
@@ -3784,7 +3783,7 @@ def snpchip():
     token = request.args.get("token", False)
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
 
     # differentiate web or api request
@@ -3893,7 +3892,7 @@ def snpclip():
     genome_build = data["genome_build"] if "genome_build" in data else "grch37"
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
 
     # differentiate web or api request
@@ -3967,7 +3966,6 @@ def snpclip():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "snpclip params "
             + json.dumps(
