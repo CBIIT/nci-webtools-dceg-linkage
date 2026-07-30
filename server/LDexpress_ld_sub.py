@@ -1,7 +1,6 @@
 import csv
-import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,set_alleles,LD_calcs,get_dbsnp_coord,get_geno
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,set_alleles,LD_calcs,get_dbsnp_coord,get_geno,tabix
 from LDutilites import get_config
 
 web = sys.argv[1]
@@ -42,8 +41,13 @@ vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome
 vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 # Import Window around SNP
-tabix_snp = export_s3_keys + " cd {4}; tabix -fhD {0} {1}:{2}-{3} | grep -v -e END".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome, start, stop, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-vcf = csv.reader([x.decode('utf-8') for x in subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE).stdout.readlines()], dialect="excel-tab")
+vcf_output = tabix(
+    "-fhD",
+    vcf_query_snp_file,
+    genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + start + "-" + stop,
+    cwd=data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],
+)
+vcf = csv.reader([line for line in vcf_output if "END" not in line], dialect="excel-tab")
 # Loop past file information and find header
 head = next(vcf, None)
 while head[0][0:2] == "##":
