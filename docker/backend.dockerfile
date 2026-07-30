@@ -27,6 +27,7 @@ RUN dnf -y update && \
     httpd \
     httpd-devel \
     libcurl-devel \
+    libcap \
     libffi-devel \
     ncurses-devel \
     openssl-devel \
@@ -101,13 +102,17 @@ RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R apache:apache /var/cache/fontconfig
 
+RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/httpd
+
 COPY server/ .
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
 
-# RUN mkdir -p /usr/share/httpd/.cache/selenium \
-#     && chown -R apache:apache /usr/share/httpd/.cache
+RUN mkdir -p /usr/share/httpd/.cache/selenium \
+    && chown -R apache:apache /usr/share/httpd/.cache
+
+USER apache
 
 EXPOSE 80
 
