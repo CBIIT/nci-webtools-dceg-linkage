@@ -651,15 +651,6 @@ def structural_input_guard():
     if request.method == "OPTIONS" or endpoint is None:
         return None
 
-    if _is_ldlinkrestweb_compute_request(request.path):
-        expected_internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
-        provided_internal_token = request.headers.get("X-Internal-Auth", "").strip()
-        request_source = request.remote_addr or "unknown"
-        has_valid_auth = bool(expected_internal_token and hmac.compare_digest(provided_internal_token, expected_internal_token))
-        is_legacy_loopback = not expected_internal_token and request_source in {"127.0.0.1", "::1", "localhost"}
-        if not has_valid_auth and not is_legacy_loopback:
-            return None
-
     response = _validate_common_parameters(endpoint)
     if response:
         return response

@@ -56,12 +56,11 @@ def _validate_export_file(parameter, value):
         return _invalid_parameter_response(parameter, "empty or null-containing path")
 
     real_path = os.path.realpath(path_value)
-    allowed_roots = [
-        os.path.realpath(param_list.get("tmp_dir", "")),
-        os.path.realpath(param_list.get("data_dir", "")),
-    ]
+    tmp_dir = param_list.get("tmp_dir")
+    data_dir = param_list.get("data_dir")
+    allowed_roots = [os.path.realpath(root) for root in (tmp_dir, data_dir) if str(root or "").strip()]
     for root in allowed_roots:
-        if root and os.path.commonpath([root, real_path]) == root:
+        if os.path.commonpath([root, real_path]) == root:
             return None
     return _invalid_parameter_response(parameter, "path is outside allowed export roots")
 
