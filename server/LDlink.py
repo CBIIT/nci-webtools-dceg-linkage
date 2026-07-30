@@ -284,7 +284,7 @@ QUERY_SNP_ENDPOINTS = {"ldhap", "ldmatrix", "ldtraitgwas", "ldexpressgwas"}
 
 
 def generate_reference():
-    return uuid.uuid4().hex
+    return str(uuid.uuid4())
 
 
 QUERY_REFERENCE_ENDPOINTS = {

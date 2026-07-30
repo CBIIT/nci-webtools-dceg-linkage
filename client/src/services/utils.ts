@@ -1,25 +1,13 @@
 import { populations } from "@/components/select/pop-select";
 import { AxiosError } from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 export const rsChrRegex = /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/;
 
 export const rsChrMultilineRegex = /^(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*)(?:\r?\n(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*))*$/;
 
 export function generateReference(): string {
-  const cryptoApi = globalThis.crypto;
-  if (!cryptoApi || typeof cryptoApi.getRandomValues !== "function") {
-    throw new Error("Secure random generator is not available (crypto.getRandomValues).");
-  }
-
-  if (typeof cryptoApi.randomUUID === "function") {
-    return cryptoApi.randomUUID().replace(/-/g, "");
-  }
-
-  const bytes = new Uint8Array(16);
-  cryptoApi.getRandomValues(bytes);
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return uuidv4();
 }
 
 export function parseSnps(text: string): string {
