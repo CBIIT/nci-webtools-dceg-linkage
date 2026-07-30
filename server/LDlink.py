@@ -291,6 +291,26 @@ JSON_REFERENCE_ENDPOINTS = {
     "zip_files",
 }
 
+WEB_COMPUTE_ENDPOINTS = {
+    "ldassoc",
+    "ldscore",
+    "ldherit",
+    "ldcorrelation",
+    "ldexpress",
+    "ldhap",
+    "ldmatrix",
+    "ldpair",
+    "ldpop",
+    "ldproxy",
+    "ldtrait",
+    "ldtraitget",
+    "ldexpressget",
+    "snpchip",
+    "snpclip",
+    "validate_sumstats",
+    "validate_bfile",
+}
+
 
 def _validation_response(message, status_code=400):
     response = jsonify({"error": message})
