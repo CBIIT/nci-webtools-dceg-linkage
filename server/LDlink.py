@@ -331,7 +331,10 @@ def _is_missing_optional(value):
 def _normalize_optional_string(value):
     if _is_missing_optional(value):
         return None
-    return str(value).strip()
+    normalized_value = str(value).strip()
+    if not normalized_value:
+        return None
+    return normalized_value
 
 
 def _validate_regex_value(parameter, value, pattern, reason):
@@ -526,7 +529,7 @@ def _validate_common_parameters(endpoint):
             if response:
                 return response
         for field in ("region[start]", "region[end]"):
-            response = _validate_number_value(field, request.args.get(field, None), minimum=0, integer=True)
+            response = _validate_text_field(field, request.args.get(field, None), SAFE_SNP_PAIR_RE)
             if response:
                 return response
 
@@ -534,7 +537,7 @@ def _validate_common_parameters(endpoint):
         response = _validate_number_value("ldwindow", request.args.get("ldwindow", None), minimum=0)
         if response:
             return response
-        response = _validate_choice_value("windUnit", request.args.get("windUnit", None), {"cm", "kb"})
+        response = _validate_choice_value("windUnit", request.args.get("windUnit", None), {"cm", "cM", "kb"})
         if response:
             return response
 
