@@ -112,6 +112,9 @@ RUN chown -R apache:apache ${LDLINK_HOME}
 RUN mkdir -p /usr/share/httpd/.cache/selenium \
     && chown -R apache:apache /usr/share/httpd/.cache
 
+ENV HOME=/usr/share/httpd
+ENV TMPDIR=/tmp
+
 USER apache
 
 EXPOSE 80
