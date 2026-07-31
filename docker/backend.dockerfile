@@ -11,6 +11,7 @@ ENV LDLINK_HEALTHCHECK_PORT=8080
 ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
 ENV PYTHONPATH=${LDLINK_HOME}
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
+ENV HOME=/usr/share/httpd
 
 # Install required build/runtime dependencies
 RUN dnf -y update && \
@@ -43,7 +44,9 @@ RUN dnf -y update && \
     xorg-x11-server-Xvfb \
     make \
     && dnf clean all
-    
+
+
+
 RUN chmod 700 /usr/bin/python3.9
 # Upgrade setuptools/wheel using Python 3.13.10
 RUN python3.13 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
@@ -92,7 +95,6 @@ RUN mkdir -p ${LDLINK_HOME}/apache-bin \
 RUN groupadd --gid 1000 bokeh \
     && useradd --uid 1000 --gid 1000 --home-dir /usr/share/httpd --shell /sbin/nologin bokeh
 
-
 WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
@@ -103,14 +105,17 @@ RUN python3.13 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.
 RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /var/cache/fontconfig \
-    && chown -R apache:apache /var/cache/fontconfig
+    && chown -R bokeh:bokeh /var/cache/fontconfig
 
 RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/httpd
 
 COPY server/ .
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
-RUN chown -R apache:apache ${LDLINK_HOME}
+RUN chown -R bokeh:bokeh ${LDLINK_HOME}
+
+RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config /local/content/analysistools_efs/ldlink/tmp \
+    && chown -R bokeh:bokeh /usr/share/httpd/.cache /usr/share/httpd/.config /local/content/analysistools_efs/ldlink/tmp
 
 EXPOSE 80
 
