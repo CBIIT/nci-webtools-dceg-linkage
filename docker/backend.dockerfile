@@ -123,8 +123,8 @@ COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R bokeh:bokeh ${LDLINK_HOME}
 
-RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
-    && chown -R bokeh:bokeh /usr/share/httpd/.cache /usr/share/httpd/.config /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
+RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config /usr/share/httpd/.mozilla /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
+    && chown -R bokeh:bokeh /usr/share/httpd/.cache /usr/share/httpd/.config /usr/share/httpd/.mozilla /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
     && chmod 700 /tmp/runtime-bokeh
 
 EXPOSE 80
