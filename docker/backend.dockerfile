@@ -12,6 +12,15 @@ ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
 ENV PYTHONPATH=${LDLINK_HOME}
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
 ENV HOME=/usr/share/httpd
+ENV TMPDIR=/tmp
+ENV XDG_CACHE_HOME=/usr/share/httpd/.cache
+ENV XDG_CONFIG_HOME=/usr/share/httpd/.config
+ENV XDG_RUNTIME_DIR=/tmp/runtime-bokeh
+ENV MOZ_HEADLESS=1
+ENV MOZ_DISABLE_CONTENT_SANDBOX=1
+ENV MOZ_DISABLE_GMP_SANDBOX=1
+ENV MOZ_DISABLE_RDD_SANDBOX=1
+ENV MOZ_DISABLE_SOCKET_PROCESS_SANDBOX=1
 
 # Install required build/runtime dependencies
 RUN dnf -y update && \
@@ -114,8 +123,9 @@ COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R bokeh:bokeh ${LDLINK_HOME}
 
-RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config /local/content/analysistools_efs/ldlink/tmp \
-    && chown -R bokeh:bokeh /usr/share/httpd/.cache /usr/share/httpd/.config /local/content/analysistools_efs/ldlink/tmp
+RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
+    && chown -R bokeh:bokeh /usr/share/httpd/.cache /usr/share/httpd/.config /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
+    && chmod 700 /tmp/runtime-bokeh
 
 EXPOSE 80
 
