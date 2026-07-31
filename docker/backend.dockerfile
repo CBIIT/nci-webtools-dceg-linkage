@@ -2,8 +2,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
 ENV HTSLIB_VERSION=1.21
 ENV PHANTOMJS_VERSION=2.1.1
-ENV GECKODRIVER_VERSION=0.36.0
-ENV MOZ_HEADLESS=1
+ENV GECKODRIVER_VERSION=0.37.1
 ENV DISPLAY=:99
 
 ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
@@ -43,9 +42,9 @@ RUN dnf -y update && \
     xorg-x11-server-Xvfb \
     make \
     && dnf clean all
-
+    
 RUN chmod 700 /usr/bin/python3.9
-    # Upgrade setuptools/wheel using Python 3.13.10
+# Upgrade setuptools/wheel using Python 3.13.10
 RUN python3.13 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
@@ -109,8 +108,8 @@ COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
 
-RUN mkdir -p /usr/share/httpd/.cache/selenium \
-    && chown -R apache:apache /usr/share/httpd/.cache
+RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config \
+    && chown -R apache:apache /usr/share/httpd/.cache /usr/share/httpd/.config
 
 ENV HOME=/usr/share/httpd
 ENV TMPDIR=/tmp
@@ -135,7 +134,6 @@ CMD PATH=${LDLINK_HOME}/apache-bin:$PATH flask --app bokehExport run & \
     --compress-responses \
     --trust-proxy-header X-Forwarded-For \
     --log-to-terminal \
-    # --log-level info \
     --access-log \
     --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined \
     --port 80 \
