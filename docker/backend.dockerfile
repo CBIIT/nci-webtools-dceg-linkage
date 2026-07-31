@@ -114,6 +114,10 @@ RUN mkdir -p /usr/share/httpd/.cache/selenium \
 
 ENV HOME=/usr/share/httpd
 ENV TMPDIR=/tmp
+ENV XDG_CACHE_HOME=/usr/share/httpd/.cache
+ENV XDG_CONFIG_HOME=/usr/share/httpd/.config
+ENV MOZ_HEADLESS=1
+ENV MOZ_DISABLE_CONTENT_SANDBOX=1
 
 USER apache
 
