@@ -39,6 +39,7 @@ RUN dnf -y update && \
     xz-devel \
     zlib-devel \
     firefox \
+    shadow-utils \
     xorg-x11-server-Xvfb \
     make \
     && dnf clean all
@@ -88,6 +89,9 @@ RUN ARCH=$(uname -m) && \
 RUN mkdir -p ${LDLINK_HOME}/apache-bin \
     && ln -sf /usr/bin/python3.13 ${LDLINK_HOME}/apache-bin/python3
 
+RUN groupadd --gid 1000 bokeh \
+    && useradd --uid 1000 --gid 1000 --home-dir /usr/share/httpd --shell /sbin/nologin bokeh
+
 
 WORKDIR ${LDLINK_HOME}
 
@@ -108,21 +112,11 @@ COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
 
-RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config \
-    && chown -R apache:apache /usr/share/httpd/.cache /usr/share/httpd/.config
-
-ENV HOME=/usr/share/httpd
-ENV TMPDIR=/tmp
-ENV XDG_CACHE_HOME=/usr/share/httpd/.cache
-ENV XDG_CONFIG_HOME=/usr/share/httpd/.config
-ENV MOZ_HEADLESS=1
-ENV MOZ_DISABLE_CONTENT_SANDBOX=1
-
-USER apache
-
 EXPOSE 80
 
 EXPOSE 8080
+
+USER bokeh
 
 CMD PATH=${LDLINK_HOME}/apache-bin:$PATH flask --app bokehExport run & \
     PATH=${LDLINK_HOME}/apache-bin:$PATH mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
