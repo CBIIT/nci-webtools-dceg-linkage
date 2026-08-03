@@ -9,7 +9,7 @@ import PopSelect, { getOptionsFromPop, getSelectedPopulationGroups } from "@/com
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPop } from "./types";
-import { rsChrRegex } from "@/services/utils";
+import { generateReference, rsChrRegex } from "@/services/utils";
 
 export default function LdPopForm({ params }: { params: submitFormData }) {
   const queryClient = useQueryClient();
@@ -50,7 +50,7 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const formData: submitFormData = {
       ...form,
       reference,
@@ -95,7 +95,7 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
         ),
         genome_build: params.genome_build,
         r2_d: params.r2_d,
-        reference: params.reference ?? Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString(),
+        reference: params.reference ?? generateReference(),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -27,7 +27,7 @@ export interface SnpClipFormData {
   r2_threshold: string;
   maf_threshold: string;
   genome_build: string;
-  reference: number;
+  reference: string;
 }
 
 export interface VariantDetails {

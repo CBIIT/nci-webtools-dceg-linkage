@@ -3,7 +3,7 @@ networkMode: awsvpc
 cpu: "${API_ECS_CPU_UNITS}"
 memory: "${API_ECS_MEMORY_UNITS}"
 executionRoleArn: "${API_ROLE_ARN}"
-taskRoleArn: "${API_ROLE_ARN}"
+taskRoleArn: "${TASK_ROLE_ARN}"
 requiresCompatibilities:
   - FARGATE
 volumes:

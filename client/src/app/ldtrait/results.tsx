@@ -8,6 +8,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Table from "@/components/table";
 import CalculateLoading from "@/components/calculateLoading";
 import { fetchOutput, ldtrait } from "@/services/queries";
+import { generateReference } from "@/services/utils";
 import { ResultsData, Ldtrait, submitFormData } from "./types";
 import { calculateEstimatedTime } from "./form";
 import { genomeBuildMap } from "@/store";
@@ -33,7 +34,7 @@ export default function LdTraitResults({ reference, ...params }: { reference: st
   const handleContinue = () => {
     if (!params) return;
 
-    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
+    const newReference = generateReference();
     const continueFormData: submitFormData = {
       ...params,
       reference: newReference,

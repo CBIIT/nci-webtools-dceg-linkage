@@ -1,10 +1,11 @@
 import csv
 import logging
+import re
 import subprocess
 import sys
 import time
 from datetime import datetime
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
+from LDcommon import checkS3File, genome_build_vars, connectMongoDBReadOnly, tabix
 from LDcommon import set_alleles, get_dbsnp_coord, get_coords, get_regDB, get_forgeDB
 from LDutilites import get_config
 
@@ -43,8 +44,6 @@ aws_info = param_list["aws_info"]
 
 logger.debug(f"Loaded configuration - data_dir: {data_dir}, tmp_dir: {tmp_dir}")
 
-export_s3_keys = retrieveAWSCredentials()
-
 # Get population ids
 try:
     pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
@@ -78,11 +77,11 @@ except Exception as e:
     logger.error(f"S3 file check failed for {vcf_query_snp_file}: {str(e)}")
     sys.exit(1)
 
-coordinates = coords.replace("_", " ")
+coordinates = re.split(r"\s+", coords.replace("_", " ").strip())
 logger.debug(
-    f"Processing coordinates: {coordinates[:100]}..."
-    if len(coordinates) > 100
-    else f"Processing coordinates: {coordinates}"
+    f"Processing {len(coordinates)} coordinates: {' '.join(coordinates)[:100]}..."
+    if len(" ".join(coordinates)) > 100
+    else f"Processing {len(coordinates)} coordinates: {' '.join(coordinates)}"
 )
 
 
@@ -186,20 +185,15 @@ bp = geno[1]
 rs = snp
 al = "(" + new_alleles[0] + "/" + new_alleles[1] + ")"
 
-# Import Window around SNP
-tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(
-    vcf_query_snp_file, coordinates, data_dir + genotypes_dir + genome_build_vars[genome_build]["1000G_dir"]
-)
 logger.debug(f"Executing tabix command for coordinate window")
 try:
-    process = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
-
-    if process.returncode != 0:
-        logger.error(f"Tabix command failed with return code {process.returncode}: {stderr.decode('utf-8')}")
-        sys.exit(1)
-
-    vcf = csv.reader([x.decode("utf-8") for x in stdout.splitlines()], dialect="excel-tab")
+    output = tabix(
+        "-fhD",
+        vcf_query_snp_file,
+        *coordinates,
+        cwd=data_dir + genotypes_dir + genome_build_vars[genome_build]["1000G_dir"],
+    )
+    vcf = csv.reader([line for line in output if "END" not in line], dialect="excel-tab")
     logger.debug("Successfully executed tabix command and loaded VCF data")
 except Exception as e:
     logger.error(f"Error executing tabix command: {str(e)}")

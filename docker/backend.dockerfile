@@ -2,8 +2,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 
 ENV HTSLIB_VERSION=1.21
 ENV PHANTOMJS_VERSION=2.1.1
-ENV GECKODRIVER_VERSION=0.36.0
-ENV MOZ_HEADLESS=1
+ENV GECKODRIVER_VERSION=0.37.1
 ENV DISPLAY=:99
 
 ENV CPATH=/usr/include/httpd/:/usr/include/apr-1/
@@ -12,6 +11,16 @@ ENV LDLINK_HEALTHCHECK_PORT=8080
 ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
 ENV PYTHONPATH=${LDLINK_HOME}
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
+ENV HOME=/usr/share/httpd
+ENV TMPDIR=/tmp
+ENV XDG_CACHE_HOME=/usr/share/httpd/.cache
+ENV XDG_CONFIG_HOME=/usr/share/httpd/.config
+ENV XDG_RUNTIME_DIR=/tmp/runtime-bokeh
+ENV MOZ_HEADLESS=1
+ENV MOZ_DISABLE_CONTENT_SANDBOX=1
+ENV MOZ_DISABLE_GMP_SANDBOX=1
+ENV MOZ_DISABLE_RDD_SANDBOX=1
+ENV MOZ_DISABLE_SOCKET_PROCESS_SANDBOX=1
 
 # Install required build/runtime dependencies
 RUN dnf -y update && \
@@ -27,6 +36,7 @@ RUN dnf -y update && \
     httpd \
     httpd-devel \
     libcurl-devel \
+    libcap \
     libffi-devel \
     ncurses-devel \
     openssl-devel \
@@ -39,12 +49,15 @@ RUN dnf -y update && \
     xz-devel \
     zlib-devel \
     firefox \
+    shadow-utils \
     xorg-x11-server-Xvfb \
     make \
     && dnf clean all
 
+
+
 RUN chmod 700 /usr/bin/python3.9
-    # Upgrade setuptools/wheel using Python 3.13.10
+# Upgrade setuptools/wheel using Python 3.13.10
 RUN python3.13 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
 RUN cd /tmp \
@@ -88,6 +101,8 @@ RUN ARCH=$(uname -m) && \
 RUN mkdir -p ${LDLINK_HOME}/apache-bin \
     && ln -sf /usr/bin/python3.13 ${LDLINK_HOME}/apache-bin/python3
 
+RUN groupadd --gid 1000 bokeh \
+    && useradd --uid 1000 --gid 1000 --home-dir /usr/share/httpd --shell /sbin/nologin bokeh
 
 WORKDIR ${LDLINK_HOME}
 
@@ -99,19 +114,24 @@ RUN python3.13 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.
 RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
 
 RUN mkdir -p /var/cache/fontconfig \
-    && chown -R apache:apache /var/cache/fontconfig
+    && chown -R bokeh:bokeh /var/cache/fontconfig
+
+RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/httpd
 
 COPY server/ .
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
-RUN chown -R apache:apache ${LDLINK_HOME}
+RUN chown -R bokeh:bokeh ${LDLINK_HOME}
 
-# RUN mkdir -p /usr/share/httpd/.cache/selenium \
-#     && chown -R apache:apache /usr/share/httpd/.cache
+RUN mkdir -p /usr/share/httpd/.cache/selenium /usr/share/httpd/.config /usr/share/httpd/.mozilla /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
+    && chown -R bokeh:bokeh /usr/share/httpd/.cache /usr/share/httpd/.config /usr/share/httpd/.mozilla /tmp/runtime-bokeh /local/content/analysistools_efs/ldlink/tmp \
+    && chmod 700 /tmp/runtime-bokeh
 
 EXPOSE 80
 
 EXPOSE 8080
+
+USER bokeh
 
 CMD PATH=${LDLINK_HOME}/apache-bin:$PATH flask --app bokehExport run & \
     PATH=${LDLINK_HOME}/apache-bin:$PATH mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
@@ -123,7 +143,6 @@ CMD PATH=${LDLINK_HOME}/apache-bin:$PATH flask --app bokehExport run & \
     --compress-responses \
     --trust-proxy-header X-Forwarded-For \
     --log-to-terminal \
-    # --log-level info \
     --access-log \
     --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined \
     --port 80 \
