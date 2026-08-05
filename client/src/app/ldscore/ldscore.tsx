@@ -156,7 +156,7 @@ export default function LDScore() {
     const window = form.getValues("window");
     const windowUnit = form.getValues("windowUnit");
     const isExample = !!exampleBed;
-    const filename = `${bed};${bim};${fam}`;
+    const filename = `${bed},${bim},${fam}`;
   
     
     const params = new URLSearchParams({
