@@ -12,6 +12,7 @@ from math import log10
 from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
 from LDutilites import get_config, array_split
 from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
 
 # Configure module logger
@@ -27,6 +28,7 @@ if not logger.handlers:
 
 options = Options()
 options.add_argument("--headless")
+options.set_preference("browser.cache.disk.parent_directory", os.environ.get("XDG_CACHE_HOME", "/tmp"))
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
@@ -871,12 +873,21 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         assoc_plot.output_backend = "svg"
         rug.output_backend = "svg"
         gene_c_plot.output_backend = "svg"
-        driver = webdriver.Firefox(options=options)
-        # export_png(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".png", webdriver=driver)
-        # export_png(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".png", webdriver=driver)
-        export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg", webdriver=driver)
-        export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg", webdriver=driver)
-        driver.quit()
+        driver = None
+        geckodriver_log = "/tmp/geckodriver-" + request + ".log"
+        try:
+            logger.info(f"Starting Firefox webdriver for request {request}; geckodriver log: {geckodriver_log}")
+            service = Service("/usr/local/bin/geckodriver", log_output=geckodriver_log)
+            driver = webdriver.Firefox(service=service, options=options)
+            driver.set_page_load_timeout(120)
+            driver.set_script_timeout(120)
+            # export_png(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".png", webdriver=driver)
+            # export_png(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".png", webdriver=driver)
+            export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg", webdriver=driver, timeout=120)
+            export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg", webdriver=driver, timeout=120)
+        finally:
+            if driver is not None:
+                driver.quit()
 
         # 1 pixel = 0.0264583333 cm
         svg_height = str(20.00 + (0.0264583333 * plot_c_h_pix)) + "cm"

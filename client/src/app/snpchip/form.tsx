@@ -5,7 +5,7 @@ import { Row, Col, Form, Button, Accordion, Spinner, Alert, Card } from "react-b
 import { snpchipPlatforms, snpchip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { FormData } from "./types";
-import { parseSnps } from "@/services/utils";
+import { generateReference, parseSnps } from "@/services/utils";
 import { Platform } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
@@ -183,7 +183,7 @@ export default function SNPChipForm({
       snps: snpsData,
       platforms: selectedPlatforms,
       genome_build: genome_build,
-      reference: Math.floor(Math.random() * (99999 - 10000 + 1) + 10000),
+      reference: generateReference(),
     };
 
     try {

@@ -11,7 +11,7 @@ import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import "./style.css";
 import { FormData, SubmitFormData } from "./types";
-import { rsChrRegex, parseRateLimitError } from "@/services/utils";
+import { generateReference, rsChrRegex, parseRateLimitError } from "@/services/utils";
 
 export default function LdProxyForm({ params }: { params: SubmitFormData }) {
   const queryClient = useQueryClient();
@@ -69,7 +69,7 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
         window: params.window,
         collapseTranscript: params.collapseTranscript,
         annotate: params.annotate,
-        reference: params.reference ?? Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString(),
+        reference: params.reference ?? generateReference(),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,7 +87,7 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
  // console.log(submitForm.error);
 
   async function onSubmit(data: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const formData: SubmitFormData = {
       ...data,
       reference,

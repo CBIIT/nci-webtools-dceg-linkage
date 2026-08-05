@@ -8,6 +8,7 @@ import { upload, ldassoc, ldassocExample } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
+import { generateReference } from "@/services/utils";
 
 export interface FormData {
   pop: PopOption[];
@@ -178,7 +179,7 @@ export default function LDAssocForm() {
 
   async function onSubmit(data: any) {
     if (!data.useEx) await handleUpload(data);
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
+    const reference = generateReference();
     const formData = {
       ...data,
       reference,

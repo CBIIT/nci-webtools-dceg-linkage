@@ -7,7 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { snpclip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps } from "@/services/utils";
+import { generateReference, parseSnps } from "@/services/utils";
 import { FormData, SnpClipFormData } from "./types";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import MultiSnp from "@/components/form/multiSnp";
@@ -64,7 +64,7 @@ export default function SNPClipForm() {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1));
+    const reference = generateReference();
     const { varFile, ...data } = form;
     const formData: SnpClipFormData = {
       ...data,
@@ -73,9 +73,9 @@ export default function SNPClipForm() {
       pop: getSelectedPopulationGroups(data.pop),
     };
 
-    queryClient.setQueryData(["snpclip-form-data", reference.toString()], formData);
+    queryClient.setQueryData(["snpclip-form-data", reference], formData);
     // Also store form data in the Zustand store so results components can read it
-    setFormData(reference.toString(), formData);
+    setFormData(reference, formData);
     submitForm.mutate(formData);
   }
 

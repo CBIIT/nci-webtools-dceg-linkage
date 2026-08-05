@@ -4,10 +4,13 @@ from LDassoc_plot_sub import calculate_assoc_svg
 from LDmatrix_plot_sub import calculate_matrix_svg
 from LDproxy_plot_sub import calculate_proxy_svg
 from LDcommon import get_config
+import hmac
+import os
 import sys
 import traceback
 import logging
 import time
+import uuid
 
 app = Flask(__name__)
 
@@ -22,6 +25,83 @@ handler.setFormatter(formatter)
 app.logger = logging.getLogger("bokehexport")
 app.logger.setLevel(log_level)
 app.logger.addHandler(handler)
+
+
+def _is_loopback(remote_addr):
+    return remote_addr in {"127.0.0.1", "::1", "localhost"}
+
+
+def _invalid_parameter_response(parameter, reason):
+    app.logger.warning(
+        f"Rejected export request: path={request.path}, remote={request.remote_addr}, parameter={parameter}, reason={reason}"
+    )
+    return jsonify({"error": f"Invalid {parameter} parameter."}), 400
+
+
+def _is_valid_uuid_reference(value):
+    normalized_value = str(value).strip()
+    try:
+        parsed_uuid = uuid.UUID(normalized_value)
+    except (TypeError, ValueError, AttributeError):
+        return False
+    return parsed_uuid.version == 4 and str(parsed_uuid) == normalized_value.lower()
+
+
+def _validate_reference(parameter, value):
+    normalized_value = str(value or "").strip()
+    if not normalized_value or not _is_valid_uuid_reference(normalized_value):
+        return _invalid_parameter_response(parameter, "request identifier must be a canonical UUIDv4 string")
+    return None
+
+
+def _validate_export_file(parameter, value):
+    if value is None:
+        return None
+
+    path_value = str(value).strip()
+    if not path_value or "\x00" in path_value:
+        return _invalid_parameter_response(parameter, "empty or null-containing path")
+
+    real_path = os.path.realpath(path_value)
+    tmp_dir = param_list.get("tmp_dir")
+    data_dir = param_list.get("data_dir")
+    allowed_roots = [os.path.realpath(root) for root in (tmp_dir, data_dir) if str(root or "").strip()]
+    for root in allowed_roots:
+        if os.path.commonpath([root, real_path]) == root:
+            return None
+    return _invalid_parameter_response(parameter, "path is outside allowed export roots")
+
+
+@app.before_request
+def export_request_guard():
+    if request.path == "/ping" or request.method == "OPTIONS":
+        return None
+
+    expected_internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
+    provided_internal_token = request.headers.get("X-Internal-Auth", "").strip()
+    if expected_internal_token:
+        if not hmac.compare_digest(provided_internal_token, expected_internal_token):
+            app.logger.warning(f"Rejected export request with invalid internal auth from {request.remote_addr}")
+            return jsonify({"error": "Forbidden"}), 403
+    elif not _is_loopback(request.remote_addr):
+        app.logger.warning(f"Rejected export request from non-loopback source {request.remote_addr}")
+        return jsonify({"error": "Forbidden"}), 403
+
+    data = request.get_json(silent=True) or {}
+    response = _validate_reference("request", data.get("request"))
+    if response:
+        return response
+
+    if "file" in data:
+        response = _validate_export_file("file", data.get("file"))
+        if response:
+            return response
+    if "snplst" in data:
+        response = _validate_export_file("snplst", data.get("snplst"))
+        if response:
+            return response
+
+    return None
 
 @app.route("/ping", methods=['GET'])
 def ping():

@@ -9,7 +9,7 @@ import { ldexpress, ldexpressTissues } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups,getOptionsFromPop } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps, getTissueOptionsFromKeys } from "@/services/utils";
+import { generateReference, parseSnps, getTissueOptionsFromKeys } from "@/services/utils";
 import { useRef } from "react";
 import { FormData, SubmitFormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
@@ -135,7 +135,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
     },
   });
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const { ldexpressFile, ...data } = form;
     const formData: LdexpressFormData = {
       ...data,
