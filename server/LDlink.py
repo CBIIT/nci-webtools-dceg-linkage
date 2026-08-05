@@ -7,6 +7,7 @@ import argparse
 import json
 import time
 import uuid
+import hmac
 import logging
 import sys
 from threading import Thread
