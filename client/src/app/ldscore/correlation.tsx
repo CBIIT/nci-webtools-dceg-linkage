@@ -34,6 +34,14 @@ const defaultGeneticForm: CorrelationFormData = {
   popPrev2: "0.01",
 };
 
+const supportedSumstatsExtensions = [".txt", ".tsv", ".csv", ".gz", ".sumstats", ".glm", ".assoc", ".regenie", ".saige"];
+const sumstatsAccept = supportedSumstatsExtensions.join(",");
+
+function hasSupportedSumstatsExtension(filename: string): boolean {
+  const lowerFilename = filename.toLowerCase();
+  return supportedSumstatsExtensions.some((extension) => lowerFilename.endsWith(extension));
+}
+
 export default function Correlation() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -90,14 +98,18 @@ export default function Correlation() {
        // console.log("File validation response:", validateData);
         
         if (validateData?.fileValid?.valid) {
+          const normalizedFilename = validateData.fileValid.normalizedFilename || validateData.fileValid.normalized_filename || filenameToUse;
+          if (normalizedFilename !== filenameToUse) {
+            setRenameWarnings((prev) => (prev ? prev + "; " + `File was normalized to ${normalizedFilename}` : `File was normalized to ${normalizedFilename}`));
+          }
           if (fileNumber === 1) {
             setFile1Valid(true);
             setValidationError1("");
-            setUploadedFile1(filenameToUse);
+            setUploadedFile1(normalizedFilename);
           } else {
             setFile2Valid(true);
             setValidationError2("");
-            setUploadedFile2(filenameToUse);
+            setUploadedFile2(normalizedFilename);
           }
         } else {
           if (fileNumber === 1) {
@@ -351,7 +363,7 @@ export default function Correlation() {
              <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
             <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="file" className="mb-3">
-              <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
+              <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
                 <div className="form-control bg-light">{exampleFile1}</div>
               ) : (
@@ -362,12 +374,11 @@ export default function Correlation() {
                     validate: (fileList: FileList | undefined) => {
                       if (!fileList || fileList.length === 0) return true;
                       const file = fileList[0];
-                      const ext = file.name.split('.').pop()?.toLowerCase();
-                      return ext === 'txt' || 'Only .txt files are allowed';
+                      return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
                     }
                   })}
-                  accept=".txt"
-                  title="Upload pre-munged GWAS sumstats"
+                  accept={sumstatsAccept}
+                  title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
                   disabled={geneticLoading}
                   style={{ maxWidth: "400px" }}
                   onChange={async (e) => {
@@ -470,7 +481,7 @@ export default function Correlation() {
           <Col s={12} sm={12} md={6} lg={4}>
            
             <Form.Group controlId="file2" className="mb-3">
-              <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
+              <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
                 <div className="form-control bg-light">{exampleFile2}</div>
               ) : (
@@ -481,12 +492,11 @@ export default function Correlation() {
                     validate: (fileList: FileList | undefined) => {
                       if (!fileList || fileList.length === 0) return true;
                       const file = fileList[0];
-                      const ext = file.name.split('.').pop()?.toLowerCase();
-                      return ext === 'txt' || 'Only .txt files are allowed';
+                      return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
                     }
                   })}
-                  accept=".txt"
-                  title="Upload pre-munged GWAS sumstats"
+                  accept={sumstatsAccept}
+                  title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
                   disabled={geneticLoading}
                   style={{ maxWidth: "400px" }}
                   onChange={async (e) => {
@@ -566,7 +576,7 @@ export default function Correlation() {
                 </div>
                  <Row>
                   <Col s={12} sm={12} md={6} lg={4}>
-                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+                   <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Upload PLINK, REGENIE, SAIGE, or LDSC-ready summary statistics. Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
                   </Col>
                 </Row>  
 

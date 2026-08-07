@@ -28,6 +28,14 @@ const defaultHeritabilityForm: HeritabilityFormData = {
   popPrev: "0.01",
 };
 
+const supportedSumstatsExtensions = [".txt", ".tsv", ".csv", ".gz", ".sumstats", ".glm", ".assoc", ".regenie", ".saige"];
+const sumstatsAccept = supportedSumstatsExtensions.join(",");
+
+function hasSupportedSumstatsExtension(filename: string): boolean {
+  const lowerFilename = filename.toLowerCase();
+  return supportedSumstatsExtensions.some((extension) => lowerFilename.endsWith(extension));
+}
+
 export default function Heritability() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -79,6 +87,13 @@ export default function Heritability() {
         const validateData = await validateSumstats(filenameToUse, newReference);
        
         if (validateData?.fileValid?.valid) {
+          const normalizedFilename = validateData.fileValid.normalizedFilename || validateData.fileValid.normalized_filename || filenameToUse;
+          setUploadedFilename(normalizedFilename);
+          if (normalizedFilename !== filenameToUse) {
+            setRenameWarnings((previous) => (
+              previous ? `${previous}; File was normalized to ${normalizedFilename}` : `File was normalized to ${normalizedFilename}`
+            ));
+          }
           heritabilityForm.clearErrors("file");
         } else {
           const errors = validateData?.fileValid?.errors || [];
@@ -199,7 +214,7 @@ export default function Heritability() {
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="file" className="mb-3">
-              <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
+              <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFilename === "string" && exampleFilename !== "" ? (
                 <div className="form-control bg-light">{exampleFilename}</div>
               ) : (
@@ -216,13 +231,12 @@ export default function Heritability() {
                       // Handle FileList, File[], or single File
                       const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
                       if (!f || !f.name) return 'File is required';
-                      const ext = f.name.split('.').pop()?.toLowerCase();
-                      return ext === 'txt' || 'Only .txt files are allowed';
+                      return hasSupportedSumstatsExtension(f.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
                     }
                   })}
                   style={{ maxWidth: "400px" }}
-                  accept=".txt"
-                  title="Upload pre-munged GWAS sumstats"
+                  accept={sumstatsAccept}
+                  title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
@@ -233,7 +247,7 @@ export default function Heritability() {
                   }}
                 />
               )}
-              <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Upload PLINK, REGENIE, SAIGE, or LDSC-ready summary statistics. Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">

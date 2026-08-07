@@ -53,6 +53,7 @@ from ApiAccess import (
 )
 import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command, validBfile
+from sumstats_normalizer import normalize_sumstats_for_ldsc
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
@@ -1599,7 +1600,7 @@ def validate_sumstats():
     """
     Validates a sumstats file for heritability/correlation analysis.
     Expects 'filename' and 'reference' as query parameters.
-    Returns JSON with 'fileValid' boolean.
+    Returns JSON with normalized filename and validation details.
     """
     start_time = time.time()
     app.logger.info("Starting sumstats validation request")
@@ -1609,35 +1610,47 @@ def validate_sumstats():
     
     if not filename:
         app.logger.warning("Validation request missing filename")
-        return jsonify({"fileValid": False, "error": "Missing filename parameter"})
+        return jsonify({"fileValid": {"valid": False, "errors": ["Missing filename parameter"], "warnings": []}})
     
     try:
-        filename, file_path, _ = _resolve_upload_file_path(filename, reference)
+        filename, file_path, upload_dir = _resolve_upload_file_path(filename, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid sumstats validation input: {validation_error}")
-        return jsonify({"fileValid": False, "error": str(validation_error)})
+        return jsonify({"fileValid": {"valid": False, "errors": [str(validation_error)], "warnings": []}})
     
     app.logger.debug(f"Validating sumstats file: {file_path}")
     
     # Check if file exists
     if not os.path.exists(file_path):
         app.logger.warning(f"File not found for validation: {file_path}")
-        return jsonify({"fileValid": False, "error": "File not found"})
+        return jsonify({"fileValid": {"valid": False, "errors": ["File not found"], "warnings": []}})
     
-    # Validate using ldsc_utils
     try:
-        from ldscore.ldsc_utils import validSumstats
-        file_valid = validSumstats(file_path)
+        file_valid = normalize_sumstats_for_ldsc(file_path, upload_dir)
+
+        # Keep this disabled for now: running LDSC's validator before/inside upload validation
+        # can reject raw PLINK/REGENIE/SAIGE files before users submit the normalized file.
+        # If we need stricter checks later, run them against file_valid["normalizedFilename"].
+        # if file_valid.get("valid") and file_valid.get("detected_format") == "LDSC-ready":
+        #     from ldscore.ldsc_utils import validSumstats
+        #     ldsc_valid = validSumstats(file_path)
+        #     if isinstance(ldsc_valid, dict):
+        #         file_valid["valid"] = bool(ldsc_valid.get("valid"))
+        #         file_valid.setdefault("errors", []).extend(ldsc_valid.get("errors", []))
+        #         file_valid.setdefault("warnings", []).extend(ldsc_valid.get("warnings", []))
+        #     else:
+        #         file_valid["valid"] = bool(ldsc_valid)
+
         app.logger.info(f"Sumstats validation result for {filename}: {file_valid}")
-        
+
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Validation completed ({execution_time}s)")
-        
+
         return jsonify({"fileValid": file_valid})
     except Exception as e:
         app.logger.error(f"Error validating sumstats file: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"fileValid": False, "error": str(e)})
+        return jsonify({"fileValid": {"valid": False, "errors": [str(e)], "warnings": []}})
 
 
 @app.route("/LDlinkRestWeb/validate_bfile", methods=["GET"])
