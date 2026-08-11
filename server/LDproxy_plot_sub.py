@@ -5,6 +5,7 @@ import sys
 import time
 import threading
 import weakref
+from pathlib import Path
 from multiprocessing.dummy import Pool
 from LDcommon import retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,ldproxy_figure
 from LDcommon import get_coords,replace_coord_rsid,get_query_variant_c,chunkWindow,get_output
@@ -90,11 +91,10 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        getWindowVariantsArgs = " ".join(["True", str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
-        commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
+        commands.append(["python3", "LDproxy_sub.py", "True", str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
 
     processes = [subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE) for command in commands]
+        command, stdout=subprocess.PIPE) for command in commands]
 
     if not hasattr(threading.current_thread(), "_children"):
         threading.current_thread()._children = weakref.WeakKeyDictionary()
@@ -156,30 +156,26 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
               ).save(tmp_dir + "proxy_plot_scaled_" + request + ".svg")
 
     # Export to PDF
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" +
-                    request + ".svg " + tmp_dir + "proxy_plot_" + request + ".pdf", shell=True)
+    subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "proxy_plot_" + request + ".svg", tmp_dir + "proxy_plot_" + request + ".pdf"])
     # Export to PNG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" +
-                    request + ".svg " + tmp_dir + "proxy_plot_" + request + ".png", shell=True)
+    subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "proxy_plot_scaled_" + request + ".svg", tmp_dir + "proxy_plot_" + request + ".png"])
     # Export to JPEG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" +
-                    request + ".svg " + tmp_dir + "proxy_plot_" + request + ".jpeg", shell=True)
+    subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "proxy_plot_scaled_" + request + ".svg", tmp_dir + "proxy_plot_" + request + ".jpeg"])
     # Remove individual SVG files after they are combined
-    subprocess.call("rm " + tmp_dir + "proxy_plot_1_" +
-                    request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_1_" +
-                    request + ".svg", shell=True)
+    Path(tmp_dir, "proxy_plot_1_" + request + ".svg").unlink(missing_ok=True)
+    Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
     # Remove scaled SVG file after it is converted to png and jpeg
-    subprocess.call("rm " + tmp_dir + "proxy_plot_scaled_" +
-                    request + ".svg", shell=True)
+    Path(tmp_dir, "proxy_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
 
     #reset_output()
 
     # Remove temporary files
-    subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-    subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-    subprocess.call("rm " + tmp_dir + "genes_*" + request + "*.json", shell=True)
-    subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
+    Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+    for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
+        path.unlink(missing_ok=True)
+    for path in Path(tmp_dir).glob("genes_*" + request + "*.json"):
+        path.unlink(missing_ok=True)
+    Path(tmp_dir, "recomb_" + request + ".txt").unlink(missing_ok=True)
 
     # Return plot output
     return None

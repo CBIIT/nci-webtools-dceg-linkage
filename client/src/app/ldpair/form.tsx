@@ -9,7 +9,7 @@ import PopSelect, { getOptionsFromPop, getSelectedPopulationGroups } from "@/com
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPair } from "./types";
-import { rsChrRegex } from "@/services/utils";
+import { generateReference, rsChrRegex } from "@/services/utils";
 
 export default function LdPairForm({ params }: { params: submitFormData }) {
   const router = useRouter();
@@ -61,7 +61,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = generateReference();
     const formData: submitFormData = {
       ...form,
       reference,

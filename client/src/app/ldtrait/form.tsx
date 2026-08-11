@@ -11,7 +11,7 @@ import { ldtrait } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups, getOptionsFromPop } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps, parseRateLimitError } from "@/services/utils";
+import { generateReference, parseSnps, parseRateLimitError } from "@/services/utils";
 import { FormData, Ldtrait, submitFormData } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
@@ -105,7 +105,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
+    const reference = generateReference();
     const { varFile, ...data } = form;
     const formData: submitFormData = {
       ...data,

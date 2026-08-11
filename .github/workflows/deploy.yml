@@ -87,7 +87,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6.0.0
         with:
           role-to-assume: ${{ env.CICD_ROLE_ARN }}
-          role-session-name: ${{ env.TIER }}-${{ env.APP }}-deploy-${{ github.run_id }}
+          role-session-name: ${{ env.TIER }}-${{ env.APP }}-deploy-${{ inputs.tier }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Set deployment metadata
@@ -137,6 +137,7 @@ jobs:
             "api/ecs_cpu_units API_ECS_CPU_UNITS"
             "api/ecs_memory_units API_ECS_MEMORY_UNITS"
             "api/role_arn API_ROLE_ARN"
+            "api/task_role_arn TASK_ROLE_ARN"
             "web/ecs_cluster WEB_ECS_CLUSTER"
             "web/ecs_service WEB_ECS_SERVICE"
             "web/ecs_task WEB_ECS_TASK"
@@ -232,9 +233,9 @@ jobs:
               > "$RENDERED_TASK_DIR/$template_name"
           }
 
-          render_template "web.yml" '$WEB_ECS_TASK $WEB_ECS_CPU_UNITS $WEB_ECS_MEMORY_UNITS $WEB_ROLE_ARN $FRONTEND_IMAGE_LATEST $API_APPLICATION_HOST $TZ $TIER $APP $AWS_REGION $APP_GIT_TAG $ENVIRONMENT_TIER'
-          render_template "api.yml" '$API_ECS_TASK $API_ECS_CPU_UNITS $API_ECS_MEMORY_UNITS $API_ROLE_ARN $EFS_FILESYSTEM_ID $EFS_ACCESS_POINT_ID $BACKEND_IMAGE_LATEST $TZ $TIER $APP $AWS_REGION $APP_GIT_TAG $ENVIRONMENT_TIER'
-          render_template "data-import.yml" '$DATA_IMPORT_ECS_TASK $API_ECS_CPU_UNITS $API_ECS_MEMORY_UNITS $API_ROLE_ARN $EFS_FILESYSTEM_ID $EFS_ACCESS_POINT_ID $DATA_IMPORT_IMAGE_LATEST $TZ $TIER $APP $AWS_REGION $ENVIRONMENT_TIER'
+          render_template "web.yml" '$WEB_ECS_TASK $WEB_ECS_CPU_UNITS $WEB_ECS_MEMORY_UNITS $WEB_ROLE_ARN $TASK_ROLE_ARN $FRONTEND_IMAGE_LATEST $API_APPLICATION_HOST $TZ $TIER $APP $AWS_REGION $APP_GIT_TAG $ENVIRONMENT_TIER'
+          render_template "api.yml" '$API_ECS_TASK $API_ECS_CPU_UNITS $API_ECS_MEMORY_UNITS $API_ROLE_ARN $TASK_ROLE_ARN $EFS_FILESYSTEM_ID $EFS_ACCESS_POINT_ID $BACKEND_IMAGE_LATEST $TZ $TIER $APP $AWS_REGION $APP_GIT_TAG $ENVIRONMENT_TIER'
+          render_template "data-import.yml" '$DATA_IMPORT_ECS_TASK $API_ECS_CPU_UNITS $API_ECS_MEMORY_UNITS $API_ROLE_ARN $TASK_ROLE_ARN $EFS_FILESYSTEM_ID $EFS_ACCESS_POINT_ID $DATA_IMPORT_IMAGE_LATEST $TZ $TIER $APP $AWS_REGION $ENVIRONMENT_TIER'
 
       - name: Register task definitions
         run: |
@@ -283,5 +284,5 @@ jobs:
       - name: Deployment summary
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tier:** ${{ env.TIER }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tier:** ${{ inputs.tier }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY

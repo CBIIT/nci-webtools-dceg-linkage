@@ -4,6 +4,7 @@ import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { fetchLdScoreCalculationResult, upload, validateBfile } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
+import { generateReference } from "@/services/utils";
 import { useState } from "react";
 import LdScoreResults from "./results";
 import { map } from "@bokeh/bokehjs/build/js/lib/core/util/iterator";
@@ -53,7 +54,7 @@ export default function LDScore() {
     setError(""); // Clear any previous errors
     
     // Generate a new reference for this upload session
-    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const newReference = generateReference();
     setReference(newReference);
     
     // Validate that all files have the same base name (excluding extension)
@@ -155,7 +156,7 @@ export default function LDScore() {
     const window = form.getValues("window");
     const windowUnit = form.getValues("windowUnit");
     const isExample = !!exampleBed;
-    const filename = `${bed};${bim};${fam}`;
+    const filename = `${bed},${bim},${fam}`;
   
     
     const params = new URLSearchParams({
@@ -325,7 +326,7 @@ export default function LDScore() {
                         setLdscoreResultRef(null);
                     if (e.target.checked) {
                       // Generate a new reference for example data
-                      const newReference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+                          const newReference = generateReference();
                       setReference(newReference);
                       setExampleBed("22.bed");
                       setExampleBim("22.bim");

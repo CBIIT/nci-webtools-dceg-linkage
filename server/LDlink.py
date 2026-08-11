@@ -1,12 +1,13 @@
 #!flask/bin/python3
 import os
-import hmac
+import re
 import traceback
 import collections
 import argparse
 import json
 import time
-import random
+import uuid
+import hmac
 import logging
 import sys
 from threading import Thread
@@ -249,6 +250,558 @@ def internal_auth_guard():
     return None
 
 
+SAFE_TEXT_RE = re.compile(r"^[A-Za-z0-9_.:+,= -]{1,512}$")
+SAFE_FREE_TEXT_RE = re.compile(r"^[^\x00\r\n]{1,512}$")
+SAFE_LIST_RE = re.compile(r"^[A-Za-z0-9_.:+,= -]{1,4096}$")
+SAFE_EMAIL_RE = re.compile(r"^[^@\s]{1,128}@[^@\s]{1,128}\.[^@\s]{2,64}$")
+SAFE_SNP_RE = re.compile(r"^[A-Za-z0-9_:.+\-\s\r\n,;|]{1,200000}$")
+SAFE_SNP_PAIR_RE = re.compile(r"^[A-Za-z0-9_:.+\-\s]{1,128}$")
+POP_RE = re.compile(r"^[A-Za-z0-9_+,-]{1,512}$")
+LDSC_POP_RE = re.compile(r"^[A-Za-z0-9_+-]{1,64}$")
+
+ANCESTRAL_POP_ENDPOINTS = {
+    "ldassoc",
+    "ldexpress",
+    "ldexpressgwas",
+    "ldhap",
+    "ldmatrix",
+    "ldpair",
+    "ldpop",
+    "ldproxy",
+    "ldtrait",
+    "ldtraitgwas",
+    "snpclip",
+}
+
+LDSC_POP_ENDPOINTS = {
+    "ldscore",
+    "ldscoreapi",
+    "ldherit",
+    "ldheritAPI",
+    "ldcorrelation",
+}
+
+GENOME_BUILD_ENDPOINTS = ANCESTRAL_POP_ENDPOINTS | LDSC_POP_ENDPOINTS | {
+    "ldassoc_example",
+    "ldscore_example",
+    "ldherit_example",
+    "ldcorrelation_example",
+    "snpchip",
+}
+
+R2_D_ENDPOINTS = {
+    "ldexpress",
+    "ldexpressgwas",
+    "ldmatrix",
+    "ldpop",
+    "ldproxy",
+    "ldtrait",
+    "ldtraitgwas",
+}
+
+WINDOW_ENDPOINTS = {
+    "ldexpress",
+    "ldexpressgwas",
+    "ldproxy",
+    "ldtrait",
+    "ldtraitgwas",
+}
+
+PROBABILITY_ENDPOINT_FIELDS = {
+    "ldexpress": {"r2_d_threshold", "p_threshold"},
+    "ldexpressgwas": {"r2_d_threshold", "p_threshold"},
+    "ldtrait": {"r2_d_threshold"},
+    "ldtraitgwas": {"r2_d_threshold"},
+    "snpclip": {"r2_threshold", "maf_threshold"},
+}
+
+BOOLEAN_ENDPOINT_FIELDS = {
+    "ldassoc": {"dprime", "useEx", "transcript"},
+    "ldscore": {"isExample"},
+    "ldscoreapi": {"isExample"},
+    "ldherit": {"isExample"},
+    "ldheritAPI": {"isExample"},
+    "ldcorrelation": {"isExample"},
+    "ldmatrix": {"collapseTranscript"},
+    "ldpair": {"json_out"},
+}
+
+JSON_SNP_ENDPOINTS = {"ldexpress", "ldmatrix", "ldtrait", "snpchip", "snpclip"}
+QUERY_SNP_ENDPOINTS = {"ldhap", "ldmatrix", "ldtraitgwas", "ldexpressgwas"}
+
+
+def generate_reference():
+    return str(uuid.uuid4())
+
+
+QUERY_REFERENCE_ENDPOINTS = {
+    "ldassoc",
+    "ldscore",
+    "ldherit",
+    "ldheritAPI",
+    "ldcorrelation",
+    "ldproxy",
+    "ldmatrix",
+    "ldpair",
+    "ldpop",
+    "ldhap",
+    "ldexpressgwas",
+    "ldtraitgwas",
+    "validate_sumstats",
+    "validate_bfile",
+}
+
+JSON_REFERENCE_ENDPOINTS = {
+    "ldexpress",
+    "ldmatrix",
+    "ldtrait",
+    "snpchip",
+    "snpclip",
+    "zip_files",
+}
+
+
+def _validation_response(message, status_code=400):
+    response = jsonify({"error": message})
+    response.status_code = status_code
+    return response
+
+
+def _validation_error(parameter, reason):
+    marker = request.headers.get("X-QA-Marker", "")
+    marker_log = f", marker={marker}" if marker else ""
+    app.logger.warning(
+        f"Rejected structural input: method={request.method}, path={request.path}, endpoint={request.endpoint}, parameter={parameter}, reason={reason}{marker_log}"
+    )
+    return _validation_response(f"Invalid {parameter} parameter.")
+
+
+def _is_missing_optional(value):
+    return value is None
+
+
+def _normalize_optional_string(value):
+    if _is_missing_optional(value):
+        return None
+    normalized_value = str(value).strip()
+    if not normalized_value:
+        return None
+    return normalized_value
+
+
+def _validate_regex_value(parameter, value, pattern, reason):
+    normalized_value = _normalize_optional_string(value)
+    if normalized_value is None:
+        return None
+    if not normalized_value or not pattern.fullmatch(normalized_value):
+        return _validation_error(parameter, reason)
+    return None
+
+
+def _is_valid_uuid_reference(value):
+    normalized_value = str(value).strip()
+    try:
+        parsed_uuid = uuid.UUID(normalized_value)
+    except (TypeError, ValueError, AttributeError):
+        return False
+    return parsed_uuid.version == 4 and str(parsed_uuid) == normalized_value.lower()
+
+
+def _validate_reference_value(parameter, value):
+    if _is_missing_optional(value):
+        return None
+
+    normalized_value = str(value).strip()
+    if not normalized_value:
+        return _validation_error(parameter, "empty reference")
+    if not _is_valid_uuid_reference(normalized_value):
+        return _validation_error(parameter, "reference must be a canonical UUIDv4 string")
+    return None
+
+
+def _validate_genome_build_value(value):
+    normalized_value = _normalize_optional_string(value)
+    if normalized_value is None:
+        return None
+    if normalized_value not in genome_build_vars["vars"]:
+        return _validation_error("genome_build", "unsupported genome build")
+    return None
+
+
+def _validate_choice_value(parameter, value, allowed_values):
+    normalized_value = _normalize_optional_string(value)
+    if normalized_value is None:
+        return None
+    if normalized_value not in allowed_values:
+        return _validation_error(parameter, "value is not in allowlist")
+    return None
+
+
+def _validate_boolean_value(parameter, value):
+    if _is_missing_optional(value):
+        return None
+    if isinstance(value, bool):
+        return None
+    normalized_value = str(value).strip().lower()
+    if normalized_value not in {"true", "false", "1", "0"}:
+        return _validation_error(parameter, "value must be boolean")
+    return None
+
+
+def _validate_number_value(parameter, value, minimum=None, maximum=None, integer=False):
+    normalized_value = _normalize_optional_string(value)
+    if normalized_value is None:
+        return None
+    normalized_value = normalized_value.replace(",", "")
+    if not normalized_value:
+        return _validation_error(parameter, "empty numeric value")
+    try:
+        parsed_value = int(normalized_value) if integer else float(normalized_value)
+    except ValueError:
+        return _validation_error(parameter, "value must be numeric")
+    if minimum is not None and parsed_value < minimum:
+        return _validation_error(parameter, "value is below minimum")
+    if maximum is not None and parsed_value > maximum:
+        return _validation_error(parameter, "value exceeds maximum")
+    return None
+
+
+def _validate_snps_value(value):
+    if _is_missing_optional(value):
+        return None
+    if not isinstance(value, str):
+        return _validation_error("snps", "value must be text")
+    if "\x00" in value:
+        return _validation_error("snps", "value contains null byte")
+    if not value.strip():
+        return _validation_error("snps", "empty SNP list")
+    if not SAFE_SNP_RE.fullmatch(value):
+        return _validation_error("snps", "SNP list contains unsupported characters")
+    return None
+
+
+def _validate_snp_pairs_value(value):
+    if _is_missing_optional(value):
+        return None
+    if not isinstance(value, list):
+        return _validation_error("snp_pairs", "value must be an array")
+    for pair in value:
+        if not isinstance(pair, list) or len(pair) != 2:
+            return _validation_error("snp_pairs", "each pair must contain two variants")
+        for variant in pair:
+            if not isinstance(variant, str) or not SAFE_SNP_PAIR_RE.fullmatch(variant.strip()):
+                return _validation_error("snp_pairs", "variant contains unsupported characters")
+    return None
+
+
+def _validate_text_field(parameter, value, pattern=SAFE_TEXT_RE):
+    return _validate_regex_value(parameter, value, pattern, "value contains unsupported characters")
+
+
+def _validate_free_text_field(parameter, value):
+    return _validate_regex_value(parameter, value, SAFE_FREE_TEXT_RE, "value contains unsupported characters")
+
+
+def _request_value(data, parameter):
+    if request.method == "POST" and data is not None and parameter in data:
+        return data.get(parameter)
+    return request.args.get(parameter, None)
+
+
+def _validate_common_parameters(endpoint):
+    data = None
+    if request.method == "POST" and request.mimetype == "application/json":
+        try:
+            data = _get_request_json_body()
+        except ValueError:
+            return _validation_response("Invalid JSON input.")
+
+    if endpoint in GENOME_BUILD_ENDPOINTS:
+        response = _validate_genome_build_value(_request_value(data, "genome_build"))
+        if response:
+            return response
+
+    if endpoint in ANCESTRAL_POP_ENDPOINTS:
+        response = _validate_regex_value("pop", _request_value(data, "pop"), POP_RE, "population contains unsupported characters")
+        if response:
+            return response
+
+    if endpoint in LDSC_POP_ENDPOINTS:
+        response = _validate_regex_value("pop", _request_value(data, "pop"), LDSC_POP_RE, "LDSC population contains unsupported characters")
+        if response:
+            return response
+
+    if endpoint in R2_D_ENDPOINTS:
+        response = _validate_choice_value("r2_d", _request_value(data, "r2_d"), {"r2", "d"})
+        if response:
+            return response
+
+    if endpoint in WINDOW_ENDPOINTS:
+        response = _validate_number_value("window", _request_value(data, "window"), minimum=0, maximum=1000000, integer=True)
+        if response:
+            return response
+
+    for field in PROBABILITY_ENDPOINT_FIELDS.get(endpoint, set()):
+        response = _validate_number_value(field, _request_value(data, field), minimum=0, maximum=1)
+        if response:
+            return response
+
+    for field in BOOLEAN_ENDPOINT_FIELDS.get(endpoint, set()):
+        response = _validate_boolean_value(field, _request_value(data, field))
+        if response:
+            return response
+
+    if endpoint in JSON_SNP_ENDPOINTS:
+        response = _validate_snps_value(_request_value(data, "snps"))
+        if response:
+            return response
+
+    if endpoint in QUERY_SNP_ENDPOINTS:
+        response = _validate_snps_value(request.args.get("snps", None))
+        if response:
+            return response
+
+    if endpoint == "ldpair" and request.method == "POST":
+        response = _validate_snp_pairs_value(_request_value(data, "snp_pairs"))
+        if response:
+            return response
+
+    if endpoint in {"ldpair", "ldpop"} and request.method == "GET":
+        for field in ("var1", "var2"):
+            response = _validate_text_field(field, request.args.get(field, None), SAFE_SNP_PAIR_RE)
+            if response:
+                return response
+
+    if endpoint == "ldproxy":
+        response = _validate_text_field("var", request.args.get("var", None), SAFE_SNP_PAIR_RE)
+        if response:
+            return response
+
+    if endpoint == "ldassoc":
+        response = _validate_choice_value("calculateRegion", request.args.get("calculateRegion", None), {"variant", "gene", "region"})
+        if response:
+            return response
+        for field in ("variant[basepair]", "gene[basepair]"):
+            response = _validate_number_value(field, request.args.get(field, None), minimum=0, maximum=3000000, integer=True)
+            if response:
+                return response
+        for field in ("variant[index]", "gene[index]", "gene[name]", "region[index]", "columns[chromosome]", "columns[position]", "columns[pvalue]"):
+            response = _validate_text_field(field, request.args.get(field, None))
+            if response:
+                return response
+        for field in ("region[start]", "region[end]"):
+            response = _validate_text_field(field, request.args.get(field, None), SAFE_SNP_PAIR_RE)
+            if response:
+                return response
+
+    if endpoint in {"ldscore", "ldscoreapi"}:
+        response = _validate_number_value("ldwindow", request.args.get("ldwindow", None), minimum=0)
+        if response:
+            return response
+        response = _validate_choice_value("windUnit", request.args.get("windUnit", None), {"cm", "cM", "kb"})
+        if response:
+            return response
+
+    if endpoint in {"ldherit", "ldheritAPI", "ldcorrelation"}:
+        response = _validate_choice_value("scale", request.args.get("scale", None), {"observed", "liability"})
+        if response:
+            return response
+
+    if endpoint == "ldexpress" or endpoint == "ldexpressgwas":
+        response = _validate_regex_value("tissues", _request_value(data, "tissues"), SAFE_LIST_RE, "tissues contains unsupported characters")
+        if response:
+            return response
+
+    if endpoint == "snpchip":
+        response = _validate_regex_value("platforms", _request_value(data, "platforms"), SAFE_LIST_RE, "platforms contains unsupported characters")
+        if response:
+            return response
+
+    if endpoint == "ldtrait":
+        response = _validate_choice_value("ifContinue", _request_value(data, "ifContinue"), {"Continue", "False", "true", "false", "True"})
+        if response:
+            return response
+
+    for field in ("firstname", "lastname", "institution"):
+        response = _validate_free_text_field(field, request.args.get(field, None))
+        if response:
+            return response
+
+    for field in ("startdatetime", "enddatetime"):
+        response = _validate_text_field(field, request.args.get(field, None))
+        if response:
+            return response
+
+    for field in ("top", "authValue"):
+        response = _validate_number_value(field, request.args.get(field, None), minimum=0, integer=True)
+        if response:
+            return response
+
+    response = _validate_choice_value("locked", request.args.get("locked", None), {"-1", "0"})
+    if response:
+        return response
+
+    response = _validate_regex_value("email", request.args.get("email", None), SAFE_EMAIL_RE, "email format is invalid")
+    if response:
+        return response
+
+    return None
+
+
+def _validate_filename_value(parameter, value, strict=True):
+    if _is_missing_optional(value):
+        return None
+
+    filename = str(value).strip()
+    if not filename:
+        return _validation_error(parameter, "empty filename")
+    if len(filename) > 255:
+        return _validation_error(parameter, "filename exceeds maximum length")
+    if "\x00" in filename or "/" in filename or "\\" in filename or ".." in filename:
+        return _validation_error(parameter, "filename contains path traversal characters")
+
+    sanitized_filename = secure_filename(filename)
+    if not sanitized_filename:
+        return _validation_error(parameter, "filename cannot be normalized")
+    if strict and sanitized_filename != filename:
+        return _validation_error(parameter, "filename changes during normalization")
+    return None
+
+
+def _validate_filename_list_value(parameter, value):
+    if _is_missing_optional(value):
+        return None
+
+    filenames = [filename.strip() for filename in str(value).replace(";", ",").split(",")]
+    if not filenames or any(not filename for filename in filenames):
+        return _validation_error(parameter, "empty filename in list")
+    for filename in filenames:
+        response = _validate_filename_value(parameter, filename, strict=False)
+        if response:
+            return response
+    return None
+
+
+def _get_request_json_body():
+    raw_body = request.get_data(cache=True)
+    if not raw_body:
+        return {}
+    try:
+        data = json.loads(raw_body)
+    except (TypeError, ValueError):
+        raise ValueError("Invalid JSON input.")
+    if not isinstance(data, dict):
+        raise ValueError("Invalid JSON input.")
+    return data
+
+
+def _validate_json_reference(endpoint):
+    if endpoint not in JSON_REFERENCE_ENDPOINTS:
+        return None
+    try:
+        data = _get_request_json_body()
+    except ValueError:
+        return _validation_response("Invalid JSON input.")
+    return _validate_reference_value("reference", data.get("reference"))
+
+
+def _validate_zip_files():
+    if request.endpoint != "zip_files":
+        return None
+    try:
+        data = _get_request_json_body()
+    except ValueError:
+        return _validation_response("Invalid JSON input.")
+    filenames = data.get("files", [])
+    if not isinstance(filenames, list):
+        return _validation_error("files", "files must be an array")
+    for filename in filenames:
+        response = _validate_filename_value("files[]", filename, strict=True)
+        if response:
+            return response
+    return None
+
+
+@app.before_request
+def structural_input_guard():
+    endpoint = request.endpoint
+    if request.method == "OPTIONS" or endpoint is None:
+        return None
+
+    response = _validate_common_parameters(endpoint)
+    if response:
+        return response
+
+    if endpoint in QUERY_REFERENCE_ENDPOINTS:
+        response = _validate_reference_value("reference", request.args.get("reference", None))
+        if response:
+            return response
+
+    if endpoint == "ldassoc":
+        response = _validate_filename_value("filename", request.args.get("filename", None), strict=False)
+        if response:
+            return response
+
+    if endpoint in {"ldscore", "ldscoreapi", "ldherit", "ldheritAPI", "ldcorrelation", "validate_sumstats", "validate_bfile"}:
+        response = _validate_filename_list_value("filename", request.args.get("filename", None))
+        if response:
+            return response
+
+    if endpoint == "ldcorrelation":
+        response = _validate_filename_value("filename2", request.args.get("filename2", None), strict=False)
+        if response:
+            return response
+
+    if endpoint == "upload":
+        response = _validate_reference_value("reference", request.form.get("reference", None))
+        if response:
+            return response
+        for uploaded_file in request.files.values():
+            response = _validate_filename_value("filename", uploaded_file.filename, strict=False)
+            if response:
+                return response
+
+    if endpoint in {"ldscoreapi", "ldheritAPI"}:
+        for uploaded_file in request.files.values():
+            response = _validate_filename_value("filename", uploaded_file.filename, strict=False)
+            if response:
+                return response
+
+    if endpoint == "copy_and_download":
+        response = _validate_filename_value("filename", (request.view_args or {}).get("filename"), strict=True)
+        if response:
+            return response
+
+    if endpoint == "send_temp_file":
+        response = _validate_filename_value("filename", (request.view_args or {}).get("filename"), strict=True)
+        if response:
+            return response
+
+    if endpoint == "send_temp_file_reference":
+        view_args = request.view_args or {}
+        response = _validate_reference_value("reference", view_args.get("reference"))
+        if response:
+            return response
+        response = _validate_filename_value("filename", view_args.get("filename"), strict=True)
+        if response:
+            return response
+
+    if endpoint == "status":
+        response = _validate_filename_value("filename", (request.view_args or {}).get("filename"), strict=True)
+        if response:
+            return response
+
+    response = _validate_json_reference(endpoint)
+    if response:
+        return response
+
+    response = _validate_zip_files()
+    if response:
+        return response
+
+    return None
+
+
 def _parse_probability_value(raw_value, field_name):
     try:
         parsed_value = float(str(raw_value).strip())
@@ -327,8 +880,8 @@ def _resolve_ldscore_example_path(file_name):
 
 
 def _resolve_upload_dir(reference, create_dir=False):
-    normalized_reference = secure_filename(str(reference or "").strip())
-    if not normalized_reference:
+    normalized_reference = str(reference or "").strip()
+    if not normalized_reference or not _is_valid_uuid_reference(normalized_reference):
         raise ValueError("Missing or invalid reference parameter.")
 
     upload_root = os.path.realpath(app.config["UPLOAD_DIR"])
@@ -918,8 +1471,9 @@ def zip_files():
     app.logger.info("Starting zip file creation")
 
     try:
-        filenames = request.json.get("files", [])
-        reference = request.json.get("reference", None)
+        data = _get_request_json_body()
+        filenames = data.get("files", [])
+        reference = data.get("reference", None)
         app.logger.debug(f"Creating zip with {len(filenames)} files, reference: {reference}")
 
         zip_filename = "files.zip"
@@ -927,9 +1481,8 @@ def zip_files():
 
         # If reference is provided, use reference subfolder for both input files and zip
         if reference:
-            uploads_dir = os.path.join(tmp_dir, "uploads", str(reference))
-            os.makedirs(uploads_dir, exist_ok=True)
-            zip_filepath = os.path.join(uploads_dir, zip_filename)
+            reference, uploads_dir = _resolve_upload_dir(reference, create_dir=True)
+            zip_filepath = safe_join(uploads_dir, zip_filename)
         else:
             uploads_dir = os.path.join(tmp_dir, "uploads")
             os.makedirs(uploads_dir, exist_ok=True)
@@ -946,30 +1499,30 @@ def zip_files():
 
         # For each file, ensure it exists in uploads_dir; if not, copy from ldscore_dir if it's an example file
         for filename in filenames:
-            upload_path = os.path.join(uploads_dir, filename)
+            safe_filename, upload_path, _ = _resolve_upload_file_path(filename, reference)
             if not os.path.exists(upload_path):
-                if filename in example_files:
-                    source_path = os.path.join(ldscore_dir, filename)
+                if safe_filename in example_files:
+                    source_path = os.path.join(ldscore_dir, safe_filename)
                     if os.path.exists(source_path):
                         # shutil.copy(source_path, upload_path)
                         app.logger.info(f"Copied example file {source_path} to {upload_path}")
                     else:
-                        app.logger.error(f"Example file {filename} not found in {ldscore_dir}")
-                        return jsonify({"error": f"Example file {filename} not found in {ldscore_dir}"}), 404
+                        app.logger.error(f"Example file {safe_filename} not found in {ldscore_dir}")
+                        return jsonify({"error": f"Example file {safe_filename} not found in {ldscore_dir}"}), 404
                 else:
-                    app.logger.error(f"File {filename} not found in uploads directory and is not an example file.")
+                    app.logger.error(f"File {safe_filename} not found in uploads directory and is not an example file.")
                     return (
                         jsonify(
-                            {"error": f"File {filename} not found in uploads directory and is not an example file."}
+                            {"error": f"File {safe_filename} not found in uploads directory and is not an example file."}
                         ),
                         404,
                     )
 
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
             for filename in filenames:
-                file_path = os.path.join(uploads_dir, filename)
+                safe_filename, file_path, _ = _resolve_upload_file_path(filename, reference)
                 zipf.write(file_path, os.path.basename(file_path))
-                app.logger.debug(f"Added file to zip: {filename}")
+                app.logger.debug(f"Added file to zip: {safe_filename}")
 
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename} in {uploads_dir}")
@@ -1012,13 +1565,10 @@ def upload():
 
                 app.logger.debug(f"Processing upload: {filename}")
 
-                os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
                 if reference:
-                    ref_dir = os.path.join(app.config["UPLOAD_DIR"], reference)
-                    os.makedirs(ref_dir, exist_ok=True)
-                    file_path = os.path.join(ref_dir, filename)
+                    _, file_path, _ = _resolve_upload_file_path(filename, reference, create_dir=True)
                 else:
-                    file_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+                    _, file_path, _ = _resolve_upload_file_path(filename, create_dir=True)
 
                 file.save(file_path)
                 uploaded_files.append(filename)
@@ -1448,7 +1998,7 @@ def ldscore():
     isExample = request.args.get("isExample", False)
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference = str(random.randint(0, 1000000))
+        reference = generate_reference()
     app.logger.debug(
         f"LDscore params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, ldwindow: {ldwindow}, windUnit: {windUnit}, isExample: {isExample}"
     )
@@ -1675,7 +2225,7 @@ def ldherit():
     isexample = request.args.get("isExample", False)
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference =  str(random.randint(0, 1000000))
+        reference = generate_reference()
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
@@ -1783,7 +2333,7 @@ def ldheritAPI():
     file = request.files["file"]
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference = str(random.randint(0, 1000000))
+        reference = generate_reference()
 
     try:
         reference, fileDir = _resolve_upload_dir(reference, create_dir=True)
@@ -1886,7 +2436,7 @@ def ldcorrelation():
     isexample = request.args.get("isExample", False)
     reference = request.args.get("reference", "")
     if not str(reference).strip():
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        reference = generate_reference()
     scale = request.args.get("scale", "observed")
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
@@ -1995,7 +2545,7 @@ def ldcorrelation():
 @requires_token
 def ldexpress():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data["snps"]
     pop = data["pop"]
     tissues = data["tissues"]
@@ -2007,7 +2557,7 @@ def ldexpress():
     genome_build = data["genome_build"] if "genome_build" in data else "grch37"
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -2085,7 +2635,6 @@ def ldexpress():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
         app.logger.debug(
             "ldexpress params "
@@ -2185,7 +2734,7 @@ def ldhap():
     token = request.args.get("token", False)
     genome_build = request.args.get("genome_build", "grch37")
     web = False
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2299,7 +2848,7 @@ def ldmatrix():
     # differentiate POST or GET request
     if request.method == "POST":
         # POST REQUEST
-        data = json.loads(request.stream.read())
+        data = _get_request_json_body()
         snps = data["snps"] if "snps" in data else False
         pop = data["pop"] if "pop" in data else False
         reference = data["reference"] if "reference" in data else False
@@ -2317,7 +2866,7 @@ def ldmatrix():
     token = request.args.get("token", False)
     web = False
     if reference is False:
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        reference = generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2438,7 +2987,7 @@ def ldpair():
     if request.method == "POST":
         # POST REQUEST
         try:
-            data = json.loads(request.stream.read())
+            data = _get_request_json_body()
         except Exception as e:
             return sendTraceback("Invalid JSON input.")
         snp_pairs = data["snp_pairs"] if "snp_pairs" in data else []
@@ -2466,7 +3015,7 @@ def ldpair():
         # WEB REQUEST
         if request.headers.get("User-Agent"):
             web = True
-            reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+            reference = request.args.get("reference") or generate_reference()
             app.logger.debug(
                 "ldpair params "
                 + json.dumps(
@@ -2499,7 +3048,7 @@ def ldpair():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        reference = generate_reference()
         app.logger.debug(
             "ldpair params "
             + json.dumps(
@@ -2577,7 +3126,7 @@ def ldpop():
     token = request.args.get("token", False)
     genome_build = request.args.get("genome_build", "grch37")
     web = False
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2616,7 +3165,6 @@ def ldpop():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "ldpop params "
             + json.dumps(
@@ -2688,7 +3236,7 @@ def ldproxy():
     collapseTranscript = request.args.get("collapseTranscript", True)
     # annotateText = request.args.get('annotate', False)
     web = False
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2731,7 +3279,6 @@ def ldproxy():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         # print('request: ' + str(reference))
         app.logger.debug(
             "ldproxy params "
@@ -2800,7 +3347,7 @@ def ldproxy():
 @requires_token
 def ldtrait():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data["snps"]
     pop = data["pop"]
     r2_d = data["r2_d"]
@@ -2810,7 +3357,7 @@ def ldtrait():
     genome_build = data["genome_build"] if "genome_build" in data else "grch37"
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
 
     # differentiate web or api request
@@ -2896,7 +3443,6 @@ def ldtrait():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "ldtrait params "
             + json.dumps(
@@ -3014,7 +3560,7 @@ def ldtraitgwas():
     # Optional parameters
     window = request.args.get("window", "500000").replace(",", "")
 
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
 
     # Run calculate_trait in a separate thread
     # differentiate web or api request
@@ -3077,7 +3623,6 @@ def ldtraitgwas():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "ldtrait params "
             + json.dumps(
@@ -3196,7 +3741,7 @@ def ldexpressgwas():
     )
     window = request.args.get("window", "500000")
     genome_build = request.args.get("genome_build", "grch37")
-    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    reference = request.args.get("reference") or generate_reference()
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3252,7 +3797,6 @@ def ldexpressgwas():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
         app.logger.debug(
             "ldexpress params "
@@ -3339,14 +3883,14 @@ def ldexpressgwas():
 @requires_token
 def snpchip():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data.get("snps")
     genome_build = data.get("genome_build", "grch37")
     platforms = data.get("platforms")
     token = request.args.get("token", False)
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
 
     # differentiate web or api request
@@ -3447,7 +3991,7 @@ def snpchip():
 @requires_token
 def snpclip():
     start_time = time.time()
-    data = json.loads(request.stream.read())
+    data = _get_request_json_body()
     snps = data["snps"]
     pop = data["pop"]
     r2_threshold = data["r2_threshold"]
@@ -3456,7 +4000,7 @@ def snpclip():
     genome_build = data["genome_build"] if "genome_build" in data else "grch37"
     web = False
     reference = (
-        str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        str(data["reference"]) if "reference" in data else generate_reference()
     )
 
     # differentiate web or api request
@@ -3530,7 +4074,6 @@ def snpclip():
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug(
             "snpclip params "
             + json.dumps(
@@ -3639,7 +4182,7 @@ if is_main:
     # debugger = args.debug == 'True'
     hostname = gethostname()
     app.logger.info(f"LDlink server starting on {hostname} at port {port_num} with debug={args.debug}")
-    app.run(host="0.0.0.0", port=port_num, use_evalex=False)
+    app.run(host="127.0.0.1", port=port_num, use_evalex=False)
     # app.logger.disabled = True
     # application = DebuggedApplication(app, True)
     app.debug = False

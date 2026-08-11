@@ -1,9 +1,8 @@
 import csv
 import json
 from bson import json_util
-import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,get_dbsnp_coord
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,get_dbsnp_coord,tabix
 from LDcommon import set_alleles,get_geno,get_forgeDB
 from LDutilites import get_config
 
@@ -116,8 +115,13 @@ al = "("+new_alleles[0]+"/"+new_alleles[1]+")"
 
 
 # Import Window around SNP
-tabix_snp = export_s3_keys + " cd {4}; tabix -fhD {0} {1}:{2}-{3} | grep -v -e END".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + chr, start, stop, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-vcf = csv.reader([x.decode('utf-8') for x in subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE).stdout.readlines()], dialect="excel-tab")
+vcf_output = tabix(
+    "-fhD",
+    vcf_query_snp_file,
+    genome_build_vars[genome_build]['1000G_chr_prefix'] + chr + ":" + start + "-" + stop,
+    cwd=data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],
+)
+vcf = csv.reader([line for line in vcf_output if "END" not in line], dialect="excel-tab")
 
 # Loop past file information and find header
 head = next(vcf, None)

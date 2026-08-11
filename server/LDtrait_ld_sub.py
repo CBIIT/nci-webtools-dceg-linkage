@@ -220,9 +220,9 @@ def get_ld_stats(variantPair, pop_ids):
 
     # Get headers	
     #tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
-    #head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
+    #head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
     #tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
-    #head2 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
+    #head2 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     # Combine phased genotypes	
     geno = {}	

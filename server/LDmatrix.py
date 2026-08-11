@@ -1201,8 +1201,12 @@ def calculate_matrix(
 
         def send_async():
             try:
+                headers = {}
+                internal_token = os.environ.get("LDLINK_INTERNAL_AUTH_TOKEN", "").strip()
+                if internal_token:
+                    headers["X-Internal-Auth"] = internal_token
                 with httpx.Client(timeout=None) as client:
-                    client.post("http://localhost:5000/ldmatrix_svg", json=payload, timeout=None, follow_redirects=True)
+                    client.post("http://localhost:5000/ldmatrix_svg", json=payload, headers=headers, timeout=None, follow_redirects=True)
             except Exception as e:
                 print(f"Async export request failed: {e}")
 
