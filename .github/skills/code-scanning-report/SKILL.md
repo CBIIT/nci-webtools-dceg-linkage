@@ -1,6 +1,7 @@
 ---
 name: code-scanning-report
-description: "Analyze GitHub Code Scanning (SAST) alerts for this repository and generate a comprehensive report with severity breakdowns, rule/CWE mappings, affected source files with line numbers, and per-rule remediation guidance. Requires gh CLI (preferred) or GITHUB_TOKEN. Uses gh api with --paginate and state=open filter for reliable, complete data retrieval."
+description: "Analyze GitHub Code Scanning (SAST) alerts for a GitHub repository and generate a comprehensive report with severity breakdowns, rule/CWE mappings, affected source files with line numbers, and per-rule remediation guidance. Requires gh CLI (preferred) or GITHUB_TOKEN. Uses gh api with --paginate and a state=open filter for reliable, complete data retrieval."
+argument-hint: "Code Scanning security URL or OWNER/REPO slug"
 tags:
   - security
   - sast
@@ -9,6 +10,15 @@ tags:
 ---
 
 # Code Scanning Alert Analysis & Report
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | A Code Scanning security URL, or an `OWNER/REPO` slug |
+| **Output** | `CODESCAN-REPORT.md` at the workspace root (overwritten each run) |
+| **Requires** | `gh`, `jq`, and a token that can read security alerts |
+| **Reads** | Source files named in each alert's `location.path` |
 
 ## Overview
 
@@ -23,143 +33,115 @@ This skill fetches and analyzes only open GitHub Code Scanning alerts from the r
 
 ## Prerequisites
 
-**Required tools:**
-- `gh` (GitHub CLI) — used for all API calls; handles auth and pagination automatically
-- `jq` — used for JSON parsing and filtering of API responses
+See [Security Report Skills — setup](../README.md) for tool installation, authentication options, token
+handling, and troubleshooting. In short: install `gh` and `jq`, then run `gh auth login` — or export a
+`GITHUB_TOKEN` carrying the `security_events` scope.
 
-**GitHub authentication (preferred order):**
-
-1. Use `gh` CLI if already authenticated (`gh auth status` returns success)
-2. Otherwise fall back to `GITHUB_TOKEN` environment variable
-
-**Option A: GitHub CLI (preferred)**
-```bash
-gh auth login
-gh auth status  # Verify authentication
-```
-
-**Option B: Set GITHUB_TOKEN manually**
-Set `GITHUB_TOKEN` with a GitHub Personal Access token that has `security_events:read` scope:
-
-```bash
-export GITHUB_TOKEN="ghp_your_token_here"
-gh auth login --with-token <<< "$GITHUB_TOKEN"
-```
-
-⚠️ **Security note:** Never commit `GITHUB_TOKEN` to version control. Use environment variables or CI/CD secrets for sensitive tokens.
-
-⚠️ **Validation note:** Always verify the token works before proceeding. A set-but-expired `GITHUB_TOKEN` will cause a silent 401. Use `gh auth status` or a test API call to confirm access before fetching alerts.
+**Security note:** never commit a token. Use environment variables or CI/CD secrets.
 
 ## Workflow
 
 ### Input
 
-**GitHub Code Scanning URL** (required)
-- Format: `https://github.com/OWNER/REPO/security/code-scanning`
-- Example: `https://github.com/CBIIT/nci-webtools-dceg-linkage/security/code-scanning`
+A Code Scanning security URL or an `OWNER/REPO` slug, passed as the slash-command argument.
+- URL format: `https://github.com/OWNER/REPO/security/code-scanning`
+- Example: `https://github.com/OWNER/REPO/security/code-scanning`
+- A target is **required**. If none is given, ask for one rather than assuming a repository. Always write the result to `CODESCAN-REPORT.md` at the workspace root.
 
 ### Steps
 
 1. **Verify authentication** before fetching any data:
    ```bash
-   gh auth status
+   gh api user --jq .login
    ```
-   Check the output for `✓ Logged in` next to the active account. **Do not rely on the exit code alone** — when multiple accounts are configured and one has a stale token, `gh auth status` exits with code 1 even though the active account is valid. Only stop if *no* account shows `- Active account: true` with a valid token. Do **not** fall back silently — a failed or expired token returns HTTP 401 with no useful error body.
+   This must print a username before continuing. Use it rather than `gh auth status`, whose exit code is unreliable when multiple accounts are configured — one stale token makes it exit non-zero even though the active account is valid. Stop and report the failure rather than falling back silently: an expired token returns HTTP 401 with no useful error body.
 
 2. **Parse the input URL** to extract `OWNER` and `REPO`:
    - Input format: `https://github.com/OWNER/REPO/security/code-scanning`
-   - Derived API slug: `OWNER/REPO` (e.g. `CBIIT/nci-webtools-dceg-linkage`)
+   - Derived API slug: `OWNER/REPO`
    - Do **not** pass the full HTML URL to the API — extract the slug first.
 
-3. **Fetch only open Code Scanning alerts** using `gh api` with the `state=open` filter and `--paginate` to handle repos with more than 100 alerts:
+3. **Fetch only open Code Scanning alerts** using `gh api` with the `state=open` filter, plus `--paginate` to handle repos with more than 100 alerts:
    ```bash
-   gh api \
-     --paginate \
+   gh api --paginate \
      "repos/OWNER/REPO/code-scanning/alerts?state=open&per_page=100" \
      > /tmp/code-scanning-alerts.json
    ```
-   Using `gh api` is strongly preferred over raw `curl` because it:
-   - Injects auth headers automatically
-   - Handles pagination with `--paginate`
-   - Returns clean JSON regardless of response size
+   The page size defaults to 30 and caps at 100, so `--paginate` is mandatory — many repositories exceed one page. For array-returning REST endpoints like this one, `gh` merges the pages into a single JSON array, so the file is ready for `jq` as-is. Do **not** add `--slurp`; that flag is for GraphQL and object-returning endpoints, and here it would nest the results one level deeper.
 
-4. **Save the response to a temp file** before parsing. Do not attempt to pipe or inline large JSON — the response can exceed 30 KB and will be truncated or mishandled in-shell. Always write to `/tmp/code-scanning-alerts.json` first, then query from there.
+   Using `gh api` is strongly preferred over raw `curl` because it injects auth headers automatically, follows pagination, and returns clean JSON regardless of response size. Always redirect to the temp file rather than piping the response onward — it can exceed 30 KB and gets truncated or mishandled in-shell.
 
-5. **Parse with `jq`** — write all complex queries to temp `.jq` files and execute with `jq -f`. Do **not** pass multi-field jq expressions containing `//` directly as shell arguments — jq's null-coalescing operator `//` causes a **"syntax error, unexpected //"** on zsh when inline-quoted. Also do not mix `#` comment lines into runnable command blocks — they produce **"command not found: #"** in the terminal.
+4. **Parse with `jq`.** Keep short queries inline; move longer multi-line queries into a `.jq` file and run them with `jq -f`, which avoids nested-quoting mistakes. Do not mix `#` comment lines into runnable command blocks — they produce **"command not found: #"** in the terminal.
 
-   **Count open alerts** (safe to run inline — no `//`):
+   **Confirm the fetch returned alerts, not an error.** A disabled feature or bad slug returns a JSON error *object*, not an array — on which `jq 'length'` misleadingly counts keys and `group_by` fails with `Cannot index string with string`. Guard before parsing:
+   ```bash
+   jq -e 'type == "array"' /tmp/code-scanning-alerts.json >/dev/null \
+     || { jq -r '.message? // "Unexpected response"' /tmp/code-scanning-alerts.json; exit 1; }
+   ```
+
+   **Count open alerts:**
    ```bash
    jq 'length' /tmp/code-scanning-alerts.json
    ```
 
-   **Severity breakdown** — write to a file first:
+   **Severity breakdown:**
    ```bash
    cat > /tmp/severity.jq << 'JQEOF'
-   group_by(.rule.security_severity_level) |
-   map({severity: .[0].rule.security_severity_level, count: length}) |
-   sort_by(.severity)
+   group_by(.rule.security_severity_level // .rule.severity) |
+   map({severity: (.[0].rule.security_severity_level // .[0].rule.severity), count: length}) |
+   sort_by({critical:0,high:1,medium:2,low:3,error:4,warning:5,note:6}[.severity] // 9)
    JQEOF
    jq -f /tmp/severity.jq /tmp/code-scanning-alerts.json
    ```
-   > Note: `rule.security_severity_level` is preferred (values: `critical`, `high`, `medium`, `low`). If some alerts return `null` for that field, fall back to `.rule.severity` (`error`, `warning`, `note`) — but handle this in Python (see below) to avoid the `//` quoting issue.
+   > Note: `rule.security_severity_level` is preferred (values: `critical`, `high`, `medium`, `low`). Non-security quality rules return `null` for it; fall back to `.rule.severity` (`error`, `warning`, `note`) for those.
 
-   **Tool/scanner breakdown** (safe to run inline — no `//`):
+   **Tool/scanner breakdown:**
    ```bash
    jq 'group_by(.tool.name) | map({tool: .[0].tool.name, version: .[0].tool.version, count: length})' /tmp/code-scanning-alerts.json
    ```
+   > Record `tool.version` in the report — it reveals whether findings came from an outdated CodeQL analysis.
 
-   **Rule / CWE breakdown** — write to a file:
+   **Rule / CWE breakdown:**
    ```bash
    cat > /tmp/rules.jq << 'JQEOF'
    group_by(.rule.id) |
    map({
      rule_id: .[0].rule.id,
-     severity: .[0].rule.security_severity_level,
+     severity: (.[0].rule.security_severity_level // .[0].rule.severity),
      cwe_tags: (.[0].rule.tags // [] | map(select(startswith("external/cwe")))),
      description: .[0].rule.description,
      count: length
    }) |
-   sort_by(.severity, .rule_id)
+   sort_by({critical:0,high:1,medium:2,low:3,error:4,warning:5,note:6}[.severity] // 9, .rule_id)
    JQEOF
    jq -f /tmp/rules.jq /tmp/code-scanning-alerts.json > /tmp/rules-parsed.json
    ```
 
-   **Flat findings list with file paths and line numbers** — use Python to avoid all quoting issues with `//` and multi-field projections:
+   **Flat findings list with file paths and line numbers:**
    ```bash
-   python3 -c "
-   import json
-   with open('/tmp/code-scanning-alerts.json') as f:
-       alerts = json.load(f)
-   findings = []
-   for a in alerts:
-       loc = a.get('most_recent_instance', {}).get('location', {})
-       tags = a.get('rule', {}).get('tags') or []
-       findings.append({
-           'number': a['number'],
-           'rule_id': a['rule']['id'],
-           'severity': a['rule'].get('security_severity_level') or a['rule'].get('severity', ''),
-           'tool': a['tool']['name'],
-           'file': loc.get('path', ''),
-           'start_line': loc.get('start_line', ''),
-           'end_line': loc.get('end_line', ''),
-           'message': (a.get('most_recent_instance', {}).get('message') or {}).get('text', ''),
-           'cwe_tags': [t for t in tags if t.startswith('external/cwe')]
-       })
-   findings.sort(key=lambda x: (x['severity'], x['file'], x['start_line'] or 0))
-   with open('/tmp/findings.json', 'w') as f:
-       json.dump(findings, f, indent=2)
-   print(f'Written {len(findings)} findings')
-   "
+   cat > /tmp/findings.jq << 'JQEOF'
+   map({
+     number,
+     rule_id: .rule.id,
+     severity: (.rule.security_severity_level // .rule.severity // ""),
+     tool: .tool.name,
+     file: (.most_recent_instance.location.path // ""),
+     start_line: (.most_recent_instance.location.start_line // null),
+     end_line: (.most_recent_instance.location.end_line // null),
+     message: (.most_recent_instance.message.text // ""),
+     cwe_tags: (.rule.tags // [] | map(select(startswith("external/cwe"))))
+   }) |
+   sort_by({critical:0,high:1,medium:2,low:3,error:4,warning:5,note:6}[.severity] // 9, .file, (.start_line // 0))
+   JQEOF
+   jq -f /tmp/findings.jq /tmp/code-scanning-alerts.json > /tmp/findings.json
    ```
    This produces `/tmp/findings.json` for use in the cross-reference and report steps.
 
-6. **Cross-reference with local source files**:
-   - `server/` for Python backend files
-   - `client/src/` for Next.js / TypeScript frontend files
+5. **Cross-reference with local source files** — only when the scanned repo is the one checked out in the workspace. The `most_recent_instance.location.path` on each alert is the source of truth; local files are a best-effort convenience.
 
-   For each affected file path returned by the API, verify the file exists locally and note the relevant module. This gives context for remediation sequencing (e.g., fix shared utilities before callers).
+   When the target repo matches the workspace, verify each affected path exists locally and note the relevant module for remediation sequencing (e.g., fix shared utilities before callers). When it does not, skip local lookups and rely on the API paths.
 
-7. **Map rules to CWE remediation guidance** using the `cwe_tags` extracted above. Common CWE categories and recommended fixes:
+6. **Map rules to CWE remediation guidance** using the `cwe_tags` extracted above. Common CWE categories and recommended fixes:
 
    | CWE | Category | Common CodeQL Rule | Remediation |
    |-----|----------|--------------------|-------------|
@@ -176,12 +158,12 @@ gh auth login --with-token <<< "$GITHUB_TOKEN"
 
    For any CWE not listed here, look up the CWE description at `https://cwe.mitre.org/data/definitions/<ID>.html` and describe the fix generically.
 
-8. **Prioritize findings**:
+7. **Prioritize findings**:
    - **P1 — Fix immediately**: `critical` and `high` severity findings, especially injection (CWE-022, CWE-078, CWE-089, CWE-094, CWE-918) and XSS (CWE-079)
    - **P2 — Fix in next sprint**: `medium` severity and `high` severity non-injection issues
    - **P3 — Track and schedule**: `low` and `note` severity findings, style/code-quality warnings
 
-9. **Generate report** and save it as `CODESCAN-REPORT.md` in the workspace root with the structure described in the Output section.
+8. **Generate report** and save it as `CODESCAN-REPORT.md` in the workspace root with the structure described in the Output section.
 
 ### Output
 
@@ -196,33 +178,31 @@ Structured markdown report saved to `CODESCAN-REPORT.md` at the workspace root w
 
 ## Example Invocation
 
+Ask in plain language (the agent auto-loads this skill by description):
+
+> Generate a code scanning report for OWNER/REPO
+
+Or invoke its slash command directly:
+
 ```
-/code-scanning-report https://github.com/CBIIT/nci-webtools-dceg-linkage/security/code-scanning
+/code-scanning-report https://github.com/OWNER/REPO/security/code-scanning
 ```
 
-## Notes
+## Troubleshooting
 
-- **`gh api` vs `curl`**: Always use `gh api` — it handles auth injection, pagination, and avoids 401s from stale `GITHUB_TOKEN` values silently.
-- **Pagination**: Use `--paginate` on `gh api` calls. Repos with many alerts will exceed the default 30-item page limit — without pagination, results will be silently incomplete.
-- **Large responses**: API responses can exceed 30 KB. Always write to a temp file (`/tmp/code-scanning-alerts.json`) before parsing; do not attempt inline pipe processing.
-- **`jq` required**: All JSON filtering and extraction should use `jq` where possible, or `python3 -c` for complex multi-field queries. Avoid heredoc-based Python scripts in-shell — they fail with multiline strings, special characters, and terminal echo interference.
-- **jq `//` operator causes zsh syntax errors when inline**: jq's null-coalescing operator (`//`) is misinterpreted by zsh when passed as a shell argument inside single quotes. Always write jq expressions containing `//` to a temp file (`/tmp/script.jq`) using a heredoc and run via `jq -f /tmp/script.jq`. Alternatively, fall back to `python3 -c` for complex multi-field extractions — this is reliable across all shells.
-- **`#` comment lines break multi-command blocks**: Shell comment lines (`# some comment`) cannot appear at the start of a command in a single terminal invocation — they produce "command not found: #". Either run commands individually, place comments inside a shell script file, or omit them from runnable examples.
-- **`gh auth status` exit code is unreliable with multiple accounts**: When multiple GitHub accounts are configured and one has an expired token, `gh auth status` exits with code 1 even if the active account is valid. Always inspect the output text for `✓ Logged in` and `- Active account: true` rather than relying on the exit code. Only abort if no active account shows a valid session.
-- **State filter at the API level**: Pass `?state=open` as a query parameter to the API rather than filtering client-side. This reduces response size and avoids processing thousands of fixed/dismissed alerts.
-- **URL parsing**: The input URL (`https://github.com/OWNER/REPO/security/code-scanning`) is a web UI URL. Extract `OWNER/REPO` from it before constructing the API path — do not pass the full URL to `gh api`.
-- **Severity field names**: Code Scanning alerts carry two severity-related fields. Prefer `rule.security_severity_level` (values: `critical`, `high`, `medium`, `low`) over `rule.severity` (values: `error`, `warning`, `note`). The latter is a code-quality signal, not a security rating; always fall back to it with `// .rule.severity` if `security_severity_level` is absent.
-- **Tool versions**: The `tool.version` field is present for CodeQL runs. Record it in the report to track whether findings are from an outdated analysis version.
-- **Dismissed alerts**: The API returns `state=open` records only. Dismissed alerts (false positives) are excluded and do not need to be processed.
-- **Code Scanning must be enabled**: Ensure the repository has Code Scanning enabled in Settings > Security & analysis, and that at least one analysis has been uploaded (via CodeQL Actions workflow or SARIF upload).
-- **Private repositories**: Requires proper permissions; verify your token has `security_events:read` scope.
+See the [shared troubleshooting table](../README.md#troubleshooting) for auth, permission, and rate-limit
+errors. Two issues are specific to this skill:
+
+| Symptom | Fix |
+|---------|-----|
+| `HTTP 404` on a repository you can browse | Code Scanning is disabled, or no analysis has been uploaded yet. Enable it under Settings → Advanced Security and run the CodeQL workflow. |
+| Every alert reports a `null` severity | The query read `rule.security_severity_level` without falling back to `rule.severity`. |
 
 ## Related Resources
 
 - [GitHub Code Scanning documentation](https://docs.github.com/en/code-security/code-scanning)
-- [CodeQL query help (GitHub)](https://codeql.github.com/codeql-query-help/)
+- [Code scanning alerts REST API](https://docs.github.com/en/rest/code-scanning/code-scanning)
+- [CodeQL query help](https://codeql.github.com/codeql-query-help/)
 - [CWE list (MITRE)](https://cwe.mitre.org/data/index.html)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [Repository source files](../../)
-  - [Backend source](../../../server/)
-  - [Frontend source](../../../client/src/)
+- Affected source files are discovered per alert via `most_recent_instance.location.path`; no fixed source tree is assumed.

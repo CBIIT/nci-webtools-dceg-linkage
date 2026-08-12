@@ -1,6 +1,7 @@
 ---
 name: dependabot-report
-description: "Analyze GitHub Dependabot security alerts for this repository and generate a comprehensive upgrade report with breaking changes, effort estimates, and recommended versions. Requires gh CLI (preferred) or GITHUB_TOKEN. Uses gh api with --paginate and state=open filter for reliable, complete data retrieval."
+description: "Analyze GitHub Dependabot security alerts for a GitHub repository and generate a comprehensive upgrade report with breaking changes, effort estimates, and recommended versions. Requires gh CLI (preferred) or GITHUB_TOKEN. Uses gh api with --paginate and a state=open filter for reliable, complete data retrieval."
+argument-hint: "Dependabot security URL or OWNER/REPO slug"
 tags:
   - dependencies
   - security
@@ -9,6 +10,15 @@ tags:
 ---
 
 # Dependabot Alert Analysis & Upgrade Report
+
+## At a glance
+
+| | |
+|---|---|
+| **Input** | A Dependabot security URL, or an `OWNER/REPO` slug |
+| **Output** | `DEPENDABOT-REPORT.md` at the workspace root (overwritten each run) |
+| **Requires** | `gh`, `jq`, and a token that can read security alerts |
+| **Reads** | Dependency manifests named in each alert's `manifest_path` (e.g. `package.json`, `requirements.txt`) |
 
 ## Overview
 
@@ -23,69 +33,45 @@ This skill fetches and analyzes only open GitHub Dependabot security alerts from
 
 ## Prerequisites
 
-**Required tools:**
-- `gh` (GitHub CLI) — used for all API calls; handles auth and pagination automatically
-- `jq` — used for JSON parsing and filtering of API responses
+See [Security Report Skills — setup](../README.md) for tool installation, authentication options, token
+handling, and troubleshooting. In short: install `gh` and `jq`, then run `gh auth login` — or export a
+`GITHUB_TOKEN` carrying the `security_events` scope.
 
-**GitHub authentication (preferred order):**
-
-1. Use `gh` CLI if already authenticated (`gh auth status` returns success)
-2. Otherwise fall back to `GITHUB_TOKEN` environment variable
-
-**Option A: GitHub CLI (preferred)**
-```bash
-gh auth login
-gh auth status  # Verify authentication
-```
-
-**Option B: Set GITHUB_TOKEN manually**
-Set `GITHUB_TOKEN` with a GitHub Personal Access token that has `security_events:read` scope:
-
-```bash
-export GITHUB_TOKEN="ghp_your_token_here"
-gh auth login --with-token <<< "$GITHUB_TOKEN"
-```
-
-⚠️ **Security note:** Never commit `GITHUB_TOKEN` to version control. Use environment variables or CI/CD secrets for sensitive tokens.
-
-⚠️ **Validation note:** Always verify the token works before proceeding. A set-but-expired `GITHUB_TOKEN` will cause a silent 401. Use `gh auth status` or a test API call to confirm access before fetching alerts.
+**Security note:** never commit a token. Use environment variables or CI/CD secrets.
 
 ## Workflow
 
 ### Input
 
-**GitHub Dependabot URL** (required)
-- Format: `https://github.com/OWNER/REPO/security/dependabot`
-- Example: `https://github.com/CBIIT/nci-webtools-dceg-linkage/security/dependabot`
+A Dependabot security URL or an `OWNER/REPO` slug, passed as the slash-command argument.
+- URL format: `https://github.com/OWNER/REPO/security/dependabot`
+- Example: `https://github.com/OWNER/REPO/security/dependabot`
+- A target is **required**. If none is given, ask for one rather than assuming a repository. Always write the result to `DEPENDABOT-REPORT.md` at the workspace root.
 
 ### Steps
 
 1. **Verify authentication** before fetching any data:
    ```bash
-   gh auth status
+   gh api user --jq .login
    ```
-   Check the output for `✓ Logged in` next to the active account. **Do not rely on the exit code alone** — when multiple accounts are configured and one has a stale token, `gh auth status` exits with code 1 even though the active account is valid. Only stop if *no* account shows `- Active account: true` with a valid token. Do **not** fall back silently — a failed or expired token returns HTTP 401 with no useful error body.
+   This must print a username before continuing. Use it rather than `gh auth status`, whose exit code is unreliable when multiple accounts are configured — one stale token makes it exit non-zero even though the active account is valid. Stop and report the failure rather than falling back silently: an expired token returns HTTP 401 with no useful error body.
 
 2. **Parse the input URL** to extract `OWNER` and `REPO`:
    - Input format: `https://github.com/OWNER/REPO/security/dependabot`
-   - Derived API slug: `OWNER/REPO` (e.g. `CBIIT/nci-webtools-dceg-linkage`)
+   - Derived API slug: `OWNER/REPO`
    - Do **not** pass the full HTML URL to the API — extract the slug first.
 
-3. **Fetch only open Dependabot alerts** using `gh api` with the `state=open` filter and `--paginate` to handle repos with more than 100 alerts:
+3. **Fetch only open Dependabot alerts** using `gh api` with the `state=open` filter, plus `--paginate` to handle repos with more than 100 alerts:
    ```bash
-   gh api \
-     --paginate \
+   gh api --paginate \
      "repos/OWNER/REPO/dependabot/alerts?state=open&per_page=100" \
      > /tmp/dependabot-alerts.json
    ```
-   Using `gh api` is strongly preferred over raw `curl` because it:
-   - Injects auth headers automatically
-   - Handles pagination with `--paginate`
-   - Returns clean JSON regardless of response size
+   The page size defaults to 30 and caps at 100, so `--paginate` is mandatory — without it the report is silently truncated. For array-returning REST endpoints like this one, `gh` merges the pages into a single JSON array, so the file is ready for `jq` as-is. Do **not** add `--slurp`; that flag is for GraphQL and object-returning endpoints, and here it would nest the results one level deeper.
 
-4. **Save the response to a temp file** before parsing. Do not attempt to pipe or inline large JSON — the response can exceed 30KB and will be truncated or mishandled in-shell. Always write to `/tmp/dependabot-alerts.json` first, then query from there.
+   Using `gh api` is strongly preferred over raw `curl` because it injects auth headers automatically, follows pagination, and returns clean JSON regardless of response size. Always redirect to the temp file rather than piping the response onward — it can exceed 30KB and gets truncated or mishandled in-shell.
 
-5. **Parse with `jq`** — do not place `#` comment lines inside runnable command blocks; they produce **"command not found: #"** in zsh. Run each command individually or omit the comments.
+4. **Parse with `jq`.** Do not place `#` comment lines inside runnable command blocks; they produce **"command not found: #"** in zsh. Run each command individually or omit the comments.
 
    **Count open alerts:**
    ```bash
@@ -109,26 +95,23 @@ gh auth login --with-token <<< "$GITHUB_TOKEN"
      })' /tmp/dependabot-alerts.json
    ```
 
-6. **Cross-reference with local dependencies**:
-   - `package.json` (repo root) for root-level npm packages (e.g. dev tools, CLI dependencies)
-   - `client/package.json` for frontend npm packages
-   - `server/requirements.txt` for pip packages
+5. **Cross-reference with local dependencies** — only when the scanned repo is the one checked out in the workspace. Each alert's `dependency.manifest_path` is the source of truth for which manifest declares the package; local files are a best-effort convenience.
 
-   Check all three files — some packages (e.g. `@anthropic-ai/claude-code`) live only in the root `package.json` and will be missed if only `client/package.json` is consulted.
+   When the target repo matches the workspace, open the manifest named in each alert's `manifest_path` (e.g. `package.json`, `requirements.txt`) to confirm whether the package is a direct or transitive dependency. A package may appear in more than one manifest, so check each path the alerts reference.
 
-7. **Assess breaking changes** by:
+6. **Assess breaking changes** by:
    - Reading package changelogs/release notes
    - Checking semantic versioning jumps (major version changes)
    - Noting deprecated APIs or removed features
    - Cross-referencing with codebase usage patterns
 
-8. **Estimate effort** per package:
+7. **Estimate effort** per package:
    - **Low**: Patch version, no API changes, auto-updateable
    - **Medium**: Minor version change, some API updates, manual testing needed
    - **High**: Major version change, significant refactoring, integration changes
    - **Critical**: Multiple dependent packages affected, ecosystem-wide changes
 
-9. **Generate report** with:
+8. **Generate report** with:
    - Executive summary (total alerts, critical count)
    - Vulnerability table (severity, package, version, remediation)
    - Ecosystem breakdown (npm vs pip distributions)
@@ -148,28 +131,30 @@ Structured markdown report saved to **`DEPENDABOT-REPORT.md`** at the workspace 
 
 ## Example Invocation
 
+Ask in plain language (the agent auto-loads this skill by description):
+
+> Generate a Dependabot report for OWNER/REPO
+
+Or invoke its slash command directly:
+
 ```
-/dependabot-report https://github.com/CBIIT/nci-webtools-dceg-linkage/security/dependabot
+/dependabot-report https://github.com/OWNER/REPO/security/dependabot
 ```
 
-## Notes
+> Alerts are a snapshot: Dependabot rescans on a schedule, so the report reflects the last scan, not live state — date any report you circulate.
 
-- **`gh api` vs `curl`**: Always use `gh api` — it handles auth injection, pagination, and avoids 401s from stale `GITHUB_TOKEN` values silently.
-- **Pagination**: Use `--paginate` on `gh api` calls. Repos with many alerts will exceed the default 30-item page limit — without pagination, results will be silently incomplete.
-- **Large responses**: API responses can exceed 30KB. Always write to a temp file (`/tmp/dependabot-alerts.json`) before parsing; do not attempt inline pipe processing.
-- **`jq` required**: All JSON filtering and extraction should use `jq`. The Dependabot alert schema does not require jq's `//` null-coalescing operator for the standard queries, so inline `jq '...'` works. Avoid Python heredoc scripts in-shell — they fail with multiline strings, special characters, and terminal echo interference.
-- **`#` comment lines break terminal blocks**: Shell comment lines (`# some comment`) cannot appear at the start of a command in a single terminal invocation — they produce "command not found: #". Run each command separately or omit comments from runnable examples.
-- **`gh auth status` exit code is unreliable with multiple accounts**: When multiple GitHub accounts are configured and one has an expired token, `gh auth status` exits with code 1 even if the active account is valid. Always inspect the output text for `✓ Logged in` and `- Active account: true` rather than relying on the exit code. Only abort if no active account shows a valid session.
-- **Root `package.json` matters**: npm alerts may reference packages declared in the repo root `package.json` (e.g. dev tools), not just `client/package.json`. Always check both.
-- **State filter at the API level**: Pass `?state=open` as a query parameter to the API rather than filtering client-side. This reduces response size and avoids processing thousands of fixed/dismissed alerts.
-- **URL parsing**: The input URL (`https://github.com/OWNER/REPO/security/dependabot`) is a web UI URL. Extract `OWNER/REPO` from it before constructing the API path — do not pass the full URL to `gh api`.
-- **Stale data**: Dependabot alerts refresh on schedule. For real-time status, check GitHub UI directly.
-- **Dependabot settings**: Ensure the repository has Dependabot enabled in Settings > Security & analysis.
-- **Private repositories**: Requires proper permissions; verify your token has `security_events:read` scope.
+## Troubleshooting
+
+See the [shared troubleshooting table](../README.md#troubleshooting) for auth, permission, and rate-limit
+errors. Two issues are specific to this skill:
+
+| Symptom | Fix |
+|---------|-----|
+| `HTTP 404` on a repository you can browse | Dependabot alerts are disabled. Enable them under Settings → Advanced Security. |
+| Report lists fewer alerts than the GitHub UI | The fetch dropped `--paginate`, or a severity filter was left on the query string. |
 
 ## Related Resources
 
-- [GitHub Dependabot documentation](https://docs.github.com/en/code-security/managing-vulnerabilities)
-- [Repository dependency files](../../)
-  - [Frontend dependencies](../../../client/package.json)
-  - [Backend dependencies](../../../server/requirements.txt)
+- [GitHub Dependabot documentation](https://docs.github.com/en/code-security/dependabot)
+- [Dependabot alerts REST API](https://docs.github.com/en/rest/dependabot/alerts)
+- Dependency manifests are discovered per alert via `dependency.manifest_path`; common examples are `package.json` and `requirements.txt`. Nothing is hardcoded to a specific repository.
