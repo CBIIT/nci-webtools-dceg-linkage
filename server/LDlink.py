@@ -54,6 +54,7 @@ from ApiAccess import (
 import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command, validBfile
 from sumstats_normalizer import normalize_sumstats_for_ldsc
+from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, write_compatibility_metadata
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
@@ -1750,39 +1751,22 @@ def validate_bfile():
         fileroot = filename
 
     try:
-        _, bfile_path, _ = _resolve_upload_file_path(fileroot, reference)
+        _, bfile_path, upload_dir = _resolve_upload_file_path(fileroot, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid bfile validation input: {validation_error}")
         return jsonify({"fileValid": False, "error": str(validation_error)})
     
     app.logger.debug(f"Validating bfile: {bfile_path}")
     
-    # Check if all required files exist (.bed, .bim, .fam)
-    required_extensions = [".bed", ".bim", ".fam"]
-    missing_files = []
-    for ext in required_extensions:
-        try:
-            _, component_path, _ = _resolve_upload_file_path(f"{fileroot}{ext}", reference)
-        except ValueError as validation_error:
-            app.logger.warning(f"Invalid bfile component path: {validation_error}")
-            return jsonify({"fileValid": False, "error": str(validation_error)})
-
-        if not os.path.exists(component_path):
-            missing_files.append(fileroot + ext)
-    
-    if missing_files:
-        app.logger.warning(f"Missing bfile components: {missing_files}")
-        return jsonify({"fileValid": False, "error": f"Missing files: {', '.join(missing_files)}"})
-    
-    # Validate using ldsc_utils
     try:
-        file_valid = validBfile(bfile_path)
-        app.logger.info(f"Bfile validation result for {filename}: {file_valid}")
+        compatibility = validate_bfile_compatibility(fileroot, reference, _resolve_upload_file_path, validBfile)
+        write_compatibility_metadata(upload_dir, compatibility)
+        app.logger.info(f"Bfile compatibility validation result for {filename}: {compatibility}")
         
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Bfile validation completed ({execution_time}s)")
         
-        return jsonify({"fileValid": file_valid})
+        return jsonify({"fileValid": compatibility})
     except Exception as e:
         app.logger.error(f"Error validating bfile: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
@@ -2152,6 +2136,12 @@ def ldscore():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
  
+        compatibility = validate_bfile_compatibility(inputfilename, reference, _resolve_upload_file_path, validBfile, genome_build=genome_build)
+        write_compatibility_metadata(fileDir, compatibility)
+        if not compatibility.get("valid"):
+            app.logger.warning(f"Blocking LDscore calculation for incompatible LD score inputs: {compatibility}")
+            return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
         result = run_ldsc_command(pop, genome_build, inputfilename, ldwindow, windUnit, isExample, reference)
         app.logger.debug("LDscore calculation completed, processing result")
         # print(result)
@@ -2364,6 +2354,13 @@ def ldherit():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
+        if str(isexample).lower() != "true":
+            compatibility = validate_sumstats_preanalysis([filename], reference, fileDir)
+            write_compatibility_metadata(fileDir, compatibility)
+            if not compatibility.get("valid"):
+                app.logger.warning(f"Blocking LDherit calculation before downstream processing: {compatibility}")
+                return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
         result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
@@ -2571,6 +2568,13 @@ def ldcorrelation():
                     app.logger.error(f"Uploaded file not found at {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
+        if str(isexample).lower() != "true":
+            compatibility = validate_sumstats_preanalysis([filename, filename2], reference, fileDir)
+            write_compatibility_metadata(fileDir, compatibility)
+            if not compatibility.get("valid"):
+                app.logger.warning(f"Blocking LDcorrelation calculation before downstream processing: {compatibility}")
+                return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
         result = run_correlation_command(
             filename,
             filename2,
