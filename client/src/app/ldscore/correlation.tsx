@@ -165,6 +165,22 @@ export default function Correlation() {
   });
 
   const selectedScale = geneticForm.watch("scale");
+  const file1Registration = geneticForm.register("file", {
+    required: "File is required",
+    validate: (fileList: FileList | undefined) => {
+      if (!fileList || fileList.length === 0) return true;
+      const file = fileList[0];
+      return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
+    }
+  });
+  const file2Registration = geneticForm.register("file2", {
+    required: "File is required",
+    validate: (fileList: FileList | undefined) => {
+      if (!fileList || fileList.length === 0) return true;
+      const file = fileList[0];
+      return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
+    }
+  });
 
   const geneticMutation = useMutation({
     mutationFn: fetchGeneticCorrelationResult,
@@ -417,19 +433,13 @@ export default function Correlation() {
               ) : (
                 <Form.Control 
                   type="file" 
-                  {...geneticForm.register("file", { 
-                    required: "File is required",
-                    validate: (fileList: FileList | undefined) => {
-                      if (!fileList || fileList.length === 0) return true;
-                      const file = fileList[0];
-                      return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
-                    }
-                  })}
+                  {...file1Registration}
                   accept={sumstatsAccept}
                   title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
                   disabled={geneticLoading}
                   style={{ maxWidth: "400px" }}
                   onChange={async (e) => {
+                    await file1Registration.onChange(e);
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
@@ -437,6 +447,7 @@ export default function Correlation() {
                       const validFormat = await geneticForm.trigger("sumstatsFormat");
                       if (!validFormat) {
                         input.value = "";
+                        geneticForm.setValue("file", undefined, { shouldValidate: true });
                         return;
                       }
                       await handleFileUpload(file, 1, geneticForm.getValues("sumstatsFormat"));
@@ -539,19 +550,13 @@ export default function Correlation() {
               ) : (
                 <Form.Control 
                   type="file" 
-                  {...geneticForm.register("file2", { 
-                    required: "File is required",
-                    validate: (fileList: FileList | undefined) => {
-                      if (!fileList || fileList.length === 0) return true;
-                      const file = fileList[0];
-                      return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
-                    }
-                  })}
+                  {...file2Registration}
                   accept={sumstatsAccept}
                   title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
                   disabled={geneticLoading}
                   style={{ maxWidth: "400px" }}
                   onChange={async (e) => {
+                    await file2Registration.onChange(e);
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
@@ -559,6 +564,7 @@ export default function Correlation() {
                       const validFormat = await geneticForm.trigger("sumstatsFormat");
                       if (!validFormat) {
                         input.value = "";
+                        geneticForm.setValue("file2", undefined, { shouldValidate: true });
                         return;
                       }
                       await handleFileUpload(file, 2, geneticForm.getValues("sumstatsFormat"));

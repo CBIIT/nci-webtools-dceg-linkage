@@ -141,6 +141,19 @@ export default function Heritability() {
   };
 
   const selectedScale = heritabilityForm.watch("scale");
+  const fileRegistration = heritabilityForm.register("file", {
+    required: "File is required",
+    validate: (file: File | FileList | undefined) => {
+      // If we already have an uploaded filename or example filename, validation passes
+      if (uploadedFilename || exampleFilename) return true;
+
+      if (!file) return 'File is required';
+      // Handle FileList, File[], or single File
+      const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
+      if (!f || !f.name) return 'File is required';
+      return hasSupportedSumstatsExtension(f.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
+    }
+  });
 
   const heritabilityMutation = useMutation({
     mutationFn: fetchHeritabilityResult,
@@ -261,23 +274,12 @@ export default function Heritability() {
                 <Form.Control 
                   type="file" 
                   disabled={heritabilityLoading}
-                   {...heritabilityForm.register("file", { 
-                    required: "File is required",
-                    validate: (file: File | FileList | undefined) => {
-                      // If we already have an uploaded filename or example filename, validation passes
-                      if (uploadedFilename || exampleFilename) return true;
-                      
-                      if (!file) return 'File is required';
-                      // Handle FileList, File[], or single File
-                      const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
-                      if (!f || !f.name) return 'File is required';
-                      return hasSupportedSumstatsExtension(f.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
-                    }
-                  })}
+                  {...fileRegistration}
                   style={{ maxWidth: "400px" }}
                   accept={sumstatsAccept}
                   title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
                   onChange={async (e) => {
+                    await fileRegistration.onChange(e);
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setHeritabilityResultRef(null);
@@ -285,6 +287,7 @@ export default function Heritability() {
                       const validFormat = await heritabilityForm.trigger("sumstatsFormat");
                       if (!validFormat) {
                         input.value = "";
+                        heritabilityForm.setValue("file", undefined, { shouldValidate: true });
                         return;
                       }
                       await handleFileUpload(file, heritabilityForm.getValues("sumstatsFormat"));
