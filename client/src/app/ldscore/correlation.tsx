@@ -115,7 +115,7 @@ export default function Correlation() {
           }
         }
         // After successful upload, validate the file (use server-provided name)
-        const validateData = await validateSumstats(filenameToUse, newReference);
+        const validateData = await validateSumstats(filenameToUse, newReference, sumstatsFormat, String(fileNumber));
        // console.log("File validation response:", validateData);
         
         if (validateData?.fileValid?.valid) {

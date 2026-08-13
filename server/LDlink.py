@@ -1643,6 +1643,8 @@ def validate_sumstats():
     
     filename = request.args.get("filename", None)
     reference = request.args.get("reference", None)
+    selected_format = request.args.get("summary_stats_format", None)
+    trait = request.args.get("trait", "")
     
     if not filename:
         app.logger.warning("Validation request missing filename")
@@ -1662,7 +1664,37 @@ def validate_sumstats():
         return jsonify({"fileValid": {"valid": False, "errors": ["File not found"], "warnings": []}})
     
     try:
-        file_valid = normalize_sumstats_for_ldsc(file_path, upload_dir)
+        file_valid = normalize_sumstats_for_ldsc(file_path, upload_dir, selected_format=selected_format)
+        validation_record = {
+            "analysis_run_id": reference,
+            "source_file": filename,
+            "trait": trait,
+            "selected_format": selected_format,
+            "detected_format": file_valid.get("detected_format"),
+            "pipeline_version": file_valid.get("pipeline_version"),
+            "status": "validated" if file_valid.get("valid") else "failed",
+            "output_location": file_valid.get("normalized_filename") if file_valid.get("valid") else "",
+            "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "validation_result": file_valid,
+        }
+        if reference:
+            validation_metadata_path = safe_join(upload_dir, "sumstats_validation_metadata.json")
+            existing_records = []
+            if os.path.exists(validation_metadata_path):
+                try:
+                    with open(validation_metadata_path) as existing_metadata_file:
+                        existing_metadata = json.load(existing_metadata_file)
+                    existing_records = existing_metadata.get("validations", [])
+                except (OSError, json.JSONDecodeError):
+                    existing_records = []
+            existing_records = [
+                record for record in existing_records
+                if not (record.get("source_file") == filename and record.get("trait", "") == trait)
+            ]
+            existing_records.append(validation_record)
+            with open(validation_metadata_path, "w") as metadata_file:
+                json.dump({"analysis_run_id": reference, "validations": existing_records}, metadata_file, sort_keys=True, indent=2)
+        app.logger.info(f"Sumstats validation metadata for analysis run {reference}: {validation_record}")
 
         # Keep this disabled for now: running LDSC's validator before/inside upload validation
         # can reject raw PLINK/REGENIE/SAIGE files before users submit the normalized file.

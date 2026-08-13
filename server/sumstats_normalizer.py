@@ -7,6 +7,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 
 LDSC_OUTPUT_COLUMNS = ["SNP", "A1", "A2", "N", "P", "BETA"]
+NORMALIZATION_PIPELINE_VERSION = "sumstats-normalizer-v1"
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,13 @@ SUMSTATS_FORMATS = [
         transforms={"OR": "log_or"},
     ),
 ]
+
+SELECTED_FORMATS = {
+    "pre_munged": "LDSC-ready",
+    "plink_raw": "PLINK",
+    "regenie_raw": "REGENIE",
+    "saige_raw": "SAIGE",
+}
 
 
 def _clean_header(header: str) -> str:
@@ -151,6 +159,15 @@ def _detect_format(columns: List[str]) -> Tuple[Optional[SumstatsFormat], Dict[s
     return None, {}, errors_by_format
 
 
+def _format_by_selected_value(selected_format: Optional[str]) -> Optional[SumstatsFormat]:
+    if not selected_format:
+        return None
+    expected_name = SELECTED_FORMATS.get(selected_format)
+    if not expected_name:
+        return None
+    return next((format_spec for format_spec in SUMSTATS_FORMATS if format_spec.name == expected_name), None)
+
+
 def _parse_float(value: str, column: str) -> float:
     try:
         return float(str(value).strip())
@@ -227,7 +244,7 @@ def _write_normalized_file(input_path: str, output_path: str, format_spec: Sumst
     return row_count, errors
 
 
-def normalize_sumstats_for_ldsc(input_path: str, output_dir: str) -> Dict[str, object]:
+def normalize_sumstats_for_ldsc(input_path: str, output_dir: str, selected_format: Optional[str] = None) -> Dict[str, object]:
     result = {
         "valid": True,
         "errors": [],
@@ -237,6 +254,10 @@ def normalize_sumstats_for_ldsc(input_path: str, output_dir: str) -> Dict[str, o
         "mappedColumns": {},
         "detected_format": None,
         "detectedFormat": None,
+        "selected_format": selected_format,
+        "selectedFormat": selected_format,
+        "pipeline_version": NORMALIZATION_PIPELINE_VERSION,
+        "pipelineVersion": NORMALIZATION_PIPELINE_VERSION,
         "normalized_filename": os.path.basename(input_path),
         "normalizedFilename": os.path.basename(input_path),
     }
@@ -253,7 +274,31 @@ def normalize_sumstats_for_ldsc(input_path: str, output_dir: str) -> Dict[str, o
         result["errors"].append("File is empty or missing a header row.")
         return result
 
-    format_spec, mapped_columns, errors_by_format = _detect_format(columns)
+    selected_format_spec = _format_by_selected_value(selected_format)
+    if selected_format and selected_format_spec is None:
+        result["valid"] = False
+        result["errors"].append(
+            "Unsupported summary statistics format selection. Select PLINK raw, REGENIE raw, SAIGE raw, or Pre-munged."
+        )
+        return result
+
+    if selected_format_spec:
+        columns_by_clean_name = _columns_by_clean_name(columns)
+        matched, mapped_columns, missing = _format_matches(selected_format_spec, columns_by_clean_name)
+        if not matched:
+            result["valid"] = False
+            result["detected_format"] = selected_format_spec.name
+            result["detectedFormat"] = selected_format_spec.name
+            result["errors"].append(
+                f"Uploaded file does not match the selected {selected_format_spec.name} format. Select the correct format or upload a pre-munged LDSC-ready file."
+            )
+            result["errors"].extend(missing)
+            return result
+        format_spec = selected_format_spec
+        errors_by_format = []
+    else:
+        format_spec, mapped_columns, errors_by_format = _detect_format(columns)
+
     if format_spec is None:
         result["valid"] = False
         result["errors"].append("Could not detect a supported summary statistics format.")

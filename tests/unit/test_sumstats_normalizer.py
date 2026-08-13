@@ -32,6 +32,41 @@ def test_plink_sumstats_are_normalized(tmp_path):
     assert rows == [{"SNP": "rs1", "A1": "A", "A2": "G", "N": "1000", "P": "0.001", "BETA": "0.25"}]
 
 
+def test_selected_raw_format_must_match_uploaded_schema(tmp_path):
+    source = tmp_path / "plink.glm"
+    write_text(source, "ID A1 REF OBS_CT BETA SE P\nrs1 A G 1000 0.25 0.04 0.001\n")
+
+    result = normalize_sumstats_for_ldsc(str(source), str(tmp_path), selected_format="saige_raw")
+
+    assert result["valid"] is False
+    assert "does not match the selected SAIGE format" in result["errors"][0]
+    assert not (tmp_path / "plink.ldsc.tsv").exists()
+
+
+def test_selected_raw_format_invokes_matching_normalization(tmp_path):
+    source = tmp_path / "plink.glm"
+    write_text(source, "ID A1 REF OBS_CT BETA SE P\nrs1 A G 1000 0.25 0.04 0.001\n")
+
+    result = normalize_sumstats_for_ldsc(str(source), str(tmp_path), selected_format="plink_raw")
+
+    assert result["valid"] is True
+    assert result["detected_format"] == "PLINK"
+    rows = read_normalized(tmp_path / result["normalized_filename"])
+    assert rows[0]["SNP"] == "rs1"
+
+
+def test_selected_pre_munged_skips_raw_format_conversion(tmp_path):
+    source = tmp_path / "ready.txt"
+    write_text(source, "SNP A1 A2 N P Z\nrs4 A C 4000 0.5 1.2\n")
+
+    result = normalize_sumstats_for_ldsc(str(source), str(tmp_path), selected_format="pre_munged")
+
+    assert result["valid"] is True
+    assert result["detected_format"] == "LDSC-ready"
+    assert result["normalized_filename"] == "ready.txt"
+    assert not (tmp_path / "ready.ldsc.tsv").exists()
+
+
 def test_regenie_log10p_is_converted(tmp_path):
     source = tmp_path / "regenie.txt"
     write_text(source, "ID ALLELE0 ALLELE1 N BETA SE LOG10P\nrs2 C T 2000 -0.1 0.03 3\n")

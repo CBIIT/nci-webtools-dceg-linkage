@@ -102,7 +102,7 @@ export default function Heritability() {
         }
         setUploadedFilename(filenameToUse);
         // After successful upload, validate the file (use server-provided name)
-        const validateData = await validateSumstats(filenameToUse, newReference);
+        const validateData = await validateSumstats(filenameToUse, newReference, sumstatsFormat);
        
         if (validateData?.fileValid?.valid) {
           const normalizedFilename = validateData.fileValid.normalizedFilename || validateData.fileValid.normalized_filename || filenameToUse;
