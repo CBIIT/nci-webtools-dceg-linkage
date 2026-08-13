@@ -1548,6 +1548,15 @@ def upload():
             return "No file part..."
     
         reference = request.form.get("reference", None)
+        upload_metadata = {
+            "analysis_type": request.form.get("analysis_type", ""),
+            "analysis_run_id": request.form.get("analysis_run_id", reference or ""),
+            "session_id": request.form.get("session_id", reference or ""),
+            "project_id": request.form.get("project_id", ""),
+            "user_id": request.form.get("user_id", ""),
+            "summary_stats_format": request.form.get("summary_stats_format", ""),
+            "trait": request.form.get("trait", ""),
+        }
         uploaded_files = []
         renamed_notifications = []
         app.logger.debug(f"Upload reference: {reference}")
@@ -1580,6 +1589,33 @@ def upload():
 
         if reference:
             schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
+
+        metadata = {key: value for key, value in upload_metadata.items() if value}
+        if metadata:
+            if reference:
+                try:
+                    _, uploads_dir = _resolve_upload_dir(reference, create_dir=True)
+                    metadata_path = safe_join(uploads_dir, "upload_metadata.json")
+                    metadata_record = {
+                        "reference": reference,
+                        "uploaded_files": uploaded_files,
+                        "metadata": metadata,
+                    }
+                    with open(metadata_path, "w") as metadata_file:
+                        json.dump(metadata_record, metadata_file, sort_keys=True, indent=2)
+                except (OSError, ValueError) as metadata_error:
+                    app.logger.error(f"Failed to write upload metadata for reference {reference}: {metadata_error}")
+                    return jsonify({"message": "Files were uploaded, but metadata could not be saved."}), 500
+
+            response = {
+                "message": "All files were saved",
+                "uploaded_files": uploaded_files,
+                "metadata": metadata,
+                "reference": reference,
+            }
+            if renamed_notifications:
+                response["renamed"] = renamed_notifications
+            return jsonify(response)
 
         # Return JSON with uploaded filenames and any sanitization notes
         # Only include the `renamed` field when there were actual sanitizations.

@@ -15,6 +15,8 @@ import LdScoreResults from "./results";
 interface CorrelationFormData {
   file?: FileList;
   file2?: FileList;
+  sumstatsFormat1: SumstatsFormat;
+  sumstatsFormat2: SumstatsFormat;
   pop: LdscorePopOption | null;
   scale: "observed" | "liability";
   samplePrev1?: string;
@@ -23,9 +25,25 @@ interface CorrelationFormData {
   popPrev2?: string;
 }
 
+type SumstatsFormat = "" | "plink_raw" | "regenie_raw" | "saige_raw" | "pre_munged";
+
+const sumstatsFormatOptions: Array<{ value: Exclude<SumstatsFormat, "">; label: string }> = [
+  { value: "plink_raw", label: "PLINK raw" },
+  { value: "regenie_raw", label: "REGENIE raw" },
+  { value: "saige_raw", label: "SAIGE raw" },
+  { value: "pre_munged", label: "Pre-munged" },
+];
+
+const sumstatsFormatLabels = sumstatsFormatOptions.reduce<Record<string, string>>((labels, option) => {
+  labels[option.value] = option.label;
+  return labels;
+}, {});
+
 const defaultGeneticForm: CorrelationFormData = {
   file: undefined,
   file2: undefined,
+  sumstatsFormat1: "",
+  sumstatsFormat2: "",
   pop: null,
   scale: "observed",
   samplePrev1: "0.5",
@@ -64,7 +82,7 @@ export default function Correlation() {
   const [validationError1, setValidationError1] = useState<string>("");
   const [validationError2, setValidationError2] = useState<string>("");
 
-  const handleFileUpload = async (file: File, fileNumber: 1 | 2) => {
+  const handleFileUpload = async (file: File, fileNumber: 1 | 2, sumstatsFormat: SumstatsFormat) => {
     setFileError(""); // Clear any previous errors
     setUploading(true);
     
@@ -77,6 +95,9 @@ export default function Correlation() {
     const formData = new FormData();
     formData.append("ldscoreFile", file);
     formData.append("reference", newReference);
+    formData.append("summary_stats_format", sumstatsFormat);
+    formData.append("analysis_type", "genetic_correlation");
+    formData.append("trait", String(fileNumber));
    
     try {
       const response = await upload(formData);
@@ -177,6 +198,8 @@ export default function Correlation() {
       genome_build: genomeBuild,
       isExample: isExample ? "true" : "false",
       reference,
+      summary_stats_format: data.sumstatsFormat1,
+      summary_stats_format2: data.sumstatsFormat2,
     });
 
     if (data.scale === "liability") {
@@ -265,6 +288,8 @@ export default function Correlation() {
                     setReference(newReference);
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
+                    geneticForm.setValue("sumstatsFormat1", "pre_munged");
+                    geneticForm.setValue("sumstatsFormat2", "pre_munged");
                     setUploadedFile1("");
                     setUploadedFile2("");
                     setValidationError1("");
@@ -277,6 +302,8 @@ export default function Correlation() {
                     setReference("");
                     setExampleFile1("");
                     setExampleFile2("");
+                    geneticForm.setValue("sumstatsFormat1", "");
+                    geneticForm.setValue("sumstatsFormat2", "");
                     //geneticForm.setValue("pop", null);
                   }
                 }}
@@ -362,6 +389,28 @@ export default function Correlation() {
            <Row>
              <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
             <Col s={12} sm={12} md={6} lg={4}>
+              <Form.Group controlId="sumstatsFormat1" className="mb-3">
+                <Form.Label>Summary statistics format</Form.Label>
+                <Form.Select
+                  disabled={geneticLoading || useExampleCorrelation}
+                  style={{ maxWidth: "400px" }}
+                  {...geneticForm.register("sumstatsFormat1", { required: "Trait 1 summary statistics format is required" })}
+                  onChange={(e) => {
+                    geneticForm.setValue("sumstatsFormat1", e.target.value as SumstatsFormat, { shouldValidate: true });
+                    setGeneticCorrelationResultRef(null);
+                    setUploadedFile1("");
+                    setFile1Valid(false);
+                    setValidationError1("");
+                    geneticForm.setValue("file", undefined);
+                  }}
+                >
+                  <option value="">Select format</option>
+                  {sumstatsFormatOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </Form.Select>
+                <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat1?.message}</Form.Text>
+              </Form.Group>
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
@@ -386,7 +435,12 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      await handleFileUpload(file, 1);
+                      const validFormat = await geneticForm.trigger("sumstatsFormat1");
+                      if (!validFormat) {
+                        input.value = "";
+                        return;
+                      }
+                      await handleFileUpload(file, 1, geneticForm.getValues("sumstatsFormat1"));
                       geneticForm.clearErrors("file");
                     }
                   }}
@@ -479,6 +533,28 @@ export default function Correlation() {
         <Row>  
            <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
           <Col s={12} sm={12} md={6} lg={4}>
+              <Form.Group controlId="sumstatsFormat2" className="mb-3">
+                <Form.Label>Summary statistics format</Form.Label>
+                <Form.Select
+                  disabled={geneticLoading || useExampleCorrelation}
+                  style={{ maxWidth: "400px" }}
+                  {...geneticForm.register("sumstatsFormat2", { required: "Trait 2 summary statistics format is required" })}
+                  onChange={(e) => {
+                    geneticForm.setValue("sumstatsFormat2", e.target.value as SumstatsFormat, { shouldValidate: true });
+                    setGeneticCorrelationResultRef(null);
+                    setUploadedFile2("");
+                    setFile2Valid(false);
+                    setValidationError2("");
+                    geneticForm.setValue("file2", undefined);
+                  }}
+                >
+                  <option value="">Select format</option>
+                  {sumstatsFormatOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </Form.Select>
+                <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat2?.message}</Form.Text>
+              </Form.Group>
            
             <Form.Group controlId="file2" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
@@ -504,7 +580,12 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      await handleFileUpload(file, 2);
+                      const validFormat = await geneticForm.trigger("sumstatsFormat2");
+                      if (!validFormat) {
+                        input.value = "";
+                        return;
+                      }
+                      await handleFileUpload(file, 2, geneticForm.getValues("sumstatsFormat2"));
                       geneticForm.clearErrors("file2");
                     }
                   }}
@@ -594,6 +675,9 @@ export default function Correlation() {
                       >
                         {exampleFile1 || uploadedFile1}
                       </a>
+                      <div>
+                        <span style={{ fontWeight: 600 }}>Trait 1 format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat1")] || "Not selected"}
+                      </div>
                       <br />
                     </>
                   )}
@@ -608,6 +692,9 @@ export default function Correlation() {
                       >
                         {exampleFile2 || uploadedFile2}
                       </a>
+                      <div>
+                        <span style={{ fontWeight: 600 }}>Trait 2 format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat2")] || "Not selected"}
+                      </div>
                       <br />
                     </>
                   )}

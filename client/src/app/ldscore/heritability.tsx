@@ -14,14 +14,30 @@ import LdScoreResults from "./results";
 
 interface HeritabilityFormData {
   file?: File;
+  sumstatsFormat: SumstatsFormat;
   pop: LdscorePopOption | null;
   scale: "observed" | "liability";
   samplePrev?: string;
   popPrev?: string;
 }
 
+type SumstatsFormat = "" | "plink_raw" | "regenie_raw" | "saige_raw" | "pre_munged";
+
+const sumstatsFormatOptions: Array<{ value: Exclude<SumstatsFormat, "">; label: string }> = [
+  { value: "plink_raw", label: "PLINK raw" },
+  { value: "regenie_raw", label: "REGENIE raw" },
+  { value: "saige_raw", label: "SAIGE raw" },
+  { value: "pre_munged", label: "Pre-munged" },
+];
+
+const sumstatsFormatLabels = sumstatsFormatOptions.reduce<Record<string, string>>((labels, option) => {
+  labels[option.value] = option.label;
+  return labels;
+}, {});
+
 const defaultHeritabilityForm: HeritabilityFormData = {
   file: undefined,
+  sumstatsFormat: "",
   pop: null,
   scale: "observed",
   samplePrev: "0.5",
@@ -56,7 +72,7 @@ export default function Heritability() {
   });
 
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, sumstatsFormat: SumstatsFormat) => {
     setUploading(true);
     setRenameWarnings("");
     
@@ -67,6 +83,8 @@ export default function Heritability() {
     const formData = new FormData();
     formData.append("ldscoreFile", file);
     formData.append("reference", newReference);
+    formData.append("summary_stats_format", sumstatsFormat);
+    formData.append("analysis_type", "heritability");
    
     try {
       const response = await upload(formData);
@@ -152,6 +170,7 @@ export default function Heritability() {
       genome_build: genomeBuild,
       isExample: isExample ? "true" : "false",
       reference,
+      summary_stats_format: data.sumstatsFormat,
     });
 
     if (data.scale === "liability") {
@@ -213,6 +232,27 @@ export default function Heritability() {
       <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
+            <Form.Group controlId="sumstatsFormat" className="mb-3">
+              <Form.Label>Summary statistics format</Form.Label>
+              <Form.Select
+                disabled={heritabilityLoading || useExample}
+                style={{ maxWidth: "400px" }}
+                {...heritabilityForm.register("sumstatsFormat", { required: "Summary statistics format is required" })}
+                onChange={(e) => {
+                  heritabilityForm.setValue("sumstatsFormat", e.target.value as SumstatsFormat, { shouldValidate: true });
+                  setHeritabilityResultRef(null);
+                  setUploadedFilename("");
+                  setRenameWarnings("");
+                  heritabilityForm.setValue("file", undefined);
+                }}
+              >
+                <option value="">Select format</option>
+                {sumstatsFormatOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.sumstatsFormat?.message}</Form.Text>
+            </Form.Group>
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFilename === "string" && exampleFilename !== "" ? (
@@ -242,7 +282,12 @@ export default function Heritability() {
                     const file = input.files && input.files[0];
                     setHeritabilityResultRef(null);
                     if (file) {
-                      await handleFileUpload(file);
+                      const validFormat = await heritabilityForm.trigger("sumstatsFormat");
+                      if (!validFormat) {
+                        input.value = "";
+                        return;
+                      }
+                      await handleFileUpload(file, heritabilityForm.getValues("sumstatsFormat"));
                     }
                   }}
                 />
@@ -273,6 +318,7 @@ export default function Heritability() {
                       // Generate a new reference for example data
                       const newReference = generateReference();
                       setReference(newReference);
+                          heritabilityForm.setValue("sumstatsFormat", "pre_munged");
                       setExampleFilename("");
                       setUploadedFilename("");
                       heritabilityForm.clearErrors("file");
@@ -293,6 +339,7 @@ export default function Heritability() {
                       setExampleFilename("");
                       setUploadedFilename("");
                       setReference("");
+                      heritabilityForm.setValue("sumstatsFormat", "");
                       //heritabilityForm.setValue("pop", null);
                     }
                   }}
@@ -312,6 +359,9 @@ export default function Heritability() {
                     >
                       {exampleFilename || uploadedFilename}
                     </a>
+                    <div>
+                      <span style={{ fontWeight: 600 }}>Selected format:</span> {sumstatsFormatLabels[heritabilityForm.getValues("sumstatsFormat")] || "Not selected"}
+                    </div>
                     {!useExample && renameWarnings.length > 0 && (
                       <Alert variant="warning" className="mt-2">
                         {renameWarnings}
