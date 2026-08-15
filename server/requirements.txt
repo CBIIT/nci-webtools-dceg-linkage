@@ -10,10 +10,11 @@ numpy==2.4.3
 pandas==2.3.3
 pymongo==4.14.0
 python-dateutil==2.8.2
-python-dotenv==1.1.1
+redis==5.0.1
+python-dotenv==1.2.2
 requests==2.33.1
 scipy==1.15.0
-urllib3==2.6.3  # CVE-2026-21441: Limited by botocore constraint with Python 3.9 (requires urllib3<1.27)
+urllib3==2.7.0  # CVE fix: Sensitive headers forwarded, decompression-bomb safeguards
 tornado>=6.5.5  # CVE fix: multipart/form-data parsing DoS in versions <6.5.5
 selenium==4.32.0
 httpx==0.28.1

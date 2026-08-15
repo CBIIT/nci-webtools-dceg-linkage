@@ -112,7 +112,20 @@ export default function CitationPage() {
           >
             LDscore: a scalable, Python 3-powered web platform for LD score regression analysis. 2025.12.19.695639.
           </a>{" "}
-          <i>bioRxiv</i>. 2025.
+          <i>bioRxiv</i>. 2025 Dec 19.
+        </p>
+        <p>
+          Breeze, C.E., Haugen, E., Gutierrez-Arcelus, M., Yao, X., Teschendorff, A., Beck, S., Dunham, I., Stamatoyannopoulos, J., Franceschini, N., Machiela, M.J., Berndt, S.I.{" "}
+          <a
+            href="https://doi.org/10.1186/s13059-023-03126-1"
+            title="FORGEdb article link"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="FORGEdb article link"
+          >
+            FORGEdb: a tool for identifying candidate functional variants and uncovering target genes and mechanisms for complex diseases.
+          </a>{" "}
+          <i>Genome Biology</i>. 25, 3 (2024).
         </p>
 
       </div>

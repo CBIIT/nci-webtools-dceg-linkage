@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/CBIIT/nci-webtools-dceg-linkage#readme",
   "devDependencies": {
-    "@anthropic-ai/claude-code": "^2.1.112",
     "chai": "^4.5.0",
     "lint-staged": "^15.0.0",
     "mocha": "^11.3.0",

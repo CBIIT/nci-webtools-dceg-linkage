@@ -28,6 +28,13 @@ services:
     networks:
       - my_network
 
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - my_network
+
   # frontend_old:
   #   build:
   #     context: .
