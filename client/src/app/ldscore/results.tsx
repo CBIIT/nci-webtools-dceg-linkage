@@ -445,15 +445,23 @@ function formatSummarySection(section: string) {
   return [headerLine, ...rowLines].join('\n');
 }
 
+// Derive the shared base filename (without .bim/.bed/.fam extension) from a comma-separated input filename list
+function getLdScoreInputBaseFilename(inputFilename: string) {
+  const firstFile = inputFilename.split(',').map(f => f.trim()).filter(Boolean)[0] || '';
+  return firstFile.replace(/\.(bim|bed|fam)$/i, '');
+}
+
 function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename, parsedTableText, reference }: { result: string; filename?: string; inputFilename?: string; parsedTableText?: string; reference?: string }) {
   const [zipping, setZipping] = useState(false);
+  const inputldFilename = inputFilename ? getLdScoreInputBaseFilename(inputFilename) : '';
   return (
     <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
       <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
         Download Options <span style={{ fontSize: '0.85em', fontWeight: 400 }}> (these results will be deleted after one hour)</span>
       </div>
       <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          {inputFilename && ((filename.includes('correlation') && inputFilename.split(',').length > 1) || (filename.includes('ldscore') && inputFilename.split(';').length > 1)) ? (
+          {inputFilename && ((filename.includes('correlation') || filename.includes('ldscore')) && inputFilename.split(',').length > 1) ? (
+          <>
           <button
             id="download-zip-input-btn"
             type="button"
@@ -461,9 +469,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
             style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
             disabled={zipping}
             onClick={async () => {
-              const files = filename.includes('ldscore')
-                ? inputFilename.split(';').map(f => f.trim()).filter(Boolean)
-                : inputFilename.split(',').map(f => f.trim()).filter(Boolean);
+              const files = inputFilename.split(',').map(f => f.trim()).filter(Boolean);
               setZipping(true);
               try {
                 const res = await fetch('/LDlinkRestWeb/zip', {
@@ -486,9 +492,29 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
               }
             }}
           >
-            {zipping ? 'Zipping...' : 'Download Inputs'}
+           {zipping ? 'Zipping...' : 'Download Inputs'}
           </button>
+             <button
+            id="download-herit-input-btn"
+            type="button"
+            className="btn btn-default"
+            style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
+            onClick={() => {
+              const a = document.createElement('a');
+              a.href = `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(inputldFilename)}.l2.ldscore.gz`;
+              a.download = `${inputldFilename}.l2.ldscore.gz`;
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(() => {
+                document.body.removeChild(a);
+              }, 0);
+            }}
+          >
+            Download ldscore.gz
+          </button>
+          </>
         ) : inputFilename && (
+          <>
           <button
             id="download-herit-input-btn"
             type="button"
@@ -507,6 +533,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
           >
             Download Input
           </button>
+          </>
         )}
        
         <button

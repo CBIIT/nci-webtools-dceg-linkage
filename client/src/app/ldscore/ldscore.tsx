@@ -507,7 +507,7 @@ export default function LDScore() {
           reference={ldscoreResultRef}
           type="ldscore"
           uploads={
-            [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')
+            [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(',')
           }
         />
         </>
