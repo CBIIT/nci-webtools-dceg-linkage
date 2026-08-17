@@ -18,7 +18,7 @@ export default function NewsCard({ title, body, newCardId }: NewsCardProps) {
             </div>
           )}
         </div>
-        <div className="news-card-body" id={`news-card-${newCardId}`}>
+        <div className="news-card-body" id={`news-card-${newCardId}`} tabIndex={0}>
           <p>
             <b>
                 {title}

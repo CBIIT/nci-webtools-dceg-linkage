@@ -37,6 +37,9 @@ containerDefinitions:
         value: "${TIER}-${APP}-web"
       - name: DD_VERSION
         value: "${APP_GIT_TAG}"
+    secrets:
+      - name: LDLINK_INTERNAL_AUTH_TOKEN
+        valueFrom: "/analysistools/${TIER}/${APP}/ldlink_internal_auth_token"
     logConfiguration:
       logDriver: awsfirelens
       options:

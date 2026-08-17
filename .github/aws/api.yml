@@ -47,7 +47,15 @@ containerDefinitions:
         value: "${TIER}-${APP}-api"
       - name: DD_VERSION
         value: "${APP_GIT_TAG}"
+      - name: ENABLE_REDIS_CACHE
+        value: "YES"
+      - name: REDIS_TLS
+        value: "YES"
     secrets:
+      - name: REDIS_HOST
+        valueFrom: "/analysistools/${TIER}/${APP}/redis_host"
+      - name: REDIS_PORT
+        valueFrom: "/analysistools/${TIER}/${APP}/redis_port"
       - name: BASE_URL
         valueFrom: "/analysistools/${TIER}/${APP}/web/base_url"
       - name: LOG_LEVEL
@@ -92,6 +100,14 @@ containerDefinitions:
         valueFrom: "/analysistools/${TIER}/${APP}/token_lock_timeout"
       - name: RESTRICT_CONCURRENCY
         valueFrom: "/analysistools/${TIER}/${APP}/restrict_concurrency"
+      - name: DISABLE_CONTROL
+        valueFrom: "/analysistools/${TIER}/${APP}/disable_control"
+      - name: RUNTIME_LIMIT_MS_24H
+        valueFrom: "/analysistools/${TIER}/${APP}/runtime_limit_ms_24h"
+      - name: RUNTIME_BLOCK_COOLDOWN_MINUTES
+        valueFrom: "/analysistools/${TIER}/${APP}/runtime_block_cooldown_minutes"
+      - name: LDLINK_INTERNAL_AUTH_TOKEN
+        valueFrom: "/analysistools/${TIER}/${APP}/ldlink_internal_auth_token"
       - name: EMAIL_SMTP_HOST
         valueFrom: "/analysistools/${TIER}/${APP}/email_smtp_host"
       - name: EMAIL_ADMIN

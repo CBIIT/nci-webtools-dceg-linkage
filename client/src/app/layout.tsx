@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Script from "next/script";
 import { Suspense } from "react";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -13,7 +13,26 @@ import { usePathname } from "next/navigation";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./styles/main.scss";
 
+async function initializeBrowserSession() {
+  try {
+    // Initialize browser session. The session cookie is httpOnly, so we cannot check for it
+    // via document.cookie. The endpoint is idempotent and handles existing valid sessions.
+    const response = await fetch("/api/init-browser-session", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      console.warn("Failed to initialize browser session:", response.status);
+    }
+  } catch (error) {
+    console.warn("Error initializing browser session:", error);
+  }
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    initializeBrowserSession();
+  }, []);
   const routes: Route[] = [
     { title: "Home", path: "/", subRoutes: [] },
     {

@@ -152,12 +152,12 @@ CMD PATH=${LDLINK_HOME}/apache-bin:$PATH flask --app bokehExport run & \
     --limit-request-body 5368709120 \
     --max-clients 200 \
     --initial-workers 1 \
-    --socket-timeout 9000 \
-    --queue-timeout 9000 \
-    --shutdown-timeout 9000 \
-    --graceful-timeout 9000 \
-    --connect-timeout 9000 \
-    --request-timeout 9000 \
+    --socket-timeout 900 \
+    --queue-timeout 900 \
+    --shutdown-timeout 900 \
+    --graceful-timeout 900 \
+    --connect-timeout 900 \
+    --request-timeout 900 \
     --send-buffer-size 50000000 \
     --receive-buffer-size 50000000 \
     --processes $(((1 + `nproc`) / 2)) \
