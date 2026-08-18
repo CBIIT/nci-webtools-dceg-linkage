@@ -109,6 +109,21 @@ export async function fetchLdScoreCalculationResult(params: URLSearchParams): Pr
   return (await axios.get(webProxyUrl("ldscore", params.toString()))).data;
 }
 
+// Lists custom LD score runs previously computed and persisted by this browser
+// session (see server/ldscore_runs.py), for reuse in Heritability/Genetic Correlation.
+export async function fetchLdScoreRuns(): Promise<{ runs: LdScoreRunSummary[] }> {
+  return (await axios.get(webProxyUrl("ldscore_runs"))).data;
+}
+
+export interface LdScoreRunSummary {
+  reference: string;
+  createdAt: string | null;
+  genomeBuild: string;
+  chromosomeCoverage: string;
+  sourceFilenames: string[];
+  label: string;
+}
+
 export async function ldtrait(params: any): Promise<any> {
   return (await axios.post(webProxyUrl("ldtrait"), params)).data;
 }

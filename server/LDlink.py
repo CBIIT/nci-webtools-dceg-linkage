@@ -14,7 +14,7 @@ from threading import Thread
 from pathlib import Path
 from functools import wraps
 from socket import gethostname
-from flask import Flask, request, jsonify, current_app, send_from_directory, send_file
+from flask import Flask, request, jsonify, current_app, send_from_directory, send_file, g
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
 from LDpair import calculate_pair
@@ -54,7 +54,8 @@ from ApiAccess import (
 import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command, validBfile
 from sumstats_normalizer import normalize_sumstats_for_ldsc
-from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, write_compatibility_metadata
+from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, validate_ldscore_source_compatibility, validate_ldscore_output, validate_ldscore_output_set, write_compatibility_metadata
+from ldscore_runs import ensure_indexes as ensure_ldscore_runs_indexes, persist_ldscore_run, list_ldscore_runs, get_ldscore_run
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
@@ -70,6 +71,7 @@ WEB_COMPUTE_ENDPOINTS = {
     "ldpop",
     "ldproxy",
     "ldscore",
+    "ldscore_runs",
     "ldherit",
     "ldcorrelation",
     "ldtrait",
@@ -116,6 +118,11 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
+
+try:
+    ensure_ldscore_runs_indexes(connectMongoDBReadOnly(False, True))
+except Exception as index_error:
+    app.logger.error(f"Failed to ensure ldscore_runs indexes at startup: {index_error}")
 
 
 # Flask Limiter initialization
@@ -249,6 +256,19 @@ def internal_auth_guard():
         response.status_code = 403
         return response
 
+    # Derived (sha256 hex) per-browser identifier forwarded by the Next.js proxy from its
+    # signed session cookie; used to scope/authorize reusable resources (e.g. saved LD score
+    # runs). Never trust a session id from anywhere else (e.g. query/form params).
+    provided_session_id = request.headers.get("X-Session-Id", "").strip()
+    if provided_session_id and SESSION_ID_RE.match(provided_session_id):
+        g.session_id = provided_session_id
+    else:
+        if provided_session_id:
+            app.logger.warning(
+                f"Malformed X-Session-Id on LDlinkRestWeb compute request for {request.path} from {request_source}."
+            )
+        g.session_id = ""
+
     return None
 
 
@@ -260,6 +280,7 @@ SAFE_SNP_RE = re.compile(r"^[A-Za-z0-9_:.+\-\s\r\n,;|]{1,200000}$")
 SAFE_SNP_PAIR_RE = re.compile(r"^[A-Za-z0-9_:.+\-\s]{1,128}$")
 POP_RE = re.compile(r"^[A-Za-z0-9_+,-]{1,512}$")
 LDSC_POP_RE = re.compile(r"^[A-Za-z0-9_+-]{1,64}$")
+SESSION_ID_RE = re.compile(r"^[a-f0-9]{64}$")
 
 ANCESTRAL_POP_ENDPOINTS = {
     "ldassoc",
@@ -376,6 +397,18 @@ def _validation_error(parameter, reason):
         f"Rejected structural input: method={request.method}, path={request.path}, endpoint={request.endpoint}, parameter={parameter}, reason={reason}{marker_log}"
     )
     return _validation_response(f"Invalid {parameter} parameter.")
+
+
+def _require_session_id():
+    """Returns the validated per-browser session id set by internal_auth_guard, or a
+    403 error response if the request arrived without a valid X-Session-Id header."""
+    session_id = getattr(g, "session_id", "")
+    if not session_id:
+        app.logger.warning(
+            f"Missing/invalid X-Session-Id on session-scoped request: method={request.method}, path={request.path}"
+        )
+        return None, _validation_response("A valid browser session is required for this request.", status_code=403)
+    return session_id, None
 
 
 def _is_missing_optional(value):
@@ -879,6 +912,82 @@ def _resolve_ldscore_example_path(file_name):
         raise FileNotFoundError(f"Example file '{normalized_name}' was not found.")
 
     return normalized_name, real_source_path
+
+
+LDSCORE_SOURCE_VALUES = {"reference", "custom"}
+
+
+def _resolve_ldscore_source(genome_build):
+    """Resolves the caller's requested LD score source for Heritability/Genetic
+    Correlation ("reference" population panel, unchanged default behavior, vs
+    "custom" reuse of a previously computed LD score run owned by this session).
+
+    Returns (ldscore_source, custom_ldscore_dir, compatibility_or_none, error_response).
+    Callers should return `error_response` immediately if it is not None. When
+    `compatibility_or_none` is set, callers should persist it via
+    write_compatibility_metadata(fileDir, compatibility) once fileDir is known."""
+    ldscore_source = str(request.args.get("ldscoreSource", "reference") or "reference").strip().lower()
+    if ldscore_source not in LDSCORE_SOURCE_VALUES:
+        return None, None, None, _validation_error("ldscoreSource", "value is not in allowlist")
+
+    if ldscore_source != "custom":
+        return "reference", None, None, None
+
+    ldscore_reference = str(request.args.get("ldscoreReference", "") or "").strip()
+    if not ldscore_reference or not _is_valid_uuid_reference(ldscore_reference):
+        return None, None, None, _validation_error("ldscoreReference", "must be a canonical UUIDv4 string")
+
+    session_id, session_error = _require_session_id()
+    if session_error is not None:
+        return None, None, None, session_error
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        run_doc = get_ldscore_run(db, ldscore_reference)
+    except Exception as lookup_error:
+        app.logger.error(f"Failed to look up LD score run {ldscore_reference}: {lookup_error}")
+        return None, None, None, _validation_response("Unable to verify the selected LD score run.", status_code=500)
+
+    compatibility = validate_ldscore_source_compatibility(run_doc, ldscore_reference, session_id, genome_build)
+    if not compatibility.get("valid"):
+        app.logger.warning(f"Blocking custom LD score reuse for {ldscore_reference}: {compatibility}")
+        status_code = 403 if "not authorized" in "; ".join(compatibility.get("errors", [])) else 400
+        error_response = jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility})
+        error_response.status_code = status_code
+        return None, None, compatibility, error_response
+
+    return "custom", run_doc.get("ldscore_path", ""), compatibility, None
+
+
+def _format_ldscore_provenance_line(ldscore_source, pop, ldscore_source_compatibility):
+    """Builds a human-readable provenance line prepended to Heritability/Genetic
+    Correlation result text so the LD score source used is visible in the output
+    (and in any exported/downloaded copy of it), satisfying result provenance."""
+    if ldscore_source == "custom":
+        ldscore_reference = request.args.get("ldscoreReference", "").strip()
+        coverage = (ldscore_source_compatibility or {}).get("chromosome_coverage", "")
+        coverage_suffix = f", {coverage} coverage" if coverage else ""
+        return f"LD Score Source: Custom LD score run {ldscore_reference}{coverage_suffix}"
+    return f"LD Score Source: Reference population panel ({pop or 'unspecified'})"
+
+
+def _invoke_ldsc_command_with_optional_custom_source(command_fn, args, kwargs, custom_ldscore_dir):
+    """Calls an external ldsc_utils command function, threading a custom LD score
+    directory through if one was selected. The installed `ldsc` package (external
+    git dependency, not part of this repo) must accept a `custom_ldscore_dir` kwarg
+    for this to take effect; if it does not yet support it, this raises a clear,
+    user-facing RuntimeError instead of silently falling back to reference panels."""
+    if custom_ldscore_dir is None:
+        return command_fn(*args, **kwargs)
+    try:
+        return command_fn(*args, custom_ldscore_dir=custom_ldscore_dir, **kwargs)
+    except TypeError as unsupported_kwarg_error:
+        app.logger.error(
+            f"Installed ldsc package does not support custom_ldscore_dir yet: {unsupported_kwarg_error}"
+        )
+        raise RuntimeError(
+            "Custom LD score sources are not yet supported by the installed LDSC package version."
+        ) from unsupported_kwarg_error
 
 
 def _resolve_upload_dir(reference, create_dir=False):
@@ -2145,7 +2254,34 @@ def ldscore():
         result = run_ldsc_command(pop, genome_build, inputfilename, ldwindow, windUnit, isExample, reference)
         app.logger.debug("LDscore calculation completed, processing result")
         # print(result)
-   
+
+        # A missing/empty/malformed output must block success, even if run_ldsc_command
+        # itself did not raise -- verify the expected variant-level output file exists.
+        output_validation = validate_ldscore_output(fileDir, inputfilename, reference)
+        write_compatibility_metadata(fileDir, output_validation)
+        if not output_validation.get("valid"):
+            app.logger.error(f"Blocking LDscore result: expected output missing/invalid: {output_validation}")
+            return jsonify({"error": "; ".join(output_validation.get("errors", [])), "compatibility": output_validation}), 500
+
+        # Persist the computed LD score (scoped to the caller's browser session) so it
+        # can be reused later for Heritability/Genetic Correlation without recomputing.
+        # No-ops silently if the request has no valid session id (e.g. bare API access).
+        try:
+            session_id = getattr(g, "session_id", "")
+            db = connectMongoDBReadOnly(False, True)
+            persist_ldscore_run(
+                db,
+                reference,
+                session_id,
+                fileDir,
+                inputfilename,
+                genome_build,
+                compatibility.get("chromosome_coverage", "unknown"),
+                filenames if filename else [],
+            )
+        except Exception as persist_error:
+            app.logger.error(f"Failed to persist LD score run {reference} for later reuse: {persist_error}")
+
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -2182,6 +2318,23 @@ def ldscore():
     schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
     return jsonify(out_json)
 
+
+# Lists LD score runs previously computed and persisted by the caller's own browser
+# session, for reuse as input to Heritability/Genetic Correlation analyses.
+@app.route("/LDlinkRestWeb/ldscore_runs", methods=["GET"])
+def ldscore_runs_list():
+    session_id, error_response = _require_session_id()
+    if error_response is not None:
+        return error_response
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        runs = list_ldscore_runs(db, session_id)
+    except Exception as list_error:
+        app.logger.error(f"Failed to list LD score runs: {list_error}")
+        return _validation_response("Unable to retrieve LD score runs at this time.", status_code=500)
+
+    return jsonify({"runs": runs})
 
 
 @app.route("/LDlinkRest/ldscoreapi", methods=["POST"])
@@ -2318,6 +2471,10 @@ def ldherit():
         app.logger.warning(f"Invalid LDherit reference: {validation_error}")
         return sendTraceback(str(validation_error))
 
+    ldscore_source, custom_ldscore_dir, ldscore_source_compatibility, ldscore_source_error = _resolve_ldscore_source(genome_build)
+    if ldscore_source_error is not None:
+        return ldscore_source_error
+
     app.logger.debug(f"LDherit processing filename: {filename}")
     # Handle file copying based on example vs uploaded
     if filename:
@@ -2361,9 +2518,18 @@ def ldherit():
                 app.logger.warning(f"Blocking LDherit calculation before downstream processing: {compatibility}")
                 return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
 
-        result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
+        if ldscore_source_compatibility is not None:
+            write_compatibility_metadata(fileDir, ldscore_source_compatibility)
+
+        result = _invoke_ldsc_command_with_optional_custom_source(
+            run_herit_command,
+            (filename, fileDir, pop, isexample),
+            {"scale": scale, "samp_prev": samp_prev, "pop_prev": pop_prev},
+            custom_ldscore_dir,
+        )
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
+            filtered_result = f"{_format_ldscore_provenance_line(ldscore_source, pop, ldscore_source_compatibility)}\n\n{filtered_result}"
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
@@ -2389,6 +2555,9 @@ def ldherit():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit request error: {e}")
+        out_json = {"error": str(e)}
+    except RuntimeError as e:
+        app.logger.error(f"LDherit custom LD score source error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -2536,7 +2705,11 @@ def ldcorrelation():
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDcorrelation reference: {validation_error}")
         return sendTraceback(str(validation_error))
-    
+
+    ldscore_source, custom_ldscore_dir, ldscore_source_compatibility, ldscore_source_error = _resolve_ldscore_source(genome_build)
+    if ldscore_source_error is not None:
+        return ldscore_source_error
+
     # Handle file copying based on example vs uploaded
     for fname in [filename, filename2]:
         if fname:
@@ -2575,18 +2748,18 @@ def ldcorrelation():
                 app.logger.warning(f"Blocking LDcorrelation calculation before downstream processing: {compatibility}")
                 return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
 
-        result = run_correlation_command(
-            filename,
-            filename2,
-            fileDir,
-            pop,
-            isexample,
-            scale=scale,
-            samp_prev=samp_prev,
-            pop_prev=pop_prev,
+        if ldscore_source_compatibility is not None:
+            write_compatibility_metadata(fileDir, ldscore_source_compatibility)
+
+        result = _invoke_ldsc_command_with_optional_custom_source(
+            run_correlation_command,
+            (filename, filename2, fileDir, pop, isexample),
+            {"scale": scale, "samp_prev": samp_prev, "pop_prev": pop_prev},
+            custom_ldscore_dir,
         )
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
+            filtered_result = f"{_format_ldscore_provenance_line(ldscore_source, pop, ldscore_source_compatibility)}\n\n{filtered_result}"
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
@@ -2614,6 +2787,9 @@ def ldcorrelation():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDcorrelation request error: {e}")
+        out_json = {"error": str(e)}
+    except RuntimeError as e:
+        app.logger.error(f"LDcorrelation custom LD score source error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()

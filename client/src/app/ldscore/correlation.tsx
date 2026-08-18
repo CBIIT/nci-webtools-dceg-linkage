@@ -3,20 +3,20 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { fetchGeneticCorrelationResult, upload, validateSumstats } from "@/services/queries";
-import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
+import { fetchGeneticCorrelationResult, fetchLdScoreRuns, upload, validateSumstats, LdScoreRunSummary } from "@/services/queries";
+import LdscoreSourceSelect, { LdscoreSourceValue, defaultLdscoreSourceValue } from "@/components/select/ldscore-source-select";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
 import { generateReference } from "@/services/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LdScoreResults from "./results";
+import { useLdScoreUpload } from "./useLdScoreUpload";
 
 interface CorrelationFormData {
   file?: FileList;
   file2?: FileList;
   sumstatsFormat: SumstatsFormat;
-  pop: LdscorePopOption | null;
   scale: "observed" | "liability";
   samplePrev1?: string;
   popPrev1?: string;
@@ -42,7 +42,6 @@ const defaultGeneticForm: CorrelationFormData = {
   file: undefined,
   file2: undefined,
   sumstatsFormat: "",
-  pop: null,
   scale: "observed",
   samplePrev1: "0.5",
   popPrev1: "0.01",
@@ -63,7 +62,8 @@ export default function Correlation() {
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
-  
+  const currentSessionLdScoreRuns = useStore((state) => state.ldScoreRuns);
+
   const [reference, setReference] = useState<string>("");
   const [exampleFile1, setExampleFile1] = useState<string>("");
   const [exampleFile2, setExampleFile2] = useState<string>("");
@@ -79,6 +79,29 @@ export default function Correlation() {
   const [file2Valid, setFile2Valid] = useState(false);
   const [validationError1, setValidationError1] = useState<string>("");
   const [validationError2, setValidationError2] = useState<string>("");
+  const [ldscoreSourceValue, setLdscoreSourceValue] = useState<LdscoreSourceValue>(defaultLdscoreSourceValue);
+  const [ldscoreSourceError, setLdscoreSourceError] = useState<string>("");
+  const [priorLdScoreRuns, setPriorLdScoreRuns] = useState<LdScoreRunSummary[]>([]);
+  const [priorRunsLoading, setPriorRunsLoading] = useState(false);
+  const ldScoreUpload = useLdScoreUpload();
+
+  useEffect(() => {
+    let cancelled = false;
+    setPriorRunsLoading(true);
+    fetchLdScoreRuns()
+      .then(({ runs }) => {
+        if (!cancelled) setPriorLdScoreRuns(runs);
+      })
+      .catch(() => {
+        if (!cancelled) setPriorLdScoreRuns([]);
+      })
+      .finally(() => {
+        if (!cancelled) setPriorRunsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleFileUpload = async (file: File, fileNumber: 1 | 2, sumstatsFormat: SumstatsFormat) => {
     setFileError(""); // Clear any previous errors
@@ -198,9 +221,17 @@ export default function Correlation() {
   });
 
   const onGeneticSubmit = async (data: CorrelationFormData) => {
+    if (ldscoreSourceValue.mode === "reference" && !ldscoreSourceValue.pop) {
+      setLdscoreSourceError("Population is required");
+      return;
+    }
+    if (ldscoreSourceValue.mode !== "reference" && !ldscoreSourceValue.ldscoreReference) {
+      setLdscoreSourceError("Select an LD score run to reuse, or upload new bed/bim/fam files");
+      return;
+    }
+    setLdscoreSourceError("");
     setGeneticCorrelationResultRef(null);
     setGeneticLoading(true);
-    const pop = data.pop?.value || '';
     const genomeBuild = genome_build || "grch37";
     const isExample = !!exampleFile1;
     const filename = exampleFile1 || uploadedFile1;
@@ -208,12 +239,19 @@ export default function Correlation() {
     const params = new URLSearchParams({
       filename,
       filename2,
-      pop,
       genome_build: genomeBuild,
       isExample: isExample ? "true" : "false",
       reference,
       summary_stats_format: data.sumstatsFormat,
     });
+
+    if (ldscoreSourceValue.mode === "reference") {
+      params.append("pop", ldscoreSourceValue.pop?.value || "");
+      params.append("ldscoreSource", "reference");
+    } else {
+      params.append("ldscoreSource", "custom");
+      params.append("ldscoreReference", ldscoreSourceValue.ldscoreReference || "");
+    }
 
     if (data.scale === "liability") {
       params.append("scale", "liability");
@@ -247,6 +285,8 @@ export default function Correlation() {
     setValidationError1("");
     setValidationError2("");
     setRenameWarnings("");
+    setLdscoreSourceValue(defaultLdscoreSourceValue);
+    setLdscoreSourceError("");
   };
 
   return (
@@ -390,10 +430,45 @@ export default function Correlation() {
           </Col>
 
            <Col s={12} sm={12} md={6} lg={2}>
-            <Form.Group controlId="pop" className="mb-3">
-              <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={geneticForm.control} isLoading={geneticLoading} rules={{ required: "Population is required" }} />
-              <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
+            <Form.Group controlId="ldscoreSource" className="mb-3">
+              <Form.Label>LD Score Source</Form.Label>
+              <LdscoreSourceSelect
+                value={ldscoreSourceValue}
+                onChange={setLdscoreSourceValue}
+                currentSessionRuns={currentSessionLdScoreRuns}
+                priorRuns={priorLdScoreRuns}
+                priorRunsLoading={priorRunsLoading}
+                disabled={geneticLoading}
+                onRequestUpload={() => ldScoreUpload.reset()}
+              />
+              {ldscoreSourceValue.mode === "customUpload" && (
+                <div className="mt-2">
+                  <Form.Control
+                    type="file"
+                    multiple
+                    accept=".bed,.bim,.fam"
+                    disabled={geneticLoading || ldScoreUpload.uploading || ldScoreUpload.computing}
+                    onChange={async (e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (input.files && input.files.length === 3) {
+                        const uploadResult = await ldScoreUpload.uploadFiles(input.files);
+                        if (uploadResult) {
+                          const computedRun = await ldScoreUpload.computeLdScore(uploadResult);
+                          if (computedRun) {
+                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
+                          }
+                        }
+                      }
+                    }}
+                  />
+                  <div style={{ fontSize: "0.85rem" }}>Upload matching *.bed, *.bim, *.fam files (same base name). The LD score will be computed automatically before running this analysis.</div>
+                  {(ldScoreUpload.uploading || ldScoreUpload.computing) && (
+                    <div className="mt-1">{ldScoreUpload.uploading ? "Uploading files..." : "Computing LD score..."}</div>
+                  )}
+                  {ldScoreUpload.fileError && <Form.Text className="text-danger">{ldScoreUpload.fileError}</Form.Text>}
+                </div>
+              )}
+              {ldscoreSourceError && <Form.Text className="text-danger d-block">{ldscoreSourceError}</Form.Text>}
             </Form.Group>
           </Col>
           <Col s={12} sm={12} md={6} lg={2}>
