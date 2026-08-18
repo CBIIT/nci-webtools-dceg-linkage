@@ -115,12 +115,26 @@ export async function fetchLdScoreRuns(): Promise<{ runs: LdScoreRunSummary[] }>
   return (await axios.get(webProxyUrl("ldscore_runs"))).data;
 }
 
+// Fetches the output file listing (name + size) for one persisted LD score run, for
+// display/download on the LD Score results page.
+export async function fetchLdScoreRunDetail(reference: string): Promise<LdScoreRunSummary> {
+  return (await axios.get(webProxyUrl(`ldscore_runs/${encodeURIComponent(reference)}`))).data;
+}
+
+export interface LdScoreOutputFile {
+  name: string;
+  size: number;
+}
+
 export interface LdScoreRunSummary {
   reference: string;
   createdAt: string | null;
   genomeBuild: string;
   chromosomeCoverage: string;
   sourceFilenames: string[];
+  outputFiles?: LdScoreOutputFile[];
+  totalSizeBytes?: number;
+  backend?: string;
   label: string;
 }
 

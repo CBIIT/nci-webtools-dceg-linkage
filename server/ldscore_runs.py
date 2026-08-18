@@ -8,9 +8,11 @@ session cookie (see LDlink.py internal_auth_guard) so one session can never list
 or reuse another session's LD score run.
 """
 import os
-import shutil
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
+
+from ldscore_compatibility import extract_chromosome_tokens
+from ldscore_storage import store_run_files
 
 RETENTION_DAYS = 7
 PERSISTED_OUTPUT_SUFFIXES = (".l2.ldscore.gz", ".l2.M", ".l2.M_5_50", ".log")
@@ -37,25 +39,20 @@ def persist_ldscore_run(
     source_filenames: List[str],
     label: Optional[str] = None,
 ) -> Optional[Dict[str, object]]:
-    """Copies computed LD score output files into persisted storage and records a
-    registry entry. Anonymous requests (no session_id) are not eligible for reuse
-    and are silently skipped -- they simply fall back to the existing 1-hour tmp
-    behavior with no reuse capability."""
+    """Stores computed LD score output files (local disk, or S3 when configured via
+    LDSCORE_S3_BUCKET) and records a registry entry. Anonymous requests (no
+    session_id) are not eligible for reuse and are silently skipped -- they simply
+    fall back to the existing 1-hour tmp behavior with no reuse capability."""
     if not session_id:
         return None
 
-    persisted_dir = os.path.join(get_persist_dir(), reference)
-    os.makedirs(persisted_dir, exist_ok=True)
+    candidate_filenames = [f"{fileroot}{suffix}" for suffix in PERSISTED_OUTPUT_SUFFIXES]
+    storage_result = store_run_files(reference, file_dir, candidate_filenames)
+    output_files = [file_info["name"] for file_info in storage_result["files"]]
+    file_sizes = {file_info["name"]: file_info["size"] for file_info in storage_result["files"]}
+    total_size_bytes = sum(file_sizes.values())
 
-    copied_files = []
-    for suffix in PERSISTED_OUTPUT_SUFFIXES:
-        source_path = os.path.join(file_dir, f"{fileroot}{suffix}")
-        if os.path.exists(source_path):
-            destination_path = os.path.join(persisted_dir, os.path.basename(source_path))
-            shutil.copyfile(source_path, destination_path)
-            copied_files.append(os.path.basename(source_path))
-
-    if not copied_files:
+    if not output_files:
         return None
 
     now = datetime.now(timezone.utc)
@@ -65,9 +62,13 @@ def persist_ldscore_run(
         "fileroot": fileroot,
         "genome_build": genome_build,
         "chromosome_coverage": chromosome_coverage,
+        "chromosome_numbers": extract_chromosome_tokens(fileroot),
         "source_filenames": list(source_filenames or []),
-        "ldscore_path": persisted_dir,
-        "output_files": copied_files,
+        "backend": storage_result["backend"],
+        "ldscore_path": storage_result["location"],
+        "output_files": output_files,
+        "file_sizes": file_sizes,
+        "total_size_bytes": total_size_bytes,
         "label": label or fileroot,
         "status": "ready",
         "created_at": now,
@@ -85,7 +86,7 @@ def list_ldscore_runs(db, session_id: str) -> List[Dict[str, object]]:
         {"session_id": session_id, "expires_at": {"$gt": now}, "status": "ready"},
         sort=[("created_at", -1)],
     )
-    return [_public_run_view(doc) for doc in cursor]
+    return [public_run_view(doc) for doc in cursor]
 
 
 def get_ldscore_run(db, reference: str) -> Optional[Dict[str, object]]:
@@ -94,13 +95,17 @@ def get_ldscore_run(db, reference: str) -> Optional[Dict[str, object]]:
     return db.ldscore_runs.find_one({"reference": reference})
 
 
-def _public_run_view(doc: Dict[str, object]) -> Dict[str, object]:
+def public_run_view(doc: Dict[str, object]) -> Dict[str, object]:
     created_at = doc.get("created_at")
+    file_sizes = doc.get("file_sizes", {}) or {}
     return {
         "reference": doc.get("reference"),
         "createdAt": created_at.isoformat() if isinstance(created_at, datetime) else None,
         "genomeBuild": doc.get("genome_build"),
         "chromosomeCoverage": doc.get("chromosome_coverage"),
         "sourceFilenames": doc.get("source_filenames", []),
+        "outputFiles": [{"name": name, "size": file_sizes.get(name, 0)} for name in doc.get("output_files", [])],
+        "totalSizeBytes": doc.get("total_size_bytes", 0),
+        "backend": doc.get("backend", "local"),
         "label": doc.get("label"),
     }

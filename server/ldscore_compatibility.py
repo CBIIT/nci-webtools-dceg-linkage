@@ -4,6 +4,7 @@ import os
 import time
 from typing import Callable, Dict, Iterable, List, Optional
 
+from ldscore_storage import run_files_exist
 
 REQUIRED_BFILE_EXTENSIONS = (".bed", ".bim", ".fam")
 SUPPORTED_LDSC_GENOME_BUILDS = {"grch37", "grch38", "grch38_high_coverage"}
@@ -107,10 +108,8 @@ def validate_ldscore_source_compatibility(
             f"Selected LD score run was computed for genome build {run_doc.get('genome_build')}, but this analysis requested {requested_genome_build}."
         )
 
-    ldscore_path = run_doc.get("ldscore_path", "")
     output_files = run_doc.get("output_files", []) or []
-    missing_files = [name for name in output_files if not os.path.exists(os.path.join(ldscore_path, name))]
-    if not output_files or missing_files:
+    if not output_files or not run_files_exist(run_doc):
         result["valid"] = False
         result["errors"].append("The persisted LD score output files are no longer available.")
 
@@ -281,6 +280,17 @@ def _detect_chromosome_coverage(fileroot: str) -> str:
     if any(part in chromosomes for part in parts):
         return "single_chromosome"
     return "unknown"
+
+
+def extract_chromosome_tokens(fileroot: str) -> List[str]:
+    """Returns the chromosome number token(s) (e.g. ["20"]) found in a bfile/LD score
+    fileroot name, using the same tokenization as _detect_chromosome_coverage. Used to
+    map a custom LD score run onto the per-chromosome-numbered directory layout LDSC
+    expects (e.g. /data/ldscore/<pop>/<chr>.l2.ldscore.gz)."""
+    basename = os.path.basename(fileroot)
+    parts = basename.replace("_", ".").replace("-", ".").split(".")
+    chromosomes = {str(chromosome) for chromosome in range(1, 23)}
+    return [part for part in parts if part in chromosomes]
 
 
 def _normalize_valid_bfile_result(raw_validity: object) -> Dict[str, object]:
