@@ -8,7 +8,7 @@ import LdscoreSourceSelect, { LdscoreSourceValue, defaultLdscoreSourceValue } fr
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
-import { generateReference } from "@/services/utils";
+import { generateReference, parseLdScoreCalculationError } from "@/services/utils";
 import { useEffect, useState } from "react";
 import LdScoreResults from "./results";
 import { useLdScoreUpload } from "./useLdScoreUpload";
@@ -73,6 +73,7 @@ export default function Correlation() {
   const [useExampleCorrelation, setUseExampleCorrelation] = useState(false);
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
+  const [geneticError, setGeneticError] = useState<string>("");
   const [fileError, setFileError] = useState<string>("");
   const [renameWarnings, setRenameWarnings] = useState<string>("");
   const [file1Valid, setFile1Valid] = useState(false);
@@ -231,6 +232,7 @@ export default function Correlation() {
     }
     setLdscoreSourceError("");
     setGeneticCorrelationResultRef(null);
+    setGeneticError("");
     setGeneticLoading(true);
     const genomeBuild = genome_build || "grch37";
     const isExample = !!exampleFile1;
@@ -265,6 +267,7 @@ export default function Correlation() {
       setGeneticCorrelationResultRef(reference);
     } catch (error) {
       console.error("Genetic correlation calculation error:", error);
+      setGeneticError(parseLdScoreCalculationError(error, "Failed to process genetic correlation calculation. Please check your input and try again."));
     } finally {
       setGeneticLoading(false);
     }
@@ -273,6 +276,7 @@ export default function Correlation() {
   const onGeneticReset = () => {
     geneticForm.reset(defaultGeneticForm);
     setGeneticCorrelationResultRef(null);
+    setGeneticError("");
     setReference("");
     setExampleFile1("");
     setExampleFile2("");
@@ -805,6 +809,11 @@ export default function Correlation() {
                   {validationError2}
                 </Alert>
               )}
+      {geneticError && (
+        <Alert variant="danger" className="mt-2">
+          {geneticError}
+        </Alert>
+      )}
       {geneticCorrelationResultRef && (
            <>
          <hr />

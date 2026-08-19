@@ -8,7 +8,7 @@ import LdscoreSourceSelect, { LdscoreSourceValue, defaultLdscoreSourceValue } fr
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
-import { generateReference } from "@/services/utils";
+import { generateReference, parseLdScoreCalculationError } from "@/services/utils";
 import { useEffect, useState } from "react";
 import LdScoreResults from "./results";
 import { useLdScoreUpload } from "./useLdScoreUpload";
@@ -65,6 +65,7 @@ export default function Heritability() {
   const [useExample, setUseExample] = useState(false);
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
+  const [heritabilityError, setHeritabilityError] = useState<string>("");
   const [reference, setReference] = useState<string>("");
   const [ldscoreSourceValue, setLdscoreSourceValue] = useState<LdscoreSourceValue>(defaultLdscoreSourceValue);
   const [ldscoreSourceError, setLdscoreSourceError] = useState<string>("");
@@ -204,6 +205,7 @@ export default function Heritability() {
     }
     setLdscoreSourceError("");
     setHeritabilityResultRef(null);
+    setHeritabilityError("");
     setHeritabilityLoading(true);
     const genomeBuild = genome_build || "grch37";
     const isExample = !!exampleFilename;
@@ -237,6 +239,7 @@ export default function Heritability() {
       setHeritabilityResultRef(reference);
     } catch (error) {
       console.error("Heritability calculation error:", error);
+      setHeritabilityError(parseLdScoreCalculationError(error, "Failed to process heritability calculation. Please check your input and try again."));
     } finally {
       setHeritabilityLoading(false);
     }
@@ -245,6 +248,7 @@ export default function Heritability() {
   const onHeritabilityReset = () => {
     heritabilityForm.reset(defaultHeritabilityForm);
     setHeritabilityResultRef(null);
+    setHeritabilityError("");
     setExampleFilename("");
     setUploadedFilename("");
     setUseExample(false);
@@ -601,6 +605,12 @@ export default function Heritability() {
               The uploaded file has the following issues:<br />
             {heritabilityForm.formState.errors.file.message}
           </Alert>
+      )}
+
+      {heritabilityError && (
+        <Alert variant="danger" className="mt-2">
+          {heritabilityError}
+        </Alert>
       )}
 
       {heritabilityResultRef && (

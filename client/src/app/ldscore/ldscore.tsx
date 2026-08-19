@@ -4,7 +4,7 @@ import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { fetchLdScoreCalculationResult, fetchLdScoreRuns, upload, validateBfile } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
-import { generateReference } from "@/services/utils";
+import { generateReference, parseLdScoreCalculationError } from "@/services/utils";
 import { useStore } from "@/store";
 import { useState } from "react";
 import LdScoreResults from "./results";
@@ -187,7 +187,7 @@ export default function LDScore() {
         // Non-fatal: reuse features simply won't see this run this session.
       }
     } catch (error) {
-      setError("Failed to process LD Score calculation. Please check your input and try again.");
+      setError(parseLdScoreCalculationError(error, "Failed to process LD Score calculation. Please check your input and try again."));
     } finally {
       setLdscoreLoading(false);
     }
