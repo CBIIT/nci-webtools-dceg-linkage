@@ -65,12 +65,20 @@ export default function LdscoreSourceSelect({
           label="Custom LD score"
           checked={value.mode !== "reference"}
           disabled={disabled}
-          onChange={() =>
-            onChange({
-              ...value,
-              mode: currentSessionRuns.length > 0 ? "customSession" : priorRuns.length > 0 ? "customPrior" : "customUpload",
-            })
-          }
+          onChange={() => {
+            // Mirror the sub-radio's own onChange so the default run is actually
+            // selected -- the sub-radio itself won't fire onChange here since
+            // `checked` is already true as soon as mode matches, so it never
+            // gets clicked by the user.
+            const defaultMode = currentSessionRuns.length > 0 ? "customSession" : priorRuns.length > 0 ? "customPrior" : "customUpload";
+            const defaultReference =
+              defaultMode === "customSession"
+                ? currentSessionRuns[0]?.reference ?? null
+                : defaultMode === "customPrior"
+                ? priorRuns[0]?.reference ?? null
+                : null;
+            onChange({ ...value, mode: defaultMode, ldscoreReference: defaultReference });
+          }}
         />
       </div>
 
