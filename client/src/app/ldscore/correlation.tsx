@@ -189,18 +189,22 @@ export default function Correlation() {
   });
 
   const selectedScale = geneticForm.watch("scale");
+  // required is enforced inside validate (rather than via the standalone `required`
+  // rule) so it can be bypassed once example/uploaded data is present; RHF evaluates
+  // `required` before `validate` and would otherwise fail immediately since the file
+  // input is never given a value when using example data.
   const file1Registration = geneticForm.register("file", {
-    required: "File is required",
     validate: (fileList: FileList | undefined) => {
-      if (!fileList || fileList.length === 0) return true;
+      if (uploadedFile1 || exampleFile1) return true;
+      if (!fileList || fileList.length === 0) return "File is required";
       const file = fileList[0];
       return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
     }
   });
   const file2Registration = geneticForm.register("file2", {
-    required: "File is required",
     validate: (fileList: FileList | undefined) => {
-      if (!fileList || fileList.length === 0) return true;
+      if (uploadedFile2 || exampleFile2) return true;
+      if (!fileList || fileList.length === 0) return "File is required";
       const file = fileList[0];
       return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
     }

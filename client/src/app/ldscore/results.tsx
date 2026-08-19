@@ -551,7 +551,6 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
       </div>
       <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
           {inputFilename && ((filename.includes('correlation') || filename.includes('ldscore')) && inputFilename.split(',').length > 1) ? (
-          <>
           <button
             id="download-zip-input-btn"
             type="button"
@@ -584,25 +583,6 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
           >
            {zipping ? 'Zipping...' : 'Download Inputs'}
           </button>
-             <button
-            id="download-herit-input-btn"
-            type="button"
-            className="btn btn-default"
-            style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
-            onClick={() => {
-              const a = document.createElement('a');
-              a.href = `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(inputldFilename)}.l2.ldscore.gz`;
-              a.download = `${inputldFilename}.l2.ldscore.gz`;
-              document.body.appendChild(a);
-              a.click();
-              setTimeout(() => {
-                document.body.removeChild(a);
-              }, 0);
-            }}
-          >
-            Download ldscore.gz
-          </button>
-          </>
         ) : inputFilename && (
           <>
           <button

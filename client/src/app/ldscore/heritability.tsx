@@ -166,7 +166,9 @@ export default function Heritability() {
 
   const selectedScale = heritabilityForm.watch("scale");
   const fileRegistration = heritabilityForm.register("file", {
-    required: "File is required",
+    // required is enforced inside validate so it can be bypassed once example/uploaded
+    // data is present; RHF would otherwise fail the standalone `required` rule first
+    // (before validate runs) since the file input unmounts and never holds a value.
     validate: (file: File | FileList | undefined) => {
       // If we already have an uploaded filename or example filename, validation passes
       if (uploadedFilename || exampleFilename) return true;
