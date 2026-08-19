@@ -14,19 +14,43 @@ import LdScoreResults from "./results";
 
 interface HeritabilityFormData {
   file?: File;
+  sumstatsFormat: SumstatsFormat;
   pop: LdscorePopOption | null;
   scale: "observed" | "liability";
   samplePrev?: string;
   popPrev?: string;
 }
 
+type SumstatsFormat = "" | "plink_raw" | "regenie_raw" | "saige_raw" | "pre_munged";
+
+const sumstatsFormatOptions: Array<{ value: Exclude<SumstatsFormat, "">; label: string }> = [
+  { value: "plink_raw", label: "PLINK raw" },
+  { value: "regenie_raw", label: "REGENIE raw" },
+  { value: "saige_raw", label: "SAIGE raw" },
+  { value: "pre_munged", label: "Pre-munged" },
+];
+
+const sumstatsFormatLabels = sumstatsFormatOptions.reduce<Record<string, string>>((labels, option) => {
+  labels[option.value] = option.label;
+  return labels;
+}, {});
+
 const defaultHeritabilityForm: HeritabilityFormData = {
   file: undefined,
+  sumstatsFormat: "",
   pop: null,
   scale: "observed",
   samplePrev: "0.5",
   popPrev: "0.01",
 };
+
+const supportedSumstatsExtensions = [".txt", ".tsv", ".csv", ".gz", ".sumstats", ".glm", ".assoc", ".regenie", ".saige"];
+const sumstatsAccept = supportedSumstatsExtensions.join(",");
+
+function hasSupportedSumstatsExtension(filename: string): boolean {
+  const lowerFilename = filename.toLowerCase();
+  return supportedSumstatsExtensions.some((extension) => lowerFilename.endsWith(extension));
+}
 
 export default function Heritability() {
   const queryClient = useQueryClient();
@@ -48,7 +72,7 @@ export default function Heritability() {
   });
 
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, sumstatsFormat: SumstatsFormat) => {
     setUploading(true);
     setRenameWarnings("");
     
@@ -59,6 +83,8 @@ export default function Heritability() {
     const formData = new FormData();
     formData.append("ldscoreFile", file);
     formData.append("reference", newReference);
+    formData.append("summary_stats_format", sumstatsFormat);
+    formData.append("analysis_type", "heritability");
    
     try {
       const response = await upload(formData);
@@ -76,9 +102,16 @@ export default function Heritability() {
         }
         setUploadedFilename(filenameToUse);
         // After successful upload, validate the file (use server-provided name)
-        const validateData = await validateSumstats(filenameToUse, newReference);
+        const validateData = await validateSumstats(filenameToUse, newReference, sumstatsFormat);
        
         if (validateData?.fileValid?.valid) {
+          const normalizedFilename = validateData.fileValid.normalizedFilename || validateData.fileValid.normalized_filename || filenameToUse;
+          setUploadedFilename(normalizedFilename);
+          if (normalizedFilename !== filenameToUse) {
+            setRenameWarnings((previous) => (
+              previous ? `${previous}; File was normalized to ${normalizedFilename}` : `File was normalized to ${normalizedFilename}`
+            ));
+          }
           heritabilityForm.clearErrors("file");
         } else {
           const errors = validateData?.fileValid?.errors || [];
@@ -108,6 +141,19 @@ export default function Heritability() {
   };
 
   const selectedScale = heritabilityForm.watch("scale");
+  const fileRegistration = heritabilityForm.register("file", {
+    required: "File is required",
+    validate: (file: File | FileList | undefined) => {
+      // If we already have an uploaded filename or example filename, validation passes
+      if (uploadedFilename || exampleFilename) return true;
+
+      if (!file) return 'File is required';
+      // Handle FileList, File[], or single File
+      const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
+      if (!f || !f.name) return 'File is required';
+      return hasSupportedSumstatsExtension(f.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
+    }
+  });
 
   const heritabilityMutation = useMutation({
     mutationFn: fetchHeritabilityResult,
@@ -137,6 +183,7 @@ export default function Heritability() {
       genome_build: genomeBuild,
       isExample: isExample ? "true" : "false",
       reference,
+      summary_stats_format: data.sumstatsFormat,
     });
 
     if (data.scale === "liability") {
@@ -198,42 +245,57 @@ export default function Heritability() {
       <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
+            <Form.Group controlId="sumstatsFormat" className="mb-3">
+              <Form.Label>Summary statistics format</Form.Label>
+              <Form.Select
+                disabled={heritabilityLoading || useExample}
+                style={{ maxWidth: "400px" }}
+                {...heritabilityForm.register("sumstatsFormat", { required: "Summary statistics format is required" })}
+                onChange={(e) => {
+                  heritabilityForm.setValue("sumstatsFormat", e.target.value as SumstatsFormat, { shouldValidate: true });
+                  setHeritabilityResultRef(null);
+                  setUploadedFilename("");
+                  setRenameWarnings("");
+                  heritabilityForm.setValue("file", undefined);
+                }}
+              >
+                <option value="">Select format</option>
+                {sumstatsFormatOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.sumstatsFormat?.message}</Form.Text>
+            </Form.Group>
             <Form.Group controlId="file" className="mb-3">
-              <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
+              <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFilename === "string" && exampleFilename !== "" ? (
                 <div className="form-control bg-light">{exampleFilename}</div>
               ) : (
                 <Form.Control 
                   type="file" 
                   disabled={heritabilityLoading}
-                   {...heritabilityForm.register("file", { 
-                    required: "File is required",
-                    validate: (file: File | FileList | undefined) => {
-                      // If we already have an uploaded filename or example filename, validation passes
-                      if (uploadedFilename || exampleFilename) return true;
-                      
-                      if (!file) return 'File is required';
-                      // Handle FileList, File[], or single File
-                      const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
-                      if (!f || !f.name) return 'File is required';
-                      const ext = f.name.split('.').pop()?.toLowerCase();
-                      return ext === 'txt' || 'Only .txt files are allowed';
-                    }
-                  })}
+                  {...fileRegistration}
                   style={{ maxWidth: "400px" }}
-                  accept=".txt"
-                  title="Upload pre-munged GWAS sumstats"
+                  accept={sumstatsAccept}
+                  title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
                   onChange={async (e) => {
+                    await fileRegistration.onChange(e);
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setHeritabilityResultRef(null);
                     if (file) {
-                      await handleFileUpload(file);
+                      const validFormat = await heritabilityForm.trigger("sumstatsFormat");
+                      if (!validFormat) {
+                        input.value = "";
+                        heritabilityForm.setValue("file", undefined, { shouldValidate: true });
+                        return;
+                      }
+                      await handleFileUpload(file, heritabilityForm.getValues("sumstatsFormat"));
                     }
                   }}
                 />
               )}
-              <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Upload PLINK, REGENIE, SAIGE, or LDSC-ready summary statistics. Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
               <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
@@ -259,6 +321,7 @@ export default function Heritability() {
                       // Generate a new reference for example data
                       const newReference = generateReference();
                       setReference(newReference);
+                          heritabilityForm.setValue("sumstatsFormat", "pre_munged");
                       setExampleFilename("");
                       setUploadedFilename("");
                       heritabilityForm.clearErrors("file");
@@ -279,6 +342,7 @@ export default function Heritability() {
                       setExampleFilename("");
                       setUploadedFilename("");
                       setReference("");
+                      heritabilityForm.setValue("sumstatsFormat", "");
                       //heritabilityForm.setValue("pop", null);
                     }
                   }}
@@ -298,6 +362,9 @@ export default function Heritability() {
                     >
                       {exampleFilename || uploadedFilename}
                     </a>
+                    <div>
+                      <span style={{ fontWeight: 600 }}>Selected format:</span> {sumstatsFormatLabels[heritabilityForm.getValues("sumstatsFormat")] || "Not selected"}
+                    </div>
                     {!useExample && renameWarnings.length > 0 && (
                       <Alert variant="warning" className="mt-2">
                         {renameWarnings}

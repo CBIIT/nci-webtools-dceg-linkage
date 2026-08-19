@@ -53,6 +53,8 @@ from ApiAccess import (
 )
 import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command, validBfile
+from sumstats_normalizer import normalize_sumstats_for_ldsc
+from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, write_compatibility_metadata
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
@@ -1547,6 +1549,15 @@ def upload():
             return "No file part..."
     
         reference = request.form.get("reference", None)
+        upload_metadata = {
+            "analysis_type": request.form.get("analysis_type", ""),
+            "analysis_run_id": request.form.get("analysis_run_id", reference or ""),
+            "session_id": request.form.get("session_id", reference or ""),
+            "project_id": request.form.get("project_id", ""),
+            "user_id": request.form.get("user_id", ""),
+            "summary_stats_format": request.form.get("summary_stats_format", ""),
+            "trait": request.form.get("trait", ""),
+        }
         uploaded_files = []
         renamed_notifications = []
         app.logger.debug(f"Upload reference: {reference}")
@@ -1580,6 +1591,33 @@ def upload():
         if reference:
             schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
 
+        metadata = {key: value for key, value in upload_metadata.items() if value}
+        if metadata:
+            if reference:
+                try:
+                    _, uploads_dir = _resolve_upload_dir(reference, create_dir=True)
+                    metadata_path = safe_join(uploads_dir, "upload_metadata.json")
+                    metadata_record = {
+                        "reference": reference,
+                        "uploaded_files": uploaded_files,
+                        "metadata": metadata,
+                    }
+                    with open(metadata_path, "w") as metadata_file:
+                        json.dump(metadata_record, metadata_file, sort_keys=True, indent=2)
+                except (OSError, ValueError) as metadata_error:
+                    app.logger.error(f"Failed to write upload metadata for reference {reference}: {metadata_error}")
+                    return jsonify({"message": "Files were uploaded, but metadata could not be saved."}), 500
+
+            response = {
+                "message": "All files were saved",
+                "uploaded_files": uploaded_files,
+                "metadata": metadata,
+                "reference": reference,
+            }
+            if renamed_notifications:
+                response["renamed"] = renamed_notifications
+            return jsonify(response)
+
         # Return JSON with uploaded filenames and any sanitization notes
         # Only include the `renamed` field when there were actual sanitizations.
         if renamed_notifications:
@@ -1599,45 +1637,89 @@ def validate_sumstats():
     """
     Validates a sumstats file for heritability/correlation analysis.
     Expects 'filename' and 'reference' as query parameters.
-    Returns JSON with 'fileValid' boolean.
+    Returns JSON with normalized filename and validation details.
     """
     start_time = time.time()
     app.logger.info("Starting sumstats validation request")
     
     filename = request.args.get("filename", None)
     reference = request.args.get("reference", None)
+    selected_format = request.args.get("summary_stats_format", None)
+    trait = request.args.get("trait", "")
     
     if not filename:
         app.logger.warning("Validation request missing filename")
-        return jsonify({"fileValid": False, "error": "Missing filename parameter"})
+        return jsonify({"fileValid": {"valid": False, "errors": ["Missing filename parameter"], "warnings": []}})
     
     try:
-        filename, file_path, _ = _resolve_upload_file_path(filename, reference)
+        filename, file_path, upload_dir = _resolve_upload_file_path(filename, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid sumstats validation input: {validation_error}")
-        return jsonify({"fileValid": False, "error": str(validation_error)})
+        return jsonify({"fileValid": {"valid": False, "errors": [str(validation_error)], "warnings": []}})
     
     app.logger.debug(f"Validating sumstats file: {file_path}")
     
     # Check if file exists
     if not os.path.exists(file_path):
         app.logger.warning(f"File not found for validation: {file_path}")
-        return jsonify({"fileValid": False, "error": "File not found"})
+        return jsonify({"fileValid": {"valid": False, "errors": ["File not found"], "warnings": []}})
     
-    # Validate using ldsc_utils
     try:
-        from ldscore.ldsc_utils import validSumstats
-        file_valid = validSumstats(file_path)
+        file_valid = normalize_sumstats_for_ldsc(file_path, upload_dir, selected_format=selected_format)
+        validation_record = {
+            "analysis_run_id": reference,
+            "source_file": filename,
+            "trait": trait,
+            "selected_format": selected_format,
+            "detected_format": file_valid.get("detected_format"),
+            "pipeline_version": file_valid.get("pipeline_version"),
+            "status": "validated" if file_valid.get("valid") else "failed",
+            "output_location": file_valid.get("normalized_filename") if file_valid.get("valid") else "",
+            "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "validation_result": file_valid,
+        }
+        if reference:
+            validation_metadata_path = safe_join(upload_dir, "sumstats_validation_metadata.json")
+            existing_records = []
+            if os.path.exists(validation_metadata_path):
+                try:
+                    with open(validation_metadata_path) as existing_metadata_file:
+                        existing_metadata = json.load(existing_metadata_file)
+                    existing_records = existing_metadata.get("validations", [])
+                except (OSError, json.JSONDecodeError):
+                    existing_records = []
+            existing_records = [
+                record for record in existing_records
+                if not (record.get("source_file") == filename and record.get("trait", "") == trait)
+            ]
+            existing_records.append(validation_record)
+            with open(validation_metadata_path, "w") as metadata_file:
+                json.dump({"analysis_run_id": reference, "validations": existing_records}, metadata_file, sort_keys=True, indent=2)
+        app.logger.info(f"Sumstats validation metadata for analysis run {reference}: {validation_record}")
+
+        # Keep this disabled for now: running LDSC's validator before/inside upload validation
+        # can reject raw PLINK/REGENIE/SAIGE files before users submit the normalized file.
+        # If we need stricter checks later, run them against file_valid["normalizedFilename"].
+        # if file_valid.get("valid") and file_valid.get("detected_format") == "LDSC-ready":
+        #     from ldscore.ldsc_utils import validSumstats
+        #     ldsc_valid = validSumstats(file_path)
+        #     if isinstance(ldsc_valid, dict):
+        #         file_valid["valid"] = bool(ldsc_valid.get("valid"))
+        #         file_valid.setdefault("errors", []).extend(ldsc_valid.get("errors", []))
+        #         file_valid.setdefault("warnings", []).extend(ldsc_valid.get("warnings", []))
+        #     else:
+        #         file_valid["valid"] = bool(ldsc_valid)
+
         app.logger.info(f"Sumstats validation result for {filename}: {file_valid}")
-        
+
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Validation completed ({execution_time}s)")
-        
+
         return jsonify({"fileValid": file_valid})
     except Exception as e:
         app.logger.error(f"Error validating sumstats file: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"fileValid": False, "error": str(e)})
+        return jsonify({"fileValid": {"valid": False, "errors": [str(e)], "warnings": []}})
 
 
 @app.route("/LDlinkRestWeb/validate_bfile", methods=["GET"])
@@ -1669,39 +1751,22 @@ def validate_bfile():
         fileroot = filename
 
     try:
-        _, bfile_path, _ = _resolve_upload_file_path(fileroot, reference)
+        _, bfile_path, upload_dir = _resolve_upload_file_path(fileroot, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid bfile validation input: {validation_error}")
         return jsonify({"fileValid": False, "error": str(validation_error)})
     
     app.logger.debug(f"Validating bfile: {bfile_path}")
     
-    # Check if all required files exist (.bed, .bim, .fam)
-    required_extensions = [".bed", ".bim", ".fam"]
-    missing_files = []
-    for ext in required_extensions:
-        try:
-            _, component_path, _ = _resolve_upload_file_path(f"{fileroot}{ext}", reference)
-        except ValueError as validation_error:
-            app.logger.warning(f"Invalid bfile component path: {validation_error}")
-            return jsonify({"fileValid": False, "error": str(validation_error)})
-
-        if not os.path.exists(component_path):
-            missing_files.append(fileroot + ext)
-    
-    if missing_files:
-        app.logger.warning(f"Missing bfile components: {missing_files}")
-        return jsonify({"fileValid": False, "error": f"Missing files: {', '.join(missing_files)}"})
-    
-    # Validate using ldsc_utils
     try:
-        file_valid = validBfile(bfile_path)
-        app.logger.info(f"Bfile validation result for {filename}: {file_valid}")
+        compatibility = validate_bfile_compatibility(fileroot, reference, _resolve_upload_file_path, validBfile)
+        write_compatibility_metadata(upload_dir, compatibility)
+        app.logger.info(f"Bfile compatibility validation result for {filename}: {compatibility}")
         
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Bfile validation completed ({execution_time}s)")
         
-        return jsonify({"fileValid": file_valid})
+        return jsonify({"fileValid": compatibility})
     except Exception as e:
         app.logger.error(f"Error validating bfile: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
@@ -2071,6 +2136,12 @@ def ldscore():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
  
+        compatibility = validate_bfile_compatibility(inputfilename, reference, _resolve_upload_file_path, validBfile, genome_build=genome_build)
+        write_compatibility_metadata(fileDir, compatibility)
+        if not compatibility.get("valid"):
+            app.logger.warning(f"Blocking LDscore calculation for incompatible LD score inputs: {compatibility}")
+            return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
         result = run_ldsc_command(pop, genome_build, inputfilename, ldwindow, windUnit, isExample, reference)
         app.logger.debug("LDscore calculation completed, processing result")
         # print(result)
@@ -2283,6 +2354,13 @@ def ldherit():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
+        if str(isexample).lower() != "true":
+            compatibility = validate_sumstats_preanalysis([filename], reference, fileDir)
+            write_compatibility_metadata(fileDir, compatibility)
+            if not compatibility.get("valid"):
+                app.logger.warning(f"Blocking LDherit calculation before downstream processing: {compatibility}")
+                return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
         result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
@@ -2490,6 +2568,13 @@ def ldcorrelation():
                     app.logger.error(f"Uploaded file not found at {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
+        if str(isexample).lower() != "true":
+            compatibility = validate_sumstats_preanalysis([filename, filename2], reference, fileDir)
+            write_compatibility_metadata(fileDir, compatibility)
+            if not compatibility.get("valid"):
+                app.logger.warning(f"Blocking LDcorrelation calculation before downstream processing: {compatibility}")
+                return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
         result = run_correlation_command(
             filename,
             filename2,

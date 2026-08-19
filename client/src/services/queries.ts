@@ -113,8 +113,8 @@ export async function ldtrait(params: any): Promise<any> {
   return (await axios.post(webProxyUrl("ldtrait"), params)).data;
 }
 
-export async function validateSumstats(filename: string, reference: string): Promise<any> {
-  const query = `filename=${encodeURIComponent(filename)}&reference=${encodeURIComponent(reference)}`;
+export async function validateSumstats(filename: string, reference: string, summaryStatsFormat?: string, trait?: string): Promise<any> {
+  const query = `filename=${encodeURIComponent(filename)}&reference=${encodeURIComponent(reference)}${summaryStatsFormat ? `&summary_stats_format=${encodeURIComponent(summaryStatsFormat)}` : ""}${trait ? `&trait=${encodeURIComponent(trait)}` : ""}`;
   return (await axios.get(webProxyUrl("validate_sumstats", query))).data;
 }
 

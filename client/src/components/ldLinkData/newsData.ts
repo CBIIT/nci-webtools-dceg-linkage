@@ -1,5 +1,5 @@
 export const newsData = [
-      { title: "LDlink 7.3.0 Release (08/18/2026)",
+      { title: "LDlink 7.3.0 Release (07/31/2026)",
       items: [
       "Fixed atomic token lock acquisition to prevent concurrent race conditions",
       "Fixed stale-lock cleanup, reliably releasing locks older than timeout",
