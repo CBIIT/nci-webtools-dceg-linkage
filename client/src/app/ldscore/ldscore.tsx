@@ -1,10 +1,11 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { fetchLdScoreCalculationResult, upload, validateBfile } from "@/services/queries";
+import { fetchLdScoreCalculationResult, fetchLdScoreRuns, upload, validateBfile } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
-import { generateReference } from "@/services/utils";
+import { generateReference, parseLdScoreCalculationError } from "@/services/utils";
+import { useStore } from "@/store";
 import { useState } from "react";
 import LdScoreResults from "./results";
 import { map } from "@bokeh/bokehjs/build/js/lib/core/util/iterator";
@@ -16,6 +17,8 @@ interface FormData {
 }
 
 export default function LDScore() {
+  const addLdScoreRun = useStore((state) => state.addLdScoreRun);
+
   // LD calculation form state
   const form = useForm<FormData>({
     defaultValues: {
@@ -171,8 +174,20 @@ export default function LDScore() {
       setLdscoreLoading(true);
       await fetchLdScoreCalculationResult(params);
       setLdscoreResultRef(reference);
+
+      // Make this run instantly reusable (as a custom LD score source) in the
+      // Heritability/Genetic Correlation tabs for the rest of this page visit.
+      try {
+        const { runs } = await fetchLdScoreRuns();
+        const justComputed = runs.find((run) => run.reference === reference);
+        if (justComputed) {
+          addLdScoreRun(justComputed);
+        }
+      } catch (runsError) {
+        // Non-fatal: reuse features simply won't see this run this session.
+      }
     } catch (error) {
-      setError("Failed to process LD Score calculation. Please check your input and try again.");
+      setError(parseLdScoreCalculationError(error, "Failed to process LD Score calculation. Please check your input and try again."));
     } finally {
       setLdscoreLoading(false);
     }
@@ -507,7 +522,7 @@ export default function LDScore() {
           reference={ldscoreResultRef}
           type="ldscore"
           uploads={
-            [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')
+            [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(',')
           }
         />
         </>
