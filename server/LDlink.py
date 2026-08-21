@@ -942,6 +942,33 @@ def _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=False):
     return normalized_scale, normalized_samp_prev, normalized_pop_prev
 
 
+def _sanitize_ldsc_pop(pop):
+    """Re-validates the LDSC reference population code against the same allowlist
+    regex structural_input_guard already enforces globally, but inline at the point
+    of use -- run_herit_command/run_correlation_command build a filesystem path from
+    this value (see ldscore_storage.get_ldsc_reference_data_dir), so the sanitizing
+    check needs to be visible in the same function as that sink, not just in a
+    separate before_request hook.
+    Raises ValueError if pop is present but doesn't match the allowlist."""
+    if not pop:
+        return pop
+    normalized = str(pop).strip()
+    if not LDSC_POP_RE.fullmatch(normalized):
+        raise ValueError("Invalid pop parameter.")
+    return normalized
+
+
+def _assert_path_confined(candidate_dir, base_dir, parameter="reference"):
+    """Explicit local barrier-guard check (redundant with, but visible alongside,
+    _resolve_upload_dir's own realpath/commonpath check) confirming a resolved
+    directory is confined to base_dir immediately before it's used to build any file
+    path -- e.g. validate_sumstats_preanalysis/run_herit_command/run_correlation_command."""
+    real_base = os.path.realpath(base_dir)
+    real_candidate = os.path.realpath(candidate_dir)
+    if os.path.commonpath([real_base, real_candidate]) != real_base:
+        raise ValueError(f"Invalid {parameter} parameter.")
+
+
 LDSCORE_EXAMPLE_DIR = "/data/ldscore"
 
 
@@ -2229,7 +2256,9 @@ def ldscore():
     )
 
     try:
+        pop = _sanitize_ldsc_pop(pop)
         reference, fileDir = _resolve_upload_dir(reference)
+        _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDscore reference: {validation_error}")
         return sendTraceback(str(validation_error))
@@ -2417,7 +2446,8 @@ def ldscore_runs_import():
     try:
         fileroot, file_path, file_dir = _resolve_upload_file_path(filename, reference)
     except ValueError as validation_error:
-        return sendTraceback(str(validation_error))
+        app.logger.warning(f"Invalid LD score import filename for {reference}: {validation_error}")
+        return _validation_error("filename", "is invalid")
 
     if fileroot.endswith(LDSCORE_OUTPUT_SUFFIX):
         fileroot = fileroot[: -len(LDSCORE_OUTPUT_SUFFIX)]
@@ -2488,7 +2518,7 @@ def ldscore_run_download_file(reference, filename):
         local_path = resolve_ldscore_local_path(run_doc, safe_filename)
     except RuntimeError as storage_error:
         app.logger.error(f"Failed to resolve LD score run file {reference}/{safe_filename}: {storage_error}")
-        return _validation_response(str(storage_error), status_code=500)
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
 
     if not os.path.exists(local_path):
         return _validation_response("The requested LD score output file is no longer available.", status_code=404)
@@ -2511,12 +2541,18 @@ def ldscore_run_download_set(reference):
     try:
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
             for output_filename in output_files:
-                local_path = resolve_ldscore_local_path(run_doc, output_filename)
+                # Re-sanitize each recorded filename (defense in depth, matching the
+                # single-file download route) even though these were only ever
+                # populated by our own persist_ldscore_run/store_run_files.
+                safe_output_filename = secure_filename(output_filename)
+                if safe_output_filename not in output_files:
+                    continue
+                local_path = resolve_ldscore_local_path(run_doc, safe_output_filename)
                 if os.path.exists(local_path):
-                    zipf.write(local_path, output_filename)
+                    zipf.write(local_path, safe_output_filename)
     except RuntimeError as storage_error:
         app.logger.error(f"Failed to build LD score run zip for {reference}: {storage_error}")
-        return _validation_response(str(storage_error), status_code=500)
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
 
     return send_file(zip_filepath, as_attachment=True, download_name=f"ldscore_{reference}.zip")
 
@@ -2638,9 +2674,10 @@ def ldherit():
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
     try:
+        pop = _sanitize_ldsc_pop(pop)
         scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
     except ValueError as validation_error:
-        app.logger.warning(f"Invalid LDherit prevalence input: {validation_error}")
+        app.logger.warning(f"Invalid LDherit input: {validation_error}")
         return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
@@ -2651,6 +2688,7 @@ def ldherit():
 
     try:
         reference, fileDir = _resolve_upload_dir(reference)
+        _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit reference: {validation_error}")
         return sendTraceback(str(validation_error))
@@ -2884,9 +2922,10 @@ def ldcorrelation():
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
     try:
+        pop = _sanitize_ldsc_pop(pop)
         scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=True)
     except ValueError as validation_error:
-        app.logger.warning(f"Invalid LDcorrelation prevalence input: {validation_error}")
+        app.logger.warning(f"Invalid LDcorrelation input: {validation_error}")
         return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}, scale: {scale}"
@@ -2898,6 +2937,7 @@ def ldcorrelation():
 
     try:
         reference, fileDir = _resolve_upload_dir(reference)
+        _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDcorrelation reference: {validation_error}")
         return sendTraceback(str(validation_error))

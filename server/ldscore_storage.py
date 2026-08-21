@@ -28,6 +28,20 @@ def is_s3_enabled() -> bool:
     return bool(get_s3_bucket()) and boto3 is not None
 
 
+def _safe_join(base_dir: str, filename: str) -> str:
+    """Joins filename onto base_dir, raising RuntimeError if filename is not a plain
+    basename or would resolve outside base_dir (e.g. path traversal via '../') --
+    defense in depth in case a persisted run's recorded output filename is ever
+    reused from a source that wasn't already sanitized."""
+    if not filename or os.path.basename(filename) != filename:
+        raise RuntimeError("Invalid LD score output filename.")
+    real_base = os.path.realpath(base_dir)
+    candidate = os.path.realpath(os.path.join(real_base, filename))
+    if os.path.commonpath([real_base, candidate]) != real_base:
+        raise RuntimeError("Invalid LD score output filename.")
+    return candidate
+
+
 def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Dict[str, object]:
     """Copies the given filenames from source_dir into persisted storage. Returns
     {"backend": "s3"|"local", "location": str, "files": [{"name", "size"}, ...]}."""
@@ -36,10 +50,13 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
     os.makedirs(persisted_dir, exist_ok=True)
 
     for filename in filenames:
-        source_path = os.path.join(source_dir, filename)
+        try:
+            source_path = _safe_join(source_dir, filename)
+        except RuntimeError:
+            continue
         if not os.path.exists(source_path):
             continue
-        destination_path = os.path.join(persisted_dir, filename)
+        destination_path = _safe_join(persisted_dir, filename)
         shutil.copyfile(source_path, destination_path)
         file_infos.append({"name": filename, "size": os.path.getsize(destination_path)})
 
@@ -50,7 +67,7 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
     s3_prefix = f"ldscore_runs/{reference}"
     s3_client = boto3.client("s3")
     for file_info in file_infos:
-        local_path = os.path.join(persisted_dir, file_info["name"])
+        local_path = _safe_join(persisted_dir, file_info["name"])
         s3_client.upload_file(local_path, bucket, f"{s3_prefix}/{file_info['name']}")
 
     return {"backend": "s3", "location": f"s3://{bucket}/{s3_prefix}", "files": file_infos}
@@ -61,7 +78,7 @@ def resolve_local_path(run_doc: Dict[str, object], filename: str) -> str:
     transparently downloading it from S3 to a local cache copy first if needed."""
     backend = run_doc.get("backend", "local")
     if backend == "local":
-        return os.path.join(run_doc.get("ldscore_path", ""), filename)
+        return _safe_join(run_doc.get("ldscore_path", ""), filename)
 
     bucket = get_s3_bucket()
     if not bucket or boto3 is None:
@@ -70,7 +87,7 @@ def resolve_local_path(run_doc: Dict[str, object], filename: str) -> str:
     reference = run_doc.get("reference", "")
     local_cache_dir = os.path.join(get_persist_dir(), "_s3_cache", reference)
     os.makedirs(local_cache_dir, exist_ok=True)
-    local_path = os.path.join(local_cache_dir, filename)
+    local_path = _safe_join(local_cache_dir, filename)
     if not os.path.exists(local_path):
         boto3.client("s3").download_file(bucket, f"ldscore_runs/{reference}/{filename}", local_path)
     return local_path
@@ -85,7 +102,10 @@ def run_files_exist(run_doc: Dict[str, object]) -> bool:
     backend = run_doc.get("backend", "local")
     if backend == "local":
         ldscore_path = run_doc.get("ldscore_path", "")
-        return all(os.path.exists(os.path.join(ldscore_path, name)) for name in output_files)
+        try:
+            return all(os.path.exists(_safe_join(ldscore_path, name)) for name in output_files)
+        except RuntimeError:
+            return False
 
     bucket = get_s3_bucket()
     if not bucket or boto3 is None:
