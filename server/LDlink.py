@@ -54,7 +54,7 @@ from ApiAccess import (
 import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command, validBfile
 from sumstats_normalizer import normalize_sumstats_for_ldsc
-from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, validate_ldscore_source_compatibility, validate_ldscore_output, validate_ldscore_output_set, write_compatibility_metadata
+from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, validate_ldscore_source_compatibility, validate_ldscore_output, validate_ldscore_output_set, write_compatibility_metadata, validate_ldscore_import_files, _detect_chromosome_coverage, LDSCORE_OUTPUT_SUFFIX, SUPPORTED_LDSC_GENOME_BUILDS
 from ldscore_runs import ensure_indexes as ensure_ldscore_runs_indexes, persist_ldscore_run, list_ldscore_runs, get_ldscore_run, public_run_view as ldscore_run_public_view
 from ldscore_storage import resolve_local_path as resolve_ldscore_local_path, prepare_ldsc_ref_dir
 from session_auth import COOKIE_NAME as BROWSER_SESSION_COOKIE_NAME, derive_session_id_from_cookie
@@ -2388,6 +2388,76 @@ def ldscore_runs_list():
         runs = []
 
     return jsonify({"runs": runs})
+
+
+# Registers a previously-computed LD score output (.l2.ldscore.gz + its companion
+# .l2.M/.l2.M_5_50 SNP-count files), uploaded directly via /LDlinkRestWeb/upload, as a
+# reusable custom LD score run -- for callers who already have LDSC output from
+# elsewhere and want to skip the bed/bim/fam upload + compute step. All three files
+# are required (see validate_ldscore_import_files): M/M_5_50 can't be reliably derived
+# from the ldscore file's row count alone, and a wrong count would silently bias the
+# downstream heritability/genetic correlation regression.
+@app.route("/LDlinkRestWeb/ldscore_runs/import", methods=["GET"])
+def ldscore_runs_import():
+    session_id, error_response = _require_session_id()
+    if error_response is not None:
+        return error_response
+
+    reference = str(request.args.get("reference", "") or "").strip()
+    filename = str(request.args.get("filename", "") or "").strip()
+    genome_build = str(request.args.get("genome_build", "") or "").strip().lower()
+
+    if not reference or not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    if not filename:
+        return _validation_error("filename", "is required")
+    if genome_build not in SUPPORTED_LDSC_GENOME_BUILDS:
+        return _validation_error("genome_build", "value is not in allowlist")
+
+    try:
+        fileroot, file_path, file_dir = _resolve_upload_file_path(filename, reference)
+    except ValueError as validation_error:
+        return sendTraceback(str(validation_error))
+
+    if fileroot.endswith(LDSCORE_OUTPUT_SUFFIX):
+        fileroot = fileroot[: -len(LDSCORE_OUTPUT_SUFFIX)]
+
+    output_validation = validate_ldscore_output(file_dir, fileroot, reference)
+    if not output_validation.get("valid"):
+        app.logger.warning(f"Rejected LD score import for {reference}: {output_validation}")
+        return jsonify({"error": "; ".join(output_validation.get("errors", [])), "compatibility": output_validation}), 400
+
+    import_files_validation = validate_ldscore_import_files(file_dir, fileroot)
+    if not import_files_validation.get("valid"):
+        app.logger.warning(f"Rejected LD score import for {reference}: {import_files_validation}")
+        return jsonify({"error": "; ".join(import_files_validation.get("errors", [])), "compatibility": import_files_validation}), 400
+
+    chromosome_coverage = _detect_chromosome_coverage(fileroot)
+    if chromosome_coverage == "unknown":
+        return _validation_error("filename", "chromosome coverage could not be inferred from the file name")
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        run_doc = persist_ldscore_run(
+            db,
+            reference,
+            session_id,
+            file_dir,
+            fileroot,
+            genome_build,
+            chromosome_coverage,
+            [f"{fileroot}{LDSCORE_OUTPUT_SUFFIX}"],
+        )
+    except Exception as persist_error:
+        app.logger.error(f"Failed to persist imported LD score run {reference}: {persist_error}")
+        return _validation_response("Unable to save the imported LD score run.", status_code=500)
+
+    if not run_doc:
+        return _validation_response("Unable to save the imported LD score run.", status_code=500)
+
+    schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
+
+    return jsonify({"run": ldscore_run_public_view(run_doc)})
 
 
 # Detail view of one persisted LD score run (session-scoped), listing its output

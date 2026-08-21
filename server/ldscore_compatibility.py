@@ -252,6 +252,31 @@ def validate_ldscore_output(file_dir: str, fileroot: str, reference: str) -> Dic
     return result
 
 
+LDSCORE_IMPORT_REQUIRED_SUFFIXES = (".l2.ldscore.gz", ".l2.M", ".l2.M_5_50")
+
+
+def validate_ldscore_import_files(file_dir: str, fileroot: str) -> Dict[str, object]:
+    """Validates that a directly-imported LD score (uploaded as pre-computed output,
+    bypassing this tool's bed/bim/fam + LDSC compute step) has its required companion
+    SNP-count files alongside .l2.ldscore.gz. Unlike a fresh compute, there is no
+    reliable way to derive .l2.M/.l2.M_5_50 (the reference-panel variant counts LDSC's
+    regression is normalized against) from the ldscore file's row count alone -- LDSC
+    often restricts .l2.ldscore.gz to a smaller regression SNP list than the M/M_5_50
+    counts cover -- so an estimate could silently bias heritability/genetic correlation
+    results. These files must be supplied by the caller instead."""
+    result = _empty_validation(fileroot, "ldscore_import_files")
+    missing_files = [
+        f"{fileroot}{suffix}"
+        for suffix in LDSCORE_IMPORT_REQUIRED_SUFFIXES
+        if not os.path.exists(os.path.join(file_dir, f"{fileroot}{suffix}"))
+    ]
+    if missing_files:
+        result["valid"] = False
+        result["errors"].append(f"Missing required file(s): {', '.join(missing_files)}")
+    result["status"] = "validated" if result["valid"] else "failed"
+    return result
+
+
 def validate_ldscore_output_set(file_dir: str, filerootlist: List[str], reference: str) -> Dict[str, object]:
     """Validates a set of per-chromosome LD score outputs (e.g. a requested 22-autosome
     run). Aggregates individual validate_ldscore_output results; the set is only valid

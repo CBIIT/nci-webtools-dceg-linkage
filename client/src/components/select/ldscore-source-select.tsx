@@ -4,7 +4,7 @@ import { Form } from "react-bootstrap";
 import { ldscorePopOptions, LdscorePopOption } from "./ldscore-pop-select";
 import { LdScoreRunSummary } from "@/services/queries";
 
-export type LdscoreSourceMode = "reference" | "customUpload" | "customSession" | "customPrior";
+export type LdscoreSourceMode = "reference" | "customUpload" | "customImport" | "customSession" | "customPrior";
 
 export interface LdscoreSourceValue {
   mode: LdscoreSourceMode;
@@ -32,6 +32,7 @@ export default function LdscoreSourceSelect({
   priorRunsLoading,
   disabled,
   onRequestUpload,
+  onRequestImport,
 }: {
   value: LdscoreSourceValue;
   onChange: (value: LdscoreSourceValue) => void;
@@ -40,6 +41,7 @@ export default function LdscoreSourceSelect({
   priorRunsLoading?: boolean;
   disabled?: boolean;
   onRequestUpload?: () => void;
+  onRequestImport?: () => void;
 }) {
   const customStyles = {
     menu: (provided: any) => ({ ...provided, zIndex: 9999 }),
@@ -101,7 +103,7 @@ export default function LdscoreSourceSelect({
       {value.mode !== "reference" && (
         <div className="ps-1">
           <div className="mb-2">
-            <Form.Check
+            {/* <Form.Check
               type="radio"
               id="ldscore-source-upload"
               name="ldscore-source-custom-mode"
@@ -111,6 +113,18 @@ export default function LdscoreSourceSelect({
               onChange={() => {
                 onChange({ ...value, mode: "customUpload", ldscoreReference: null });
                 onRequestUpload?.();
+              }}
+            /> */}
+            <Form.Check
+              type="radio"
+              id="ldscore-source-import"
+              name="ldscore-source-custom-mode"
+              label="Upload existing LD score result (.l2.ldscore.gz)"
+              checked={value.mode === "customImport"}
+              disabled={disabled}
+              onChange={() => {
+                onChange({ ...value, mode: "customImport", ldscoreReference: null });
+                onRequestImport?.();
               }}
             />
             <Form.Check

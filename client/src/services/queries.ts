@@ -121,6 +121,13 @@ export async function fetchLdScoreRunDetail(reference: string): Promise<LdScoreR
   return (await axios.get(webProxyUrl(`ldscore_runs/${encodeURIComponent(reference)}`))).data;
 }
 
+// Registers an already-computed LD score output file (.l2.ldscore.gz), uploaded via
+// `upload()`, as a reusable custom LD score run -- skipping the bed/bim/fam upload +
+// compute step (see server/LDlink.py ldscore_runs_import).
+export async function importLdScoreRun(params: URLSearchParams): Promise<{ run: LdScoreRunSummary }> {
+  return (await axios.get(webProxyUrl("ldscore_runs/import", params.toString()))).data;
+}
+
 export interface LdScoreOutputFile {
   name: string;
   size: number;
