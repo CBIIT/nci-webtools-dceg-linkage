@@ -10,7 +10,7 @@ import operator
 import json
 import sys
 from pymongo.errors import ConnectionFailure
-from LDcommon import genome_build_vars,connectMongoDBReadOnly,validsnp,replace_coords_rsid_list,get_coords
+from LDcommon import genome_build_vars,connectMongoDBReadOnly,validsnp,replace_coords_rsid_list,get_coords,assert_safe_job_id
 from LDutilites import get_config
 
 
@@ -48,6 +48,7 @@ def convert_codeToPlatforms(platform_query, web):
 
 
 def calculate_chip(snplst, platform_query, web, request, genome_build):
+    request = assert_safe_job_id(request, "request")
     # Set data directories using config.yml
     param_list = get_config()
     tmp_dir = param_list['tmp_dir']
@@ -181,6 +182,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
 
 
 def createOutputFile(request, genome_build):
+    request = assert_safe_job_id(request, "request")
     # Set data directories using config.yml
     param_list = get_config()
     tmp_dir = param_list['tmp_dir']
