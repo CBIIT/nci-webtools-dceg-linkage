@@ -493,17 +493,6 @@ def _is_valid_uuid_reference(value):
     return parsed_uuid.version == 4 and str(parsed_uuid) == normalized_value.lower()
 
 
-def _is_reference_confined_to_tmp(reference):
-    """Extra path-shaped confinement check (normalize + startswith-root), on top of
-    the UUID format check above -- CodeQL's path-injection barrier recognition
-    specifically looks for this normalize+prefix-check shape, not a value-format
-    check, before it will treat the many `tmp_dir + "..." + reference + "..."`
-    path expressions built from this variable throughout the route handlers as safe."""
-    candidate = os.path.normpath(os.path.join(tmp_dir, str(reference)))
-    root = os.path.normpath(tmp_dir)
-    return candidate == root or candidate.startswith(root + os.sep)
-
-
 def _validate_reference_value(parameter, value):
     if _is_missing_optional(value):
         return None
@@ -2227,7 +2216,8 @@ def ldassoc():
         reference = request.args.get("reference") or generate_reference()
         if not _is_valid_uuid_reference(str(reference)):
             return _validation_error("reference", "must be a canonical UUIDv4 string")
-        if not _is_reference_confined_to_tmp(reference):
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
             return _validation_error("reference", "must be a canonical UUIDv4 string")
         app.logger.debug(f"LDassoc reference: {reference}")
         app.logger.debug(
@@ -2292,7 +2282,8 @@ def ldscore():
         pop = _sanitize_ldsc_pop(pop)
         reference, fileDir = _resolve_upload_dir(reference)
         _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
-        if not _is_reference_confined_to_tmp(reference):
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
             raise ValueError("Invalid reference parameter.")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDscore reference: {validation_error}")
@@ -2729,7 +2720,8 @@ def ldherit():
     try:
         reference, fileDir = _resolve_upload_dir(reference)
         _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
-        if not _is_reference_confined_to_tmp(reference):
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
             raise ValueError("Invalid reference parameter.")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit reference: {validation_error}")
@@ -2980,7 +2972,8 @@ def ldcorrelation():
     try:
         reference, fileDir = _resolve_upload_dir(reference)
         _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
-        if not _is_reference_confined_to_tmp(reference):
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
             raise ValueError("Invalid reference parameter.")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDcorrelation reference: {validation_error}")
@@ -3115,7 +3108,8 @@ def ldexpress():
     )
     if not _is_valid_uuid_reference(reference):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -3295,7 +3289,8 @@ def ldhap():
     reference = request.args.get("reference") or generate_reference()
     if not _is_valid_uuid_reference(str(reference)):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -3431,7 +3426,8 @@ def ldmatrix():
         reference = generate_reference()
     if not _is_valid_uuid_reference(str(reference)):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -3584,7 +3580,8 @@ def ldpair():
             reference = request.args.get("reference") or generate_reference()
             if not _is_valid_uuid_reference(str(reference)):
                 return _validation_error("reference", "must be a canonical UUIDv4 string")
-            if not _is_reference_confined_to_tmp(reference):
+            _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+            if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
                 return _validation_error("reference", "must be a canonical UUIDv4 string")
             app.logger.debug(
                 "ldpair params "
@@ -3699,7 +3696,8 @@ def ldpop():
     reference = request.args.get("reference") or generate_reference()
     if not _is_valid_uuid_reference(str(reference)):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -3813,7 +3811,8 @@ def ldproxy():
     reference = request.args.get("reference") or generate_reference()
     if not _is_valid_uuid_reference(str(reference)):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -3939,7 +3938,8 @@ def ldtrait():
     )
     if not _is_valid_uuid_reference(reference):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
@@ -4145,7 +4145,8 @@ def ldtraitgwas():
     reference = request.args.get("reference") or generate_reference()
     if not _is_valid_uuid_reference(str(reference)):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # Run calculate_trait in a separate thread
@@ -4330,7 +4331,8 @@ def ldexpressgwas():
     reference = request.args.get("reference") or generate_reference()
     if not _is_valid_uuid_reference(str(reference)):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -4484,7 +4486,8 @@ def snpchip():
     )
     if not _is_valid_uuid_reference(reference):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
@@ -4598,7 +4601,8 @@ def snpclip():
     )
     if not _is_valid_uuid_reference(reference):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
-    if not _is_reference_confined_to_tmp(reference):
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
         return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request

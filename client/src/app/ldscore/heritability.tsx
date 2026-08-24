@@ -291,6 +291,51 @@ export default function Heritability() {
       <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
+            <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
+              
+                <Form.Check 
+                  type="switch"
+                  id="use-example-heritability"
+                  label="Use example data"
+                  checked={useExample}
+                  disabled={heritabilityLoading}
+                  onChange={async (e) => {
+                    setUseExample(e.target.checked);
+                    setHeritabilityResultRef(null);
+                    if (e.target.checked) {
+                      // Generate a new reference for example data
+                      const newReference = generateReference();
+                      setReference(newReference);
+                          heritabilityForm.setValue("sumstatsFormat", "pre_munged");
+                      setExampleFilename("");
+                      setUploadedFilename("");
+                      heritabilityForm.clearErrors("file");
+                      try {
+                        const response = await fetch("/LDlinkRestWeb/ldherit_example");
+                        if (response.ok) {
+                          const data = await response.json();
+                          setExampleFilename(data.filenames || "");
+                        } else {
+                          setExampleFilename("");
+                          console.error("Failed to fetch example data");
+                        }
+                      } catch (error) {
+                        setExampleFilename("");
+                        console.error("Error fetching example data:", error);
+                      }
+                    } else {
+                      setExampleFilename("");
+                      setUploadedFilename("");
+                      setReference("");
+                      heritabilityForm.setValue("sumstatsFormat", "");
+                      //heritabilityForm.setValue("pop", null);
+                    }
+                  }}
+                />
+                  <HoverUnderlineLink href="/help#LDscore">
+                  Click here for sample format
+                </HoverUnderlineLink>
+              </div>
             <Form.Group controlId="sumstatsFormat" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
               <Form.Select
@@ -343,56 +388,11 @@ export default function Heritability() {
               )}
               <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Upload PLINK, REGENIE, SAIGE, or LDSC-ready summary statistics. Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
-              <div className="mt-2">
-                <HoverUnderlineLink href="/help#LDscore">
-                  Click here for sample format
-                </HoverUnderlineLink>
-              </div>
               {heritabilityForm.formState.errors?.file?.type !== "server" && (
                 <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
               )}
             </Form.Group>
             <Form.Group controlId="useEx" className="mb-3">
-              <div className="mt-2">
-                <Form.Check 
-                  type="switch"
-                  id="use-example-heritability"
-                  label="Use example data"
-                  checked={useExample}
-                  disabled={heritabilityLoading}
-                  onChange={async (e) => {
-                    setUseExample(e.target.checked);
-                    setHeritabilityResultRef(null);
-                    if (e.target.checked) {
-                      // Generate a new reference for example data
-                      const newReference = generateReference();
-                      setReference(newReference);
-                          heritabilityForm.setValue("sumstatsFormat", "pre_munged");
-                      setExampleFilename("");
-                      setUploadedFilename("");
-                      heritabilityForm.clearErrors("file");
-                      try {
-                        const response = await fetch("/LDlinkRestWeb/ldherit_example");
-                        if (response.ok) {
-                          const data = await response.json();
-                          setExampleFilename(data.filenames || "");
-                        } else {
-                          setExampleFilename("");
-                          console.error("Failed to fetch example data");
-                        }
-                      } catch (error) {
-                        setExampleFilename("");
-                        console.error("Error fetching example data:", error);
-                      }
-                    } else {
-                      setExampleFilename("");
-                      setUploadedFilename("");
-                      setReference("");
-                      heritabilityForm.setValue("sumstatsFormat", "");
-                      //heritabilityForm.setValue("pop", null);
-                    }
-                  }}
-                />
                 {(exampleFilename || uploadedFilename) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
                     <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
@@ -418,7 +418,6 @@ export default function Heritability() {
                     )}
                   </div>
                 )}
-              </div>
             </Form.Group>
           </Col>
 

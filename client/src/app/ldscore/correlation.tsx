@@ -327,15 +327,8 @@ export default function Correlation() {
       <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
-            <Form.Group>
-              <div className="mt-2">
-                <HoverUnderlineLink href="/help#LDscore">
-                  Click here for sample format
-                </HoverUnderlineLink>
-              </div>
-           
-            </Form.Group>
-              <div className="mb-3">
+            <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
+            
               <Form.Check
                 type="switch"
                 id="use-example-correlation"
@@ -371,6 +364,9 @@ export default function Correlation() {
                   }
                 }}
               />
+                <HoverUnderlineLink href="/help#LDscore">
+                Click here for sample format
+              </HoverUnderlineLink>
             </div>
           </Col>
         
