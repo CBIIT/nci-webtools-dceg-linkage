@@ -28,18 +28,13 @@ def is_s3_enabled() -> bool:
     return bool(get_s3_bucket()) and boto3 is not None
 
 
-def _safe_join(base_dir: str, filename: str) -> str:
-    """Joins filename onto base_dir, raising RuntimeError if filename is not a plain
-    basename or would resolve outside base_dir (e.g. path traversal via '../') --
-    defense in depth in case a persisted run's recorded output filename is ever
-    reused from a source that wasn't already sanitized."""
-    if not filename or os.path.basename(filename) != filename:
-        raise RuntimeError("Invalid LD score output filename.")
-    real_base = os.path.realpath(base_dir)
-    candidate = os.path.realpath(os.path.join(real_base, filename))
-    if os.path.commonpath([real_base, candidate]) != real_base:
-        raise RuntimeError("Invalid LD score output filename.")
-    return candidate
+def _is_path_confined(candidate_path: str, base_dir: str) -> bool:
+    """Returns True iff the normalized candidate_path resolves inside base_dir --
+    call this immediately before using a user-influenced path, in the same function
+    as the file operation, so static analysis (and readers) can see the guard."""
+    normalized_base = os.path.normpath(os.path.realpath(base_dir))
+    normalized_candidate = os.path.normpath(os.path.realpath(candidate_path))
+    return normalized_candidate == normalized_base or normalized_candidate.startswith(normalized_base + os.sep)
 
 
 def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Dict[str, object]:
@@ -48,17 +43,22 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
     file_infos = []
     persist_root = get_persist_dir()
     os.makedirs(persist_root, exist_ok=True)
-    persisted_dir = _safe_join(persist_root, reference)
+    persisted_dir = os.path.normpath(os.path.join(persist_root, reference))
+    if not _is_path_confined(persisted_dir, persist_root):
+        raise RuntimeError("Invalid reference parameter.")
     os.makedirs(persisted_dir, exist_ok=True)
 
     for filename in filenames:
-        try:
-            source_path = _safe_join(source_dir, filename)
-        except RuntimeError:
+        if not filename or os.path.basename(filename) != filename:
+            continue
+        source_path = os.path.normpath(os.path.join(source_dir, filename))
+        if not _is_path_confined(source_path, source_dir):
             continue
         if not os.path.exists(source_path):
             continue
-        destination_path = _safe_join(persisted_dir, filename)
+        destination_path = os.path.normpath(os.path.join(persisted_dir, filename))
+        if not _is_path_confined(destination_path, persisted_dir):
+            continue
         shutil.copyfile(source_path, destination_path)
         file_infos.append({"name": filename, "size": os.path.getsize(destination_path)})
 
@@ -69,8 +69,11 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
     s3_prefix = f"ldscore_runs/{reference}"
     s3_client = boto3.client("s3")
     for file_info in file_infos:
-        local_path = _safe_join(persisted_dir, file_info["name"])
-        s3_client.upload_file(local_path, bucket, f"{s3_prefix}/{file_info['name']}")
+        local_name = file_info["name"]
+        local_path = os.path.normpath(os.path.join(persisted_dir, local_name))
+        if not _is_path_confined(local_path, persisted_dir):
+            continue
+        s3_client.upload_file(local_path, bucket, f"{s3_prefix}/{local_name}")
 
     return {"backend": "s3", "location": f"s3://{bucket}/{s3_prefix}", "files": file_infos}
 
@@ -78,9 +81,16 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
 def resolve_local_path(run_doc: Dict[str, object], filename: str) -> str:
     """Returns a readable local filesystem path for a persisted output file,
     transparently downloading it from S3 to a local cache copy first if needed."""
+    if not filename or os.path.basename(filename) != filename:
+        raise RuntimeError("Invalid LD score output filename.")
+
     backend = run_doc.get("backend", "local")
     if backend == "local":
-        return _safe_join(run_doc.get("ldscore_path", ""), filename)
+        ldscore_path = run_doc.get("ldscore_path", "")
+        local_path = os.path.normpath(os.path.join(ldscore_path, filename))
+        if not _is_path_confined(local_path, ldscore_path):
+            raise RuntimeError("Invalid LD score output filename.")
+        return local_path
 
     bucket = get_s3_bucket()
     if not bucket or boto3 is None:
@@ -89,9 +99,13 @@ def resolve_local_path(run_doc: Dict[str, object], filename: str) -> str:
     reference = run_doc.get("reference", "")
     s3_cache_root = os.path.join(get_persist_dir(), "_s3_cache")
     os.makedirs(s3_cache_root, exist_ok=True)
-    local_cache_dir = _safe_join(s3_cache_root, reference)
+    local_cache_dir = os.path.normpath(os.path.join(s3_cache_root, reference))
+    if not _is_path_confined(local_cache_dir, s3_cache_root):
+        raise RuntimeError("Invalid reference parameter.")
     os.makedirs(local_cache_dir, exist_ok=True)
-    local_path = _safe_join(local_cache_dir, filename)
+    local_path = os.path.normpath(os.path.join(local_cache_dir, filename))
+    if not _is_path_confined(local_path, local_cache_dir):
+        raise RuntimeError("Invalid LD score output filename.")
     if not os.path.exists(local_path):
         boto3.client("s3").download_file(bucket, f"ldscore_runs/{reference}/{filename}", local_path)
     return local_path
@@ -106,10 +120,13 @@ def run_files_exist(run_doc: Dict[str, object]) -> bool:
     backend = run_doc.get("backend", "local")
     if backend == "local":
         ldscore_path = run_doc.get("ldscore_path", "")
-        try:
-            return all(os.path.exists(_safe_join(ldscore_path, name)) for name in output_files)
-        except RuntimeError:
-            return False
+        for name in output_files:
+            if not name or os.path.basename(name) != name:
+                return False
+            candidate = os.path.normpath(os.path.join(ldscore_path, name))
+            if not _is_path_confined(candidate, ldscore_path) or not os.path.exists(candidate):
+                return False
+        return True
 
     bucket = get_s3_bucket()
     if not bucket or boto3 is None:
@@ -146,7 +163,9 @@ def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
     subdir_name = f"custom_{reference}".lower()
     ldsc_reference_root = get_ldsc_reference_data_dir()
     os.makedirs(ldsc_reference_root, exist_ok=True)
-    target_dir = _safe_join(ldsc_reference_root, subdir_name)
+    target_dir = os.path.normpath(os.path.join(ldsc_reference_root, subdir_name))
+    if not _is_path_confined(target_dir, ldsc_reference_root):
+        raise RuntimeError("Invalid reference parameter.")
     os.makedirs(target_dir, exist_ok=True)
 
     fileroot = run_doc.get("fileroot", "")
@@ -159,7 +178,10 @@ def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
             source_path = resolve_local_path(run_doc, source_filename)
             if not os.path.exists(source_path):
                 continue
-            destination_path = _safe_join(target_dir, f"{chromosome}{suffix}")
+            destination_name = f"{chromosome}{suffix}"
+            destination_path = os.path.normpath(os.path.join(target_dir, destination_name))
+            if not _is_path_confined(destination_path, target_dir):
+                continue
             if not os.path.exists(destination_path):
                 shutil.copyfile(source_path, destination_path)
 

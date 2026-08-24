@@ -74,9 +74,19 @@ SAFE_JOB_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
 
 def assert_safe_job_id(value, parameter_name="request"):
-    """Raises ValueError unless value is a safe, traversal-free job-id string."""
+    """Raises ValueError unless value is a safe, traversal-free job-id string that,
+    once joined onto tmp_dir (as every caller does, e.g. tmp_dir + "snps_" + value +
+    ".txt"), still resolves inside tmp_dir. The format check alone isn't enough for
+    CodeQL's path-injection barrier recognition, which specifically looks for a
+    normalize + startswith-root shape (see also LDlink.py's
+    _is_reference_confined_to_tmp) -- so this does both checks together, once, for
+    every caller."""
     text_value = str(value or "")
     if not SAFE_JOB_ID_RE.fullmatch(text_value):
+        raise ValueError(f"Invalid {parameter_name} identifier.")
+    normalized_root = os.path.normpath(tmp_dir)
+    candidate = os.path.normpath(os.path.join(normalized_root, text_value))
+    if candidate != normalized_root and not candidate.startswith(normalized_root + os.sep):
         raise ValueError(f"Invalid {parameter_name} identifier.")
     return text_value
 
@@ -84,9 +94,9 @@ def assert_safe_job_id(value, parameter_name="request"):
 def assert_confined_path(candidate_path, base_dir, parameter_name="filename"):
     """Raises ValueError unless candidate_path resolves inside base_dir -- for
     callers that build a full path (rather than a bare job-id) from user input."""
-    real_base = os.path.realpath(base_dir)
-    real_candidate = os.path.realpath(candidate_path)
-    if os.path.commonpath([real_base, real_candidate]) != real_base:
+    normalized_base = os.path.normpath(base_dir)
+    normalized_candidate = os.path.normpath(candidate_path)
+    if normalized_candidate != normalized_base and not normalized_candidate.startswith(normalized_base + os.sep):
         raise ValueError(f"Invalid {parameter_name} parameter.")
     return candidate_path
 
@@ -191,6 +201,7 @@ def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,reque
     output = tabix("-fhD", query_file, *tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
     if is_output:
+        request = assert_safe_job_id(request, "request")
         with open(tmp_dir+"snp_no_dups_"+request+".vcf", "w") as f:
             f.write("\n".join(vcf))
         vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
@@ -472,6 +483,7 @@ def set_alleles(a1, a2):
 # get the genotype ###
 #################################################
 def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,output={}):
+    request = assert_safe_job_id(request, "request")
     queryVariantWarnings = []
     #vcf1_pos: 60697654; snp_coord: ['rs4672393', '2', '60697654']
     tmp_coord = [str(x) for x in snp_coord]
