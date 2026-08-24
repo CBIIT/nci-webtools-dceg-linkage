@@ -3,9 +3,9 @@ import json
 import os
 import sys
 import collections
-from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
+from LDcommon import genome_build_vars, connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
-from LDcommon import set_alleles,check_same_chromosome
+from LDcommon import set_alleles,check_same_chromosome,assert_safe_job_id
 from LDutilites import get_config
 from LDcommon import get_1000g_data,parse_vcf
 
@@ -16,6 +16,7 @@ from LDcommon import get_1000g_data,parse_vcf
 # Create SNPtip function
 
 def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, maf_threshold=0.01):
+    request = assert_safe_job_id(request, "request")
     max_list = 5000
     # Set data directories using config.yml
     param_list = get_config()
@@ -26,8 +27,6 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     genotypes_dir = param_list['genotypes_dir']
     aws_info = param_list['aws_info']
    
-    export_s3_keys = retrieveAWSCredentials()
-
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)

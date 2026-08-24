@@ -2,7 +2,7 @@ import csv
 import json
 from bson import json_util
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,get_dbsnp_coord,tabix
+from LDcommon import checkS3File, genome_build_vars,connectMongoDBReadOnly,get_dbsnp_coord,tabix,assert_safe_job_id
 from LDcommon import set_alleles,get_geno,get_forgeDB
 from LDutilites import get_config
 
@@ -11,7 +11,7 @@ snp = sys.argv[2]
 chr = sys.argv[3]
 start = sys.argv[4]
 stop = sys.argv[5]
-request = sys.argv[6]
+request = assert_safe_job_id(sys.argv[6], "request")
 genome_build = sys.argv[7]
 process = sys.argv[8]
 
@@ -22,8 +22,6 @@ data_dir = param_list['data_dir']
 tmp_dir = param_list['tmp_dir']
 genotypes_dir = param_list['genotypes_dir']
 aws_info = param_list['aws_info']
-
-export_s3_keys = retrieveAWSCredentials()
 
 # Get population ids
 pop_list = open(tmp_dir+"pops_"+request+".txt").readlines()

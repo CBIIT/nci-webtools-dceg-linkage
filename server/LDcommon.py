@@ -64,6 +64,33 @@ genome_build_vars = {
     }
 }
 
+# Per-request job-id strings (query param "reference"/"request") are used throughout
+# this codebase to build temp file paths, e.g. tmp_dir + "snps_" + request + ".txt".
+# LDlink.py's structural_input_guard before_request hook already validates these as
+# canonical UUIDv4 strings, but that happens in a separate function static analysis
+# tools (e.g. CodeQL) can't trace through -- so callers should also validate locally,
+# right where the id is first read, via assert_safe_job_id below.
+SAFE_JOB_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
+
+
+def assert_safe_job_id(value, parameter_name="request"):
+    """Raises ValueError unless value is a safe, traversal-free job-id string."""
+    text_value = str(value or "")
+    if not SAFE_JOB_ID_RE.fullmatch(text_value):
+        raise ValueError(f"Invalid {parameter_name} identifier.")
+    return text_value
+
+
+def assert_confined_path(candidate_path, base_dir, parameter_name="filename"):
+    """Raises ValueError unless candidate_path resolves inside base_dir -- for
+    callers that build a full path (rather than a bare job-id) from user input."""
+    real_base = os.path.realpath(base_dir)
+    real_candidate = os.path.realpath(candidate_path)
+    if os.path.commonpath([real_base, real_candidate]) != real_base:
+        raise ValueError(f"Invalid {parameter_name} parameter.")
+    return candidate_path
+
+
 def checkS3File(aws_info, bucket, filePath):
     try:
         boto3.client('s3').head_object(Bucket=bucket, Key=filePath)
@@ -141,6 +168,7 @@ def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, 
     vcf = [line for line in output if "END" not in line]
 
     if write_output:
+        request = assert_safe_job_id(request, "request")
         temp_filepath = tmp_dir + "snp_no_dups_" + request + ".vcf"
         with open(temp_filepath, "w") as f:
             f.write("\n".join(vcf))
@@ -253,6 +281,7 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
     #temp = query_results_sanitized.pop(0)
     #query_results_sanitized.append(temp)
     #print(query_results_sanitized)
+    assert_confined_path(filename, tmp_dir, "filename")
     with open(filename, "w") as f:
         for x in query_results_sanitized:
             f.write(json.dumps(x) + '\n')
@@ -268,6 +297,7 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
 	})
     recomb_results_sanitized = json.loads(json_util.dumps(recomb_results)) 
 
+    assert_confined_path(filename, tmp_dir, "filename")
     with open(filename, "w") as f:
         for recomb_obj in recomb_results_sanitized:
             f.write(json.dumps({
@@ -398,6 +428,7 @@ def replace_coords_rsid_list(db, snp_lst,genome_build,output):
 ### common function to retrieve population ###
 ##############################################
 def get_population(pop, request,output):
+    request = assert_safe_job_id(request, "request")
     # Select desired ancestral populations
     pops = pop.split("+")
     pop_dirs = []
@@ -703,6 +734,7 @@ def get_regDB(db,genome_build,chr, pos):
         return result["score"]
 #################
 def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript,annotate):
+    request = assert_safe_job_id(request, "request")
     q_rs = []
     q_allele = []
     q_coord = []

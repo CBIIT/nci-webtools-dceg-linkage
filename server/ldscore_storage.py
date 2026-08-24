@@ -46,7 +46,9 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
     """Copies the given filenames from source_dir into persisted storage. Returns
     {"backend": "s3"|"local", "location": str, "files": [{"name", "size"}, ...]}."""
     file_infos = []
-    persisted_dir = os.path.join(get_persist_dir(), reference)
+    persist_root = get_persist_dir()
+    os.makedirs(persist_root, exist_ok=True)
+    persisted_dir = _safe_join(persist_root, reference)
     os.makedirs(persisted_dir, exist_ok=True)
 
     for filename in filenames:
@@ -85,7 +87,9 @@ def resolve_local_path(run_doc: Dict[str, object], filename: str) -> str:
         raise RuntimeError("S3 storage is not configured but this run was persisted with an S3 backend.")
 
     reference = run_doc.get("reference", "")
-    local_cache_dir = os.path.join(get_persist_dir(), "_s3_cache", reference)
+    s3_cache_root = os.path.join(get_persist_dir(), "_s3_cache")
+    os.makedirs(s3_cache_root, exist_ok=True)
+    local_cache_dir = _safe_join(s3_cache_root, reference)
     os.makedirs(local_cache_dir, exist_ok=True)
     local_path = _safe_join(local_cache_dir, filename)
     if not os.path.exists(local_path):
@@ -140,7 +144,9 @@ def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
 
     reference = run_doc.get("reference", "")
     subdir_name = f"custom_{reference}".lower()
-    target_dir = os.path.join(get_ldsc_reference_data_dir(), subdir_name)
+    ldsc_reference_root = get_ldsc_reference_data_dir()
+    os.makedirs(ldsc_reference_root, exist_ok=True)
+    target_dir = _safe_join(ldsc_reference_root, subdir_name)
     os.makedirs(target_dir, exist_ok=True)
 
     fileroot = run_doc.get("fileroot", "")
@@ -153,7 +159,7 @@ def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
             source_path = resolve_local_path(run_doc, source_filename)
             if not os.path.exists(source_path):
                 continue
-            destination_path = os.path.join(target_dir, f"{chromosome}{suffix}")
+            destination_path = _safe_join(target_dir, f"{chromosome}{suffix}")
             if not os.path.exists(destination_path):
                 shutil.copyfile(source_path, destination_path)
 

@@ -1,6 +1,6 @@
 import csv
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,set_alleles,LD_calcs,get_dbsnp_coord,get_geno,tabix
+from LDcommon import checkS3File, genome_build_vars,connectMongoDBReadOnly,set_alleles,LD_calcs,get_dbsnp_coord,get_geno,tabix,assert_safe_job_id
 from LDutilites import get_config
 
 web = sys.argv[1]
@@ -8,7 +8,7 @@ snp = sys.argv[2]
 chromosome = sys.argv[3]
 start = sys.argv[4]
 stop = sys.argv[5]
-request = sys.argv[6]
+request = assert_safe_job_id(sys.argv[6], "request")
 subprocess_id = sys.argv[7]
 r2_d = sys.argv[8]
 r2_d_threshold = sys.argv[9]
@@ -19,7 +19,6 @@ data_dir = param_list['data_dir']
 tmp_dir = param_list['tmp_dir']
 genotypes_dir = param_list['genotypes_dir']
 aws_info = param_list['aws_info']
-export_s3_keys = retrieveAWSCredentials()
 # Get population ids
 pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
 ids = []

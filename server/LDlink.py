@@ -962,11 +962,13 @@ def _assert_path_confined(candidate_dir, base_dir, parameter="reference"):
     """Explicit local barrier-guard check (redundant with, but visible alongside,
     _resolve_upload_dir's own realpath/commonpath check) confirming a resolved
     directory is confined to base_dir immediately before it's used to build any file
-    path -- e.g. validate_sumstats_preanalysis/run_herit_command/run_correlation_command."""
+    path -- e.g. validate_sumstats_preanalysis/run_herit_command/run_correlation_command.
+    Returns the resolved candidate path for convenience."""
     real_base = os.path.realpath(base_dir)
     real_candidate = os.path.realpath(candidate_dir)
     if os.path.commonpath([real_base, real_candidate]) != real_base:
         raise ValueError(f"Invalid {parameter} parameter.")
+    return real_candidate
 
 
 LDSCORE_EXAMPLE_DIR = "/data/ldscore"
@@ -1651,7 +1653,16 @@ def send_temp_file(filename):
 @app.route("/LDlinkRestWeb/tmp/uploads/<reference>/<filename>", strict_slashes=False)
 @app.route("/tmp/uploads/<reference>/<filename>", strict_slashes=False)
 def send_temp_file_reference(reference, filename):
-    return send_from_directory(os.path.join(tmp_dir, "uploads", reference), filename)
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    upload_root = os.path.realpath(os.path.join(tmp_dir, "uploads"))
+    target_dir = safe_join(upload_root, reference)
+    if target_dir is None:
+        return _validation_error("reference", "is invalid")
+    target_dir = os.path.realpath(target_dir)
+    if os.path.commonpath([upload_root, target_dir]) != upload_root:
+        return _validation_error("reference", "is invalid")
+    return send_from_directory(target_dir, filename)
 
 
 @app.route("/LDlinkRestWeb/zip", methods=["POST"])
@@ -1967,14 +1978,18 @@ def copy_and_download(filename):
     and serves it for download.
     """
     start_time = time.time()
-    app.logger.info(f"Starting file copy and download: {filename}")
+    safe_filename = secure_filename(filename)
+    app.logger.info(f"Starting file copy and download: {safe_filename}")
+
+    if not safe_filename:
+        return _validation_error("filename", "is invalid")
 
     try:
         # Define source and destination paths
         source_dir = os.path.join(param_list["data_dir"], "ldscore")
         destination_dir = os.path.join(tmp_dir, "uploads")
-        source_file = os.path.join(source_dir, filename)
-        destination_file = os.path.join(destination_dir, filename)
+        source_file = _assert_path_confined(os.path.join(source_dir, safe_filename), source_dir, "filename")
+        destination_file = _assert_path_confined(os.path.join(destination_dir, safe_filename), destination_dir, "filename")
 
         # Ensure the destination directory exists
         os.makedirs(destination_dir, exist_ok=True)
@@ -1985,15 +2000,18 @@ def copy_and_download(filename):
 
         # Serve the file for download
         execution_time = round(time.time() - start_time, 2)
-        app.logger.info(f"File download completed ({execution_time}s): {filename}")
-        return send_from_directory(destination_dir, filename, as_attachment=True)
+        app.logger.info(f"File download completed ({execution_time}s): {safe_filename}")
+        return send_from_directory(destination_dir, safe_filename, as_attachment=True)
 
     except FileNotFoundError:
-        app.logger.error(f"File not found: {filename} in {source_dir}")
-        return f"File {filename} not found in {source_dir}", 404
+        app.logger.error(f"File not found: {safe_filename} in {source_dir}")
+        return _validation_response("Requested file was not found.", status_code=404)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid copy_and_download request: {validation_error}")
+        return _validation_error("filename", "is invalid")
     except Exception as e:
         app.logger.error(f"File copy/download failed: {str(e)}")
-        return f"An error occurred: {e}", 500
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
 
 
 # Route for LDassoc example GWAS data
@@ -2195,7 +2213,9 @@ def ldassoc():
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
         web = True
-        reference = request.args.get("reference", False)
+        reference = request.args.get("reference") or generate_reference()
+        if not _is_valid_uuid_reference(str(reference)):
+            return _validation_error("reference", "must be a canonical UUIDv4 string")
         app.logger.debug(f"LDassoc reference: {reference}")
         app.logger.debug(
             "ldassoc params "
@@ -2571,6 +2591,11 @@ def ldscoreapi():
     ldwindow = request.args.get("ldwindow", "1")
     windUnit = request.args.get("windUnit", "cm")
     isExample = request.args.get("isExample", False)
+
+    try:
+        pop = _sanitize_ldsc_pop(pop)
+    except ValueError as validation_error:
+        return sendTraceback(str(validation_error))
 
     if filename:
         filename = secure_filename(filename)
@@ -3069,6 +3094,8 @@ def ldexpress():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3245,6 +3272,8 @@ def ldhap():
     genome_build = request.args.get("genome_build", "grch37")
     web = False
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3377,6 +3406,8 @@ def ldmatrix():
     web = False
     if reference is False:
         reference = generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3526,6 +3557,8 @@ def ldpair():
         if request.headers.get("User-Agent"):
             web = True
             reference = request.args.get("reference") or generate_reference()
+            if not _is_valid_uuid_reference(str(reference)):
+                return _validation_error("reference", "must be a canonical UUIDv4 string")
             app.logger.debug(
                 "ldpair params "
                 + json.dumps(
@@ -3637,6 +3670,8 @@ def ldpop():
     genome_build = request.args.get("genome_build", "grch37")
     web = False
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3747,6 +3782,8 @@ def ldproxy():
     # annotateText = request.args.get('annotate', False)
     web = False
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3869,6 +3906,8 @@ def ldtrait():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -4071,6 +4110,8 @@ def ldtraitgwas():
     window = request.args.get("window", "500000").replace(",", "")
 
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # Run calculate_trait in a separate thread
     # differentiate web or api request
@@ -4252,6 +4293,8 @@ def ldexpressgwas():
     window = request.args.get("window", "500000")
     genome_build = request.args.get("genome_build", "grch37")
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -4402,6 +4445,8 @@ def snpchip():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -4512,6 +4557,8 @@ def snpclip():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:

@@ -13,7 +13,7 @@ import httpx
 from pathlib import Path
 from LDutilites import get_config
 from multiprocessing.dummy import Pool
-from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
+from LDcommon import genome_build_vars, connectMongoDBReadOnly
 from LDcommon import (
     validsnp,
     get_coords,
@@ -23,6 +23,7 @@ from LDcommon import (
     chunkWindow,
     get_output,
     ldproxy_figure,
+    assert_safe_job_id,
 )
 from LDutilites import get_config
 
@@ -63,14 +64,13 @@ def calculate_proxy(
     aws_info = param_list["aws_info"]
     num_subprocesses = param_list["num_subprocesses"]
 
-    export_s3_keys = retrieveAWSCredentials()
-
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
     if request is False:
         request = str(time.strftime("%I%M%S"))
+    request = assert_safe_job_id(request, "request")
 
     # Create JSON output
     out_json = open(tmp_dir + "proxy" + request + ".json", "w")

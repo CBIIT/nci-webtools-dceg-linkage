@@ -12,8 +12,9 @@ import httpx
 from datetime import datetime
 from pathlib import Path
 from multiprocessing.dummy import Pool
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly, tabix
+from LDcommon import checkS3File, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly, tabix
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
+from LDcommon import assert_safe_job_id
 from LDutilites import get_config,array_split
 
 # Configure module logger
@@ -35,6 +36,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     
     start_time = time.time()
 
+    request = assert_safe_job_id(request, "request")
+
     # Set data directories using config.yml
     param_list = get_config()
     dbsnp_version = param_list['dbsnp_version']
@@ -44,8 +47,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     genotypes_dir = param_list['genotypes_dir']
     aws_info = param_list['aws_info']
     num_subprocesses = param_list['num_subprocesses']
-
-    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):

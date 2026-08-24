@@ -6,17 +6,19 @@ import subprocess
 import sys
 import httpx
 import threading
-from LDcommon import retrieveAWSCredentials, genome_build_vars, getRefGene, connectMongoDBReadOnly
+from LDcommon import genome_build_vars, getRefGene, connectMongoDBReadOnly
 from LDcommon import get_coords, replace_coords_rsid_list, validsnp, get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import get_1000g_data, parse_vcf, check_same_chromosome, get_forgeDB
+from LDcommon import assert_safe_job_id
 
 
 # Create LDmatrix function
 def calculate_matrix(
     snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True, annotate="forge"
 ):
+    request = assert_safe_job_id(request, "request")
     # Set data directories using config.yml
     param_list = get_config()
     dbsnp_version = param_list["dbsnp_version"]
@@ -25,8 +27,6 @@ def calculate_matrix(
     tmp_dir = param_list["tmp_dir"]
     genotypes_dir = param_list["genotypes_dir"]
     aws_info = param_list["aws_info"]
-
-    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):

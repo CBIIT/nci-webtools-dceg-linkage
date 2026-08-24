@@ -9,7 +9,8 @@ from datetime import datetime
 from pathlib import Path
 from multiprocessing.dummy import Pool
 from math import log10
-from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
+from LDcommon import get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
+from LDcommon import assert_safe_job_id, assert_confined_path
 from LDutilites import get_config, array_split
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -54,6 +55,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     
     start_time = time.time()
     
+    request = assert_safe_job_id(request, "request")
     logger.debug(f"Starting LDassoc SVG generation - file: {file}, region: {region}, pop: {pop}, request: {request}, genome_build: {genome_build}")
     
     # Set data directories using config.yml 
@@ -65,8 +67,6 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     num_subprocesses = param_list['num_subprocesses']
 
     logger.debug(f"Loaded configuration - data_dir: {data_dir}, tmp_dir: {tmp_dir}")
-
-    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -125,6 +125,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     # Load input file
     logger.debug(f"Loading association data file: {file}")
     try:
+        file = assert_confined_path(file, data_dir, "file")
         with open(file) as fp:
             header = fp.readline().strip().split()
             first = fp.readline().strip().split()

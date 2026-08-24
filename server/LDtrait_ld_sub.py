@@ -1,10 +1,10 @@
 import json
 import sys
-from LDcommon import retrieveAWSCredentials, genome_build_vars,get_1000g_data_single
+from LDcommon import genome_build_vars,get_1000g_data_single,assert_safe_job_id
 from LDutilites import get_config
 #import cache from functools
 
-request = sys.argv[1]
+request = assert_safe_job_id(sys.argv[1], "request")
 subprocess_id = sys.argv[2]
 genome_build = sys.argv[3]
 
@@ -15,8 +15,6 @@ data_dir = param_list['data_dir']
 tmp_dir = param_list['tmp_dir']
 genotypes_dir = param_list['genotypes_dir']
 aws_info = param_list['aws_info']
-
-export_s3_keys = retrieveAWSCredentials()
 
 # Get population ids
 pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
