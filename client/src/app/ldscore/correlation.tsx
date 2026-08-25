@@ -490,7 +490,7 @@ export default function Correlation() {
               </Button>
             </div>
           </Col>
-        </Row>
+  
 
            <div className="mb-1 position-relative">
           {selectedScale === "liability" && ( 
@@ -500,7 +500,7 @@ export default function Correlation() {
                   top: 0,
                   bottom: 0,
                   left: -5,
-                  width: "100%",
+                  width: "50%",
                   border: "1px solid #dee2e6",
                   borderRadius: "0.375rem",
                   pointerEvents: "none",
@@ -639,7 +639,7 @@ export default function Correlation() {
                 top: 0,
                 bottom: 0,
                 left: -5,
-                width: "100%",
+                width: "50%",
                 border: "1px solid #dee2e6",
                 borderRadius: "0.375rem",
                 pointerEvents: "none",
@@ -815,7 +815,8 @@ export default function Correlation() {
                   )}
                 </>
               )}
-        </Form>
+      </Row>
+      </Form>
 
       {fileError && (
         <Row>
