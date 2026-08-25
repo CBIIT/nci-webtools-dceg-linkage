@@ -327,9 +327,8 @@ export default function Correlation() {
       <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
         <Row className="align-items-start">
         <Col s={12} sm={12} md={12} lg={7}>
-        <div className="border rounded p-3 mb-3">
         <Row>
-          <Col s={12} sm={12} md={6} lg={4}>
+          <Col xs={12}>
             <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
             
               <Form.Check
@@ -371,8 +370,52 @@ export default function Correlation() {
                 Click here for sample format
               </HoverUnderlineLink>
             </div>
-            <br />
-            <br />
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={12}>
+            <Form.Group controlId="scale" className="mb-3">
+              <Form.Label className="d-block">Scale</Form.Label>
+              <ButtonGroup>
+                <ToggleButton
+                  id="radio-correlation-scale-observed"
+                  title="Observed scale"
+                  type="radio"
+                  variant="outline-primary"
+                  disabled={geneticLoading}
+                  {...geneticForm.register("scale")}
+                  value="observed"
+                  checked={selectedScale === "observed"}
+                  onChange={() => {
+                    geneticForm.setValue("scale", "observed");
+                    geneticForm.setValue("samplePrev1", "0.5");
+                    geneticForm.setValue("popPrev1", "0.01");
+                    geneticForm.setValue("samplePrev2", "0.5");
+                    geneticForm.setValue("popPrev2", "0.01");
+                    geneticForm.clearErrors(["samplePrev1", "popPrev1", "samplePrev2", "popPrev2"]);
+                  }}>
+                  Observed
+                </ToggleButton>
+                <ToggleButton
+                  id="radio-correlation-scale-liability"
+                  title="Liability scale"
+                  type="radio"
+                  variant="outline-primary"
+                  disabled={geneticLoading}
+                  {...geneticForm.register("scale")}
+                  value="liability"
+                  checked={selectedScale === "liability"}
+                  onChange={() => {
+                    geneticForm.setValue("scale", "liability");
+                  }}>
+                  Liability
+                </ToggleButton>
+              </ButtonGroup>
+            </Form.Group>
+          </Col>
+        </Row>
+        <Row>
+          <Col s={12} sm={12} md={6} lg={5}>
             <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
             <Form.Group controlId="sumstatsFormat1" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
@@ -429,112 +472,68 @@ export default function Correlation() {
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
             </Form.Group>
           </Col>
-        
-           <Col s={12} sm={12} md={6} lg={3}>
-            <Form.Group controlId="scale" className="mb-3">
-              <Form.Label className="d-block">Scale</Form.Label>
-              <ButtonGroup>
-                <ToggleButton
-                  id="radio-correlation-scale-observed"
-                  title="Observed scale"
-                  type="radio"
-                  variant="outline-primary"
-                  disabled={geneticLoading}
-                  {...geneticForm.register("scale")}
-                  value="observed"
-                  checked={selectedScale === "observed"}
-                  onChange={() => {
-                    geneticForm.setValue("scale", "observed");
-                    geneticForm.setValue("samplePrev1", "0.5");
-                    geneticForm.setValue("popPrev1", "0.01");
-                    geneticForm.setValue("samplePrev2", "0.5");
-                    geneticForm.setValue("popPrev2", "0.01");
-                    geneticForm.clearErrors(["samplePrev1", "popPrev1", "samplePrev2", "popPrev2"]);
-                  }}>
-                  Observed
-                </ToggleButton>
-                <ToggleButton
-                  id="radio-correlation-scale-liability"
-                  title="Liability scale"
-                  type="radio"
-                  variant="outline-primary"
-                  disabled={geneticLoading}
-                  {...geneticForm.register("scale")}
-                  value="liability"
-                  checked={selectedScale === "liability"}
-                  onChange={() => {
-                    geneticForm.setValue("scale", "liability");
-                  }}>
-                  Liability
-                </ToggleButton>
-              </ButtonGroup>
-            </Form.Group>
-            <br />
-            {selectedScale === "liability" && (
-              <Row>
-                <Col md={6}>
-                  <Form.Group controlId="samplePrev1">
-                    <Form.Label>
-                     Sample prevalence
-                    </Form.Label>
-                    <Form.Control
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      max={1}
-                      disabled={geneticLoading}
-                      placeholder="0.5"
-                      style={{ maxWidth: "160px" }}
-                      {...geneticForm.register("samplePrev1", {
-                        validate: (value) => {
-                          if (selectedScale !== "liability") return true;
-                          if (!value || value.trim() === "") return "Sample prevalence is required";
-                          const num = Number(value);
-                          if (Number.isNaN(num)) return "Sample prevalence must be numeric";
-                          return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
-                        },
-                      })}
-                        title="Percentage (enter as 0–1)"
-                    />
-                    <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev1?.message}</Form.Text>
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group controlId="popPrev1">
-                    <Form.Label>
-                      Population prevalence
-                     </Form.Label>
-                    <Form.Control
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      max={1}
-                      disabled={geneticLoading}
-                      placeholder="0.01"
-                      style={{ maxWidth: "160px" }}
-                      {...geneticForm.register("popPrev1", {
-                        validate: (value) => {
-                          if (selectedScale !== "liability") return true;
-                          if (!value || value.trim() === "") return "Population prevalence is required";
-                          const num = Number(value);
-                          if (Number.isNaN(num)) return "Population prevalence must be numeric";
-                          return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
-                        },
-                      })}
-                        title="Percentage (enter as 0–1)"
-                    />
-                    <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev1?.message}</Form.Text>
-                  </Form.Group>
-                </Col>
-              </Row>
-            )}
-          </Col>
+          {selectedScale === "liability" && (
+            <>
+              <Col s={12} sm={12} md={6} lg={2}>
+                <Form.Group controlId="samplePrev1">
+                  <Form.Label>
+                   Sample prevalence
+                  </Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    max={1}
+                    disabled={geneticLoading}
+                    placeholder="0.5"
+                    style={{ maxWidth: "160px" }}
+                    {...geneticForm.register("samplePrev1", {
+                      validate: (value) => {
+                        if (selectedScale !== "liability") return true;
+                        if (!value || value.trim() === "") return "Sample prevalence is required";
+                        const num = Number(value);
+                        if (Number.isNaN(num)) return "Sample prevalence must be numeric";
+                        return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
+                      },
+                    })}
+                      title="Percentage (enter as 0–1)"
+                  />
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev1?.message}</Form.Text>
+                </Form.Group>
+              </Col>
+              <Col s={12} sm={12} md={6} lg={2}>
+                <Form.Group controlId="popPrev1">
+                  <Form.Label>
+                    Population prevalence
+                   </Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    max={1}
+                    disabled={geneticLoading}
+                    placeholder="0.01"
+                    style={{ maxWidth: "160px" }}
+                    {...geneticForm.register("popPrev1", {
+                      validate: (value) => {
+                        if (selectedScale !== "liability") return true;
+                        if (!value || value.trim() === "") return "Population prevalence is required";
+                        const num = Number(value);
+                        if (Number.isNaN(num)) return "Population prevalence must be numeric";
+                        return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
+                      },
+                    })}
+                      title="Percentage (enter as 0–1)"
+                  />
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev1?.message}</Form.Text>
+                </Form.Group>
+              </Col>
+            </>
+          )}
         </Row>
-        </div>
         </Col>
 
         <Col s={12} sm={12} md={12} lg={5}>
-        <div className="border rounded p-3 mb-3">
         <Row>
            <Col s={12} sm={12} md={6} lg={7}>
             <Form.Group controlId="ldscoreSource" className="mb-3">
@@ -616,7 +615,6 @@ export default function Correlation() {
             </div>
           </Col>
         </Row>
-        </div>
         </Col>
         </Row>
         <br/>
