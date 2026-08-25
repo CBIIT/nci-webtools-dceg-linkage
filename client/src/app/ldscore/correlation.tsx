@@ -490,7 +490,7 @@ export default function Correlation() {
               </Button>
             </div>
           </Col>
-  
+        </Row>
 
            <div className="mb-1 position-relative">
           {selectedScale === "liability" && ( 
@@ -509,7 +509,7 @@ export default function Correlation() {
              )}
            <Row>
              <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
-            <Col s={12} sm={12} md={6} lg={4}>
+            <Col s={12} sm={12} md={6} lg={3}>
             <Form.Group controlId="sumstatsFormat1" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
               <Form.Select
@@ -569,7 +569,7 @@ export default function Correlation() {
             </Col>
               {selectedScale === "liability" && (
               <>
-              <Col s={12} sm={12} md={6} lg={5}>
+              <Col s={12} sm={12} md={6} lg={3}>
                 <Row>
                   <Col xs={6}>
                     <Form.Group controlId="samplePrev1">
@@ -648,7 +648,7 @@ export default function Correlation() {
           )}
         <Row>  
            <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
-          <Col s={12} sm={12} md={6} lg={4}>
+          <Col s={12} sm={12} md={6} lg={3}>
             <Form.Group controlId="sumstatsFormat2" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
               <Form.Select
@@ -706,7 +706,7 @@ export default function Correlation() {
               </Col>
               {selectedScale === "liability" && (
                 <>
-                <Col s={12} sm={12} md={6} lg={5}>
+                <Col s={12} sm={12} md={6} lg={3}>
                     <Row>
                       <Col xs={6}>
                         <Form.Group controlId="samplePrev2">
@@ -815,7 +815,6 @@ export default function Correlation() {
                   )}
                 </>
               )}
-      </Row>
       </Form>
 
       {fileError && (
