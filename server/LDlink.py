@@ -56,7 +56,7 @@ from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlat
 from sumstats_normalizer import normalize_sumstats_for_ldsc
 from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, validate_ldscore_source_compatibility, validate_ldscore_output, validate_ldscore_output_set, write_compatibility_metadata, validate_ldscore_import_files, _detect_chromosome_coverage, LDSCORE_OUTPUT_SUFFIX, SUPPORTED_LDSC_GENOME_BUILDS
 from ldscore_runs import ensure_indexes as ensure_ldscore_runs_indexes, persist_ldscore_run, list_ldscore_runs, get_ldscore_run, public_run_view as ldscore_run_public_view
-from ldscore_storage import resolve_local_path as resolve_ldscore_local_path, prepare_ldsc_ref_dir
+from ldscore_storage import resolve_local_path as resolve_ldscore_local_path, prepare_ldsc_ref_dir, get_local_path_base as get_ldscore_local_path_base
 from session_auth import COOKIE_NAME as BROWSER_SESSION_COOKIE_NAME, derive_session_id_from_cookie
 import zipfile
 import shutil
@@ -1853,7 +1853,7 @@ def validate_sumstats():
         filename, file_path, upload_dir = _resolve_upload_file_path(filename, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid sumstats validation input: {validation_error}")
-        return jsonify({"fileValid": {"valid": False, "errors": [str(validation_error)], "warnings": []}})
+        return jsonify({"fileValid": {"valid": False, "errors": ["Invalid filename or reference parameter."], "warnings": []}})
     
     app.logger.debug(f"Validating sumstats file: {file_path}")
     
@@ -1917,7 +1917,7 @@ def validate_sumstats():
     except Exception as e:
         app.logger.error(f"Error validating sumstats file: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"fileValid": {"valid": False, "errors": [str(e)], "warnings": []}})
+        return jsonify({"fileValid": {"valid": False, "errors": ["An error occurred while validating the file."], "warnings": []}})
 
 
 @app.route("/LDlinkRestWeb/validate_bfile", methods=["GET"])
@@ -1952,7 +1952,7 @@ def validate_bfile():
         _, bfile_path, upload_dir = _resolve_upload_file_path(fileroot, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid bfile validation input: {validation_error}")
-        return jsonify({"fileValid": False, "error": str(validation_error)})
+        return jsonify({"fileValid": False, "error": "Invalid filename or reference parameter."})
     
     app.logger.debug(f"Validating bfile: {bfile_path}")
     
@@ -1968,7 +1968,7 @@ def validate_bfile():
     except Exception as e:
         app.logger.error(f"Error validating bfile: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"fileValid": False, "error": str(e)})
+        return jsonify({"fileValid": False, "error": "An error occurred while validating the file."})
 
 
 @app.route("/LDlinkRestWeb/copy_and_download/<filename>", methods=["GET"])
@@ -2546,10 +2546,17 @@ def ldscore_run_download_file(reference, filename):
         app.logger.error(f"Failed to resolve LD score run file {reference}/{safe_filename}: {storage_error}")
         return _validation_response("Unable to prepare the requested download.", status_code=500)
 
-    if not os.path.exists(local_path):
+    # Redundant inline confinement recheck (defense in depth): the check inside
+    # resolve_ldscore_local_path() is not a visible barrier for this function.
+    _local_path_base = os.path.normpath(get_ldscore_local_path_base(run_doc))
+    _normalized_local_path = os.path.normpath(local_path)
+    if _normalized_local_path != _local_path_base and not _normalized_local_path.startswith(_local_path_base + os.sep):
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
+
+    if not os.path.exists(_normalized_local_path):
         return _validation_response("The requested LD score output file is no longer available.", status_code=404)
 
-    return send_file(local_path, as_attachment=True, download_name=safe_filename)
+    return send_file(_normalized_local_path, as_attachment=True, download_name=safe_filename)
 
 
 # Downloads the complete set of output files from a persisted LD score run as a zip.
@@ -2564,6 +2571,7 @@ def ldscore_run_download_set(reference):
         return _validation_response("No output files are available for this LD score run.", status_code=404)
 
     zip_filepath = os.path.join(tmp_dir, f"ldscore_run_{reference}.zip")
+    _local_path_base = os.path.normpath(get_ldscore_local_path_base(run_doc))
     try:
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
             for output_filename in output_files:
@@ -2574,8 +2582,13 @@ def ldscore_run_download_set(reference):
                 if safe_output_filename not in output_files:
                     continue
                 local_path = resolve_ldscore_local_path(run_doc, safe_output_filename)
-                if os.path.exists(local_path):
-                    zipf.write(local_path, safe_output_filename)
+                # Redundant inline confinement recheck (defense in depth): the check
+                # inside resolve_ldscore_local_path() is not a visible barrier here.
+                _normalized_local_path = os.path.normpath(local_path)
+                if _normalized_local_path != _local_path_base and not _normalized_local_path.startswith(_local_path_base + os.sep):
+                    continue
+                if os.path.exists(_normalized_local_path):
+                    zipf.write(_normalized_local_path, safe_output_filename)
     except RuntimeError as storage_error:
         app.logger.error(f"Failed to build LD score run zip for {reference}: {storage_error}")
         return _validation_response("Unable to prepare the requested download.", status_code=500)

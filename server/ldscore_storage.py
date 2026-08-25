@@ -111,6 +111,20 @@ def resolve_local_path(run_doc: Dict[str, object], filename: str) -> str:
     return local_path
 
 
+def get_local_path_base(run_doc: Dict[str, object]) -> str:
+    """Returns the base directory that resolve_local_path()'s return value must
+    resolve inside for the given run's backend. Callers that go on to use that
+    path in a file operation (open/zipf.write/send_file/...) should redundantly
+    re-check confinement against this base, inline in their own function, since a
+    boolean/path check performed only inside resolve_local_path() itself is not a
+    visible barrier for static analysis of the caller."""
+    backend = run_doc.get("backend", "local")
+    if backend == "local":
+        return run_doc.get("ldscore_path", "")
+    reference = run_doc.get("reference", "")
+    return os.path.normpath(os.path.join(get_persist_dir(), "_s3_cache", reference))
+
+
 def run_files_exist(run_doc: Dict[str, object]) -> bool:
     """Verifies every recorded output file for a run is still present in storage."""
     output_files = run_doc.get("output_files", []) or []

@@ -1,10 +1,13 @@
 import gzip
 import json
+import logging
 import os
 import time
 from typing import Callable, Dict, Iterable, List, Optional
 
 from ldscore_storage import run_files_exist
+
+logger = logging.getLogger("ldscore_compatibility")
 
 REQUIRED_BFILE_EXTENSIONS = (".bed", ".bim", ".fam")
 SUPPORTED_LDSC_GENOME_BUILDS = {"grch37", "grch38", "grch38_high_coverage"}
@@ -45,8 +48,9 @@ def validate_bfile_compatibility(
         try:
             _, component_path, _ = resolve_upload_file_path(component_name, reference)
         except ValueError as validation_error:
+            logger.warning(f"Invalid bfile component path for {component_name}: {validation_error}")
             result["valid"] = False
-            result["errors"].append(str(validation_error))
+            result["errors"].append(f"Invalid file reference: {component_name}")
             continue
         resolved_paths[extension] = component_path
         if not os.path.exists(component_path):
@@ -141,8 +145,11 @@ def validate_sumstats_preanalysis(
         with open(metadata_path) as metadata_file:
             metadata = json.load(metadata_file)
     except (OSError, json.JSONDecodeError) as metadata_error:
+        # Log the exception detail server-side only -- it can include the full local
+        # file path and should not be reflected back to the client.
+        logger.warning(f"Summary statistics validation metadata is unreadable ({metadata_path}): {metadata_error}")
         result["valid"] = False
-        result["errors"].append(f"Summary statistics validation metadata is unreadable: {metadata_error}")
+        result["errors"].append("Summary statistics validation metadata is unreadable.")
         result["status"] = "failed"
         return result
 
@@ -213,8 +220,11 @@ def validate_ldscore_output(file_dir: str, fileroot: str, reference: str) -> Dic
             header_line = output_file.readline()
             data_line = output_file.readline()
     except OSError as read_error:
+        # Log the exception detail server-side only -- it can include the full local
+        # file path and should not be reflected back to the client.
+        logger.warning(f"LD score output file is not readable ({output_path}): {read_error}")
         result["valid"] = False
-        result["errors"].append(f"LD score output file is not readable: {read_error}")
+        result["errors"].append(f"LD score output file is not readable: {output_filename}")
         result["status"] = "failed"
         return result
 
