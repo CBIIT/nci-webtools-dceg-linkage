@@ -325,6 +325,9 @@ export default function Correlation() {
       )}
 
       <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
+        <Row className="align-items-start">
+        <Col s={12} sm={12} md={12} lg={7}>
+        <div className="border rounded p-3 mb-3">
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
             <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
@@ -368,7 +371,8 @@ export default function Correlation() {
                 Click here for sample format
               </HoverUnderlineLink>
             </div>
-            <hr />
+            <br />
+            <br />
             <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
             <Form.Group controlId="sumstatsFormat1" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
@@ -465,7 +469,7 @@ export default function Correlation() {
                 </ToggleButton>
               </ButtonGroup>
             </Form.Group>
-
+            <br />
             {selectedScale === "liability" && (
               <Row>
                 <Col md={6}>
@@ -525,8 +529,14 @@ export default function Correlation() {
               </Row>
             )}
           </Col>
+        </Row>
+        </div>
+        </Col>
 
-           <Col s={12} sm={12} md={6} lg={3}>
+        <Col s={12} sm={12} md={12} lg={5}>
+        <div className="border rounded p-3 mb-3">
+        <Row>
+           <Col s={12} sm={12} md={6} lg={7}>
             <Form.Group controlId="ldscoreSource" className="mb-3">
               <Form.Label>LD Score Source</Form.Label>
               <LdscoreSourceSelect
@@ -595,7 +605,7 @@ export default function Correlation() {
               {ldscoreSourceError && <Form.Text className="text-danger d-block">{ldscoreSourceError}</Form.Text>}
             </Form.Group>
           </Col>
-          <Col s={12} sm={12} md={6} lg={2}>
+          <Col s={12} sm={12} md={6} lg={5}>
             <div className="text-end">
               <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
                 Reset
@@ -606,7 +616,10 @@ export default function Correlation() {
             </div>
           </Col>
         </Row>
-
+        </div>
+        </Col>
+        </Row>
+        <br/>
         <div className="mb-1 position-relative">
           {selectedScale === "liability" && (
             <div
@@ -622,6 +635,7 @@ export default function Correlation() {
               }}
             />
           )}
+  
         <Row>  
            <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
           <Col s={12} sm={12} md={6} lg={4}>

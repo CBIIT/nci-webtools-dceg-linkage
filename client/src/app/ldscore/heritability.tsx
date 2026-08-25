@@ -336,6 +336,8 @@ export default function Heritability() {
                   Click here for sample format
                 </HoverUnderlineLink>
               </div>
+                <br />
+                  <br />
             <Form.Group controlId="sumstatsFormat" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
               <Form.Select
