@@ -4,14 +4,12 @@ import math
 import os
 import time
 import re
-from LDcommon import genome_build_vars, connectMongoDBReadOnly,validsnp
+from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,validsnp
 from LDcommon import replace_coord_rsid, get_coords,get_population,get_query_variant_c,check_allele
-from LDcommon import assert_safe_job_id
 from LDutilites import get_config
 # Create LDpair function
 
 def calculate_pair(snp_pairs, pop, web, genome_build, request):
-    request = assert_safe_job_id(request, "request")
 
     # Set data directories using config.yml
     param_list = get_config()
@@ -22,6 +20,8 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     tmp_dir = param_list['tmp_dir']
     genotypes_dir = param_list['genotypes_dir']
     aws_info = param_list['aws_info']
+
+    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):

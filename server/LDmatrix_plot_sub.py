@@ -5,9 +5,9 @@ import math
 import os
 import subprocess
 from pathlib import Path
-from LDcommon import genome_build_vars, connectMongoDBReadOnly
+from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import get_coords, replace_coords_rsid_list, validsnp, get_population, get_1000g_data, parse_vcf
-from LDcommon import set_alleles, get_forgeDB, assert_safe_job_id
+from LDcommon import set_alleles, get_forgeDB
 from LDutilites import get_config
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -36,7 +36,6 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     Returns:
         None
     """
-    request = assert_safe_job_id(request, "request")
 
     # Set data directories using config.yml
     param_list = get_config()
@@ -46,6 +45,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     tmp_dir = param_list["tmp_dir"]
     genotypes_dir = param_list["genotypes_dir"]
     aws_info = param_list["aws_info"]
+
+    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):

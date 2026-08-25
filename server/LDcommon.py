@@ -64,43 +64,6 @@ genome_build_vars = {
     }
 }
 
-# Per-request job-id strings (query param "reference"/"request") are used throughout
-# this codebase to build temp file paths, e.g. tmp_dir + "snps_" + request + ".txt".
-# LDlink.py's structural_input_guard before_request hook already validates these as
-# canonical UUIDv4 strings, but that happens in a separate function static analysis
-# tools (e.g. CodeQL) can't trace through -- so callers should also validate locally,
-# right where the id is first read, via assert_safe_job_id below.
-SAFE_JOB_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
-
-
-def assert_safe_job_id(value, parameter_name="request"):
-    """Raises ValueError unless value is a safe, traversal-free job-id string that,
-    once joined onto tmp_dir (as every caller does, e.g. tmp_dir + "snps_" + value +
-    ".txt"), still resolves inside tmp_dir. The format check alone isn't enough for
-    CodeQL's path-injection barrier recognition, which specifically looks for a
-    normalize + startswith-root shape (see also LDlink.py's
-    _is_reference_confined_to_tmp) -- so this does both checks together, once, for
-    every caller."""
-    text_value = str(value or "")
-    if not SAFE_JOB_ID_RE.fullmatch(text_value):
-        raise ValueError(f"Invalid {parameter_name} identifier.")
-    normalized_root = os.path.normpath(tmp_dir)
-    candidate = os.path.normpath(os.path.join(normalized_root, text_value))
-    if candidate != normalized_root and not candidate.startswith(normalized_root + os.sep):
-        raise ValueError(f"Invalid {parameter_name} identifier.")
-    return text_value
-
-
-def assert_confined_path(candidate_path, base_dir, parameter_name="filename"):
-    """Raises ValueError unless candidate_path resolves inside base_dir -- for
-    callers that build a full path (rather than a bare job-id) from user input."""
-    normalized_base = os.path.normpath(base_dir)
-    normalized_candidate = os.path.normpath(candidate_path)
-    if normalized_candidate != normalized_base and not normalized_candidate.startswith(normalized_base + os.sep):
-        raise ValueError(f"Invalid {parameter_name} parameter.")
-    return candidate_path
-
-
 def checkS3File(aws_info, bucket, filePath):
     try:
         boto3.client('s3').head_object(Bucket=bucket, Key=filePath)
@@ -178,7 +141,6 @@ def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, 
     vcf = [line for line in output if "END" not in line]
 
     if write_output:
-        request = assert_safe_job_id(request, "request")
         temp_filepath = tmp_dir + "snp_no_dups_" + request + ".vcf"
         with open(temp_filepath, "w") as f:
             f.write("\n".join(vcf))
@@ -201,7 +163,6 @@ def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,reque
     output = tabix("-fhD", query_file, *tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
     if is_output:
-        request = assert_safe_job_id(request, "request")
         with open(tmp_dir+"snp_no_dups_"+request+".vcf", "w") as f:
             f.write("\n".join(vcf))
         vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
@@ -292,7 +253,6 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
     #temp = query_results_sanitized.pop(0)
     #query_results_sanitized.append(temp)
     #print(query_results_sanitized)
-    assert_confined_path(filename, tmp_dir, "filename")
     with open(filename, "w") as f:
         for x in query_results_sanitized:
             f.write(json.dumps(x) + '\n')
@@ -308,7 +268,6 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
 	})
     recomb_results_sanitized = json.loads(json_util.dumps(recomb_results)) 
 
-    assert_confined_path(filename, tmp_dir, "filename")
     with open(filename, "w") as f:
         for recomb_obj in recomb_results_sanitized:
             f.write(json.dumps({
@@ -439,7 +398,6 @@ def replace_coords_rsid_list(db, snp_lst,genome_build,output):
 ### common function to retrieve population ###
 ##############################################
 def get_population(pop, request,output):
-    request = assert_safe_job_id(request, "request")
     # Select desired ancestral populations
     pops = pop.split("+")
     pop_dirs = []
@@ -483,7 +441,6 @@ def set_alleles(a1, a2):
 # get the genotype ###
 #################################################
 def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,output={}):
-    request = assert_safe_job_id(request, "request")
     queryVariantWarnings = []
     #vcf1_pos: 60697654; snp_coord: ['rs4672393', '2', '60697654']
     tmp_coord = [str(x) for x in snp_coord]
@@ -746,7 +703,6 @@ def get_regDB(db,genome_build,chr, pos):
         return result["score"]
 #################
 def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript,annotate):
-    request = assert_safe_job_id(request, "request")
     q_rs = []
     q_allele = []
     q_coord = []

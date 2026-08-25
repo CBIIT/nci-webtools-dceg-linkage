@@ -7,8 +7,8 @@ import threading
 import weakref
 from pathlib import Path
 from multiprocessing.dummy import Pool
-from LDcommon import genome_build_vars,connectMongoDBReadOnly,ldproxy_figure
-from LDcommon import get_coords,replace_coord_rsid,get_query_variant_c,chunkWindow,get_output,assert_safe_job_id
+from LDcommon import retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,ldproxy_figure
+from LDcommon import get_coords,replace_coord_rsid,get_query_variant_c,chunkWindow,get_output
 from LDutilites import get_config
 
 # LDproxy subprocess to export bokeh to high quality images in the background
@@ -22,13 +22,14 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     aws_info = param_list['aws_info']
     num_subprocesses = param_list['num_subprocesses']
 
+    export_s3_keys = retrieveAWSCredentials()
+
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
     if request is False:
         request = str(time.strftime("%I%M%S"))
-    request = assert_safe_job_id(request, "request")
 
     # Create JSON output
 

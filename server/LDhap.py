@@ -7,11 +7,10 @@ from LDcommon import validsnp,replace_coords_rsid_list,get_coords,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import connectMongoDBReadOnly, genome_build_vars, parse_vcf,get_1000g_data
-from LDcommon import check_same_chromosome, assert_safe_job_id
+from LDcommon import check_same_chromosome
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
-    request = assert_safe_job_id(request, "request")
     # Set data directories using config.yml
     param_list = get_config()
     dbsnp_version = param_list['dbsnp_version']

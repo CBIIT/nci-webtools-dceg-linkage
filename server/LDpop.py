@@ -3,15 +3,12 @@ import json
 import math
 import os
 import sys
-from LDcommon import genome_build_vars, connectMongoDBReadOnly
+from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords,get_query_variant_c
-from LDcommon import assert_safe_job_id
 from LDutilites import get_config
 
 # Create LDpop function
 def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
-    if request is not None:
-        request = assert_safe_job_id(request, "request")
     # trim any whitespace
     snp1 = snp1.lower().strip()
     snp2 = snp2.lower().strip() 
@@ -27,6 +24,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     tmp_dir = param_list['tmp_dir']
     genotypes_dir = param_list['genotypes_dir']
     aws_info = param_list['aws_info']
+
+    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -170,12 +169,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     ID_dict = {k: [] for k in pop_split}
     adds = ["CHROM", "POS", "ID", "REF", "ALT"]
     
-    for pop_i in pop_split:
-        # Re-check against the same allowlist as the loop above -- makes the
-        # sanitizing barrier visible locally at this second open() call too, rather
-        # than relying on control flow from the earlier loop's early-return.
-        if pop_i not in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            continue
+    for pop_i in pop_split:        
         with open(data_dir + population_samples_dir + pop_i + ".txt", "r") as f:
             # print pop_dir + pop_i + ".txt"
             for line in f:

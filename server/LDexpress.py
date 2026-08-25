@@ -9,7 +9,6 @@ from pymongo.errors import ConnectionFailure
 from bson import json_util
 from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords,get_query_variant_c,chunkWindow,get_output
-from LDcommon import assert_safe_job_id
 from LDutilites import get_config,array_split
 
 # Set data directories using config.yml 
@@ -42,7 +41,6 @@ def get_ldexpress_tissues(web):
 
 # Create LDexpress function
 def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2_d_threshold=0.1, p_threshold=0.1, window=500000):
-    request = assert_safe_job_id(request, "request")
     print("##### START LD EXPRESS CALCULATION #####")   
     print("raw snplst", snplst)
     print("raw pop", pop)
