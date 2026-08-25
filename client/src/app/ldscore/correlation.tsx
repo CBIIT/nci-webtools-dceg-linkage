@@ -328,9 +328,9 @@ export default function Correlation() {
         <Row className="align-items-start">
         <Col s={12} sm={12} md={12} lg={7}>
         <Row>
-          <Col xs={12}>
+          <Col xs={12} md={8} lg={8}>
             <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
-            
+
               <Form.Check
                 type="switch"
                 id="use-example-correlation"
@@ -371,9 +371,7 @@ export default function Correlation() {
               </HoverUnderlineLink>
             </div>
           </Col>
-        </Row>
-        <Row>
-          <Col xs={12}>
+          <Col xs={12} md={4} lg={4}>
             <Form.Group controlId="scale" className="mb-3">
               <Form.Label className="d-block">Scale</Form.Label>
               <ButtonGroup>
@@ -415,8 +413,26 @@ export default function Correlation() {
           </Col>
         </Row>
         <Row>
-          <Col s={12} sm={12} md={6} lg={5}>
+
+        <div className="mb-1 position-relative">
+          {selectedScale === "liability" && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: -5,
+                width: "100%",
+                border: "1px solid #dee2e6",
+                borderRadius: "0.375rem",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+  
+        <Row>  
             <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
+             <Col xs={12} sm={12} md={6} lg={6}>
             <Form.Group controlId="sumstatsFormat1" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
               <Form.Select
@@ -474,62 +490,205 @@ export default function Correlation() {
           </Col>
           {selectedScale === "liability" && (
             <>
-              <Col s={12} sm={12} md={6} lg={2}>
-                <Form.Group controlId="samplePrev1">
-                  <Form.Label>
-                   Sample prevalence
-                  </Form.Label>
-                  <Form.Control
-                    type="number"
-                    step="0.01"
-                    min={0}
-                    max={1}
-                    disabled={geneticLoading}
-                    placeholder="0.5"
-                    style={{ maxWidth: "160px" }}
-                    {...geneticForm.register("samplePrev1", {
-                      validate: (value) => {
-                        if (selectedScale !== "liability") return true;
-                        if (!value || value.trim() === "") return "Sample prevalence is required";
-                        const num = Number(value);
-                        if (Number.isNaN(num)) return "Sample prevalence must be numeric";
-                        return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
-                      },
-                    })}
-                      title="Percentage (enter as 0–1)"
-                  />
-                  <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev1?.message}</Form.Text>
-                </Form.Group>
-              </Col>
-              <Col s={12} sm={12} md={6} lg={2}>
-                <Form.Group controlId="popPrev1">
-                  <Form.Label>
-                    Population prevalence
-                   </Form.Label>
-                  <Form.Control
-                    type="number"
-                    step="0.01"
-                    min={0}
-                    max={1}
-                    disabled={geneticLoading}
-                    placeholder="0.01"
-                    style={{ maxWidth: "160px" }}
-                    {...geneticForm.register("popPrev1", {
-                      validate: (value) => {
-                        if (selectedScale !== "liability") return true;
-                        if (!value || value.trim() === "") return "Population prevalence is required";
-                        const num = Number(value);
-                        if (Number.isNaN(num)) return "Population prevalence must be numeric";
-                        return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
-                      },
-                    })}
-                      title="Percentage (enter as 0–1)"
-                  />
-                  <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev1?.message}</Form.Text>
-                </Form.Group>
+              <Col xs={12} sm={12} md={6} lg={6}>
+                <Row>
+                  <Col xs={6}>
+                    <Form.Group controlId="samplePrev1">
+                      <Form.Label>
+                       Sample prevalence
+                      </Form.Label>
+                      <Form.Control
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        max={1}
+                        disabled={geneticLoading}
+                        placeholder="0.5"
+                        style={{ maxWidth: "160px" }}
+                        {...geneticForm.register("samplePrev1", {
+                          validate: (value) => {
+                            if (selectedScale !== "liability") return true;
+                            if (!value || value.trim() === "") return "Sample prevalence is required";
+                            const num = Number(value);
+                            if (Number.isNaN(num)) return "Sample prevalence must be numeric";
+                            return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
+                          },
+                        })}
+                          title="Percentage (enter as 0–1)"
+                      />
+                      <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev1?.message}</Form.Text>
+                    </Form.Group>
+                  </Col>
+                  <Col xs={6}>
+                    <Form.Group controlId="popPrev1">
+                      <Form.Label>
+                        Population prevalence
+                       </Form.Label>
+                      <Form.Control
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        max={1}
+                        disabled={geneticLoading}
+                        placeholder="0.01"
+                        style={{ maxWidth: "160px" }}
+                        {...geneticForm.register("popPrev1", {
+                          validate: (value) => {
+                            if (selectedScale !== "liability") return true;
+                            if (!value || value.trim() === "") return "Population prevalence is required";
+                            const num = Number(value);
+                            if (Number.isNaN(num)) return "Population prevalence must be numeric";
+                            return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
+                          },
+                        })}
+                          title="Percentage (enter as 0–1)"
+                      />
+                      <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev1?.message}</Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
               </Col>
             </>
           )}
+          </Row>
+        </div>
+        </Row>
+        <Row>
+        <div className="mb-1 position-relative">
+          {selectedScale === "liability" && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: -5,
+                width: "100%",
+                border: "1px solid #dee2e6",
+                borderRadius: "0.375rem",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+  
+        <Row>  
+           <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
+          <Col xs={12} sm={12} md={6} lg={6}>
+            <Form.Group controlId="sumstatsFormat2" className="mb-3">
+              <Form.Label>Summary statistics format</Form.Label>
+              <Form.Select
+                disabled={geneticLoading || useExampleCorrelation}
+                style={{ maxWidth: "400px" }}
+                {...geneticForm.register("sumstatsFormat2", { required: "Summary statistics format is required" })}
+                onChange={(e) => {
+                  geneticForm.setValue("sumstatsFormat2", e.target.value as SumstatsFormat, { shouldValidate: true });
+                  setGeneticCorrelationResultRef(null);
+                  setUploadedFile2("");
+                  setFile2Valid(false);
+                  setValidationError2("");
+                  geneticForm.setValue("file2", undefined);
+                }}
+              >
+                <option value="">Select format</option>
+                {sumstatsFormatOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat2?.message}</Form.Text>
+            </Form.Group>
+            <Form.Group controlId="file2" className="mb-3">
+              <Form.Label>Upload GWAS summary statistics file</Form.Label>
+              {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
+                <div className="form-control bg-light">{exampleFile2}</div>
+              ) : (
+                <Form.Control 
+                  type="file" 
+                  {...file2Registration}
+                  accept={sumstatsAccept}
+                  title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
+                  disabled={geneticLoading}
+                  style={{ maxWidth: "400px" }}
+                  onChange={async (e) => {
+                    await file2Registration.onChange(e);
+                    const input = e.target as HTMLInputElement;
+                    const file = input.files && input.files[0];
+                    setGeneticCorrelationResultRef(null);
+                    if (file) {
+                      const validFormat = await geneticForm.trigger("sumstatsFormat2");
+                      if (!validFormat) {
+                        input.value = "";
+                        geneticForm.setValue("file2", undefined, { shouldValidate: true });
+                        return;
+                      }
+                      await handleFileUpload(file, 2, geneticForm.getValues("sumstatsFormat2"));
+                      geneticForm.clearErrors("file2");
+                    }
+                  }}
+                />
+              )}
+                <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
+              </Form.Group>
+              </Col>
+              {selectedScale === "liability" && (
+                <>
+                <Col xs={12} sm={12} md={6} lg={6}>
+                    <Row>
+                      <Col xs={6}>
+                        <Form.Group controlId="samplePrev2">
+                          <Form.Label>Sample prevalence
+                           </Form.Label>
+                          <Form.Control
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            max={1}
+                            disabled={geneticLoading}
+                            placeholder="0.5"
+                            style={{ maxWidth: "160px" }}
+                            {...geneticForm.register("samplePrev2", {
+                              validate: (value) => {
+                                if (selectedScale !== "liability") return true;
+                                if (!value || value.trim() === "") return "Sample prevalence is required";
+                                const num = Number(value);
+                                if (Number.isNaN(num)) return "Sample prevalence must be numeric";
+                                return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
+                              },
+                            })}
+                             title="Percentage (enter as 0–1)"
+                          />
+                          <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev2?.message}</Form.Text>
+                        </Form.Group>
+                      </Col>
+                      <Col xs={6}>
+                        <Form.Group controlId="popPrev2">
+                          <Form.Label>Population prevalence
+                           </Form.Label>
+                          <Form.Control
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            max={1}
+                            disabled={geneticLoading}
+                            placeholder="0.01"
+                            style={{ maxWidth: "160px" }}
+                            {...geneticForm.register("popPrev2", {
+                              validate: (value) => {
+                                if (selectedScale !== "liability") return true;
+                                if (!value || value.trim() === "") return "Population prevalence is required";
+                                const num = Number(value);
+                                if (Number.isNaN(num)) return "Population prevalence must be numeric";
+                                return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
+                              },
+                            })}
+                               title="Percentage (enter as 0–1)"
+                          />
+                          <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev2?.message}</Form.Text>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  </Col>
+                  </>)}
+                </Row>
+        </div>
         </Row>
         </Col>
 
@@ -617,142 +776,6 @@ export default function Correlation() {
         </Row>
         </Col>
         </Row>
-        <br/>
-        <div className="mb-1 position-relative">
-          {selectedScale === "liability" && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                bottom: 0,
-                left: -5,
-                width: "60%",
-                border: "1px solid #dee2e6",
-                borderRadius: "0.375rem",
-                pointerEvents: "none",
-              }}
-            />
-          )}
-  
-        <Row>  
-           <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
-          <Col s={12} sm={12} md={6} lg={4}>
-            <Form.Group controlId="sumstatsFormat2" className="mb-3">
-              <Form.Label>Summary statistics format</Form.Label>
-              <Form.Select
-                disabled={geneticLoading || useExampleCorrelation}
-                style={{ maxWidth: "400px" }}
-                {...geneticForm.register("sumstatsFormat2", { required: "Summary statistics format is required" })}
-                onChange={(e) => {
-                  geneticForm.setValue("sumstatsFormat2", e.target.value as SumstatsFormat, { shouldValidate: true });
-                  setGeneticCorrelationResultRef(null);
-                  setUploadedFile2("");
-                  setFile2Valid(false);
-                  setValidationError2("");
-                  geneticForm.setValue("file2", undefined);
-                }}
-              >
-                <option value="">Select format</option>
-                {sumstatsFormatOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-              <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat2?.message}</Form.Text>
-            </Form.Group>
-            <Form.Group controlId="file2" className="mb-3">
-              <Form.Label>Upload GWAS summary statistics file</Form.Label>
-              {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
-                <div className="form-control bg-light">{exampleFile2}</div>
-              ) : (
-                <Form.Control 
-                  type="file" 
-                  {...file2Registration}
-                  accept={sumstatsAccept}
-                  title="Upload PLINK, REGENIE, SAIGE, or LDSC-ready GWAS sumstats"
-                  disabled={geneticLoading}
-                  style={{ maxWidth: "400px" }}
-                  onChange={async (e) => {
-                    await file2Registration.onChange(e);
-                    const input = e.target as HTMLInputElement;
-                    const file = input.files && input.files[0];
-                    setGeneticCorrelationResultRef(null);
-                    if (file) {
-                      const validFormat = await geneticForm.trigger("sumstatsFormat2");
-                      if (!validFormat) {
-                        input.value = "";
-                        geneticForm.setValue("file2", undefined, { shouldValidate: true });
-                        return;
-                      }
-                      await handleFileUpload(file, 2, geneticForm.getValues("sumstatsFormat2"));
-                      geneticForm.clearErrors("file2");
-                    }
-                  }}
-                />
-              )}
-                <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
-              </Form.Group>
-              </Col>
-              {selectedScale === "liability" && (
-                <>
-                <Col s={12} sm={12} md={6} lg={3}>
-                    <Row>
-                      <Col xs={6}>
-                        <Form.Group controlId="samplePrev2">
-                          <Form.Label>Sample prevalence
-                           </Form.Label>
-                          <Form.Control
-                            type="number"
-                            step="0.01"
-                            min={0}
-                            max={1}
-                            disabled={geneticLoading}
-                            placeholder="0.5"
-                            style={{ maxWidth: "160px" }}
-                            {...geneticForm.register("samplePrev2", {
-                              validate: (value) => {
-                                if (selectedScale !== "liability") return true;
-                                if (!value || value.trim() === "") return "Sample prevalence is required";
-                                const num = Number(value);
-                                if (Number.isNaN(num)) return "Sample prevalence must be numeric";
-                                return (num > 0 && num < 1) || "Sample prevalence must be between 0 and 1";
-                              },
-                            })}
-                             title="Percentage (enter as 0–1)"
-                          />
-                          <Form.Text className="text-danger">{geneticForm.formState.errors?.samplePrev2?.message}</Form.Text>
-                        </Form.Group>
-                      </Col>
-                      <Col xs={6}>
-                        <Form.Group controlId="popPrev2">
-                          <Form.Label>Population prevalence
-                           </Form.Label>
-                          <Form.Control
-                            type="number"
-                            step="0.01"
-                            min={0}
-                            max={1}
-                            disabled={geneticLoading}
-                            placeholder="0.01"
-                            style={{ maxWidth: "160px" }}
-                            {...geneticForm.register("popPrev2", {
-                              validate: (value) => {
-                                if (selectedScale !== "liability") return true;
-                                if (!value || value.trim() === "") return "Population prevalence is required";
-                                const num = Number(value);
-                                if (Number.isNaN(num)) return "Population prevalence must be numeric";
-                                return (num > 0 && num < 1) || "Population prevalence must be between 0 and 1";
-                              },
-                            })}
-                               title="Percentage (enter as 0–1)"
-                          />
-                          <Form.Text className="text-danger">{geneticForm.formState.errors?.popPrev2?.message}</Form.Text>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-                  </Col>
-                  </>)}
-                </Row>
-                </div>
                  <Row>
                   <Col s={12} sm={12} md={6} lg={4}>
                    <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Upload PLINK, REGENIE, SAIGE, or LDSC-ready summary statistics. Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
