@@ -213,10 +213,43 @@ def _build_output_mapping(format_spec: SumstatsFormat, columns_by_clean_name: Di
     return output_mapping
 
 
+def _resolve_plink_a2(
+    row: Dict[str, str],
+    a1_value: str,
+    ref_column: Optional[str],
+    alt_column: Optional[str],
+    a2_column: Optional[str],
+) -> str:
+    # PLINK REF/ALT are unordered w.r.t. A1, so A2 must be picked per-row rather than from a fixed column.
+    if a2_column:
+        return str(row.get(a2_column, "")).strip()
+    ref_value = str(row.get(ref_column, "")).strip() if ref_column else None
+    alt_value = str(row.get(alt_column, "")).strip() if alt_column else None
+    if ref_value is not None and alt_value is not None:
+        if a1_value == ref_value:
+            return alt_value
+        if a1_value == alt_value:
+            return ref_value
+        raise ValueError(f"A1 allele {a1_value} matches neither REF ({ref_value}) nor ALT ({alt_value})")
+    if ref_value is not None:
+        if a1_value == ref_value:
+            raise ValueError(f"A1 allele {a1_value} matches REF ({ref_value}); cannot determine A2 without an ALT column")
+        return ref_value
+    if alt_value is not None:
+        if a1_value == alt_value:
+            raise ValueError(f"A1 allele {a1_value} matches ALT ({alt_value}); cannot determine A2 without a REF column")
+        return alt_value
+    raise ValueError("No REF, ALT, or A2 column found to determine A2")
+
+
 def _write_normalized_file(input_path: str, output_path: str, format_spec: SumstatsFormat, delimiter: Optional[str], max_error_count: int = 10) -> Tuple[int, List[str]]:
     columns, _ = _read_header(input_path)
     columns_by_clean_name = _columns_by_clean_name(columns)
     output_mapping = _build_output_mapping(format_spec, columns_by_clean_name)
+    is_plink = format_spec.name == "PLINK"
+    ref_column = columns_by_clean_name.get("REF") if is_plink else None
+    alt_column = columns_by_clean_name.get("ALT") if is_plink else None
+    a2_literal_column = columns_by_clean_name.get("A2") if is_plink else None
     errors = []
     row_count = 0
 
@@ -227,6 +260,9 @@ def _write_normalized_file(input_path: str, output_path: str, format_spec: Sumst
             try:
                 output_row = {}
                 for canonical_name in LDSC_OUTPUT_COLUMNS:
+                    if is_plink and canonical_name == "A2":
+                        output_row["A2"] = _resolve_plink_a2(row, output_row["A1"], ref_column, alt_column, a2_literal_column)
+                        continue
                     source_column = output_mapping.get(canonical_name)
                     if not source_column:
                         raise ValueError(f"No source column mapped for {canonical_name}")

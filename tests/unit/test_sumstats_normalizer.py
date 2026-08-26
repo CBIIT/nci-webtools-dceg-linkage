@@ -32,6 +32,43 @@ def test_plink_sumstats_are_normalized(tmp_path):
     assert rows == [{"SNP": "rs1", "A1": "A", "A2": "G", "N": "1000", "P": "0.001", "BETA": "0.25"}]
 
 
+def test_plink_a2_is_resolved_per_row_when_a1_equals_ref(tmp_path):
+    source = tmp_path / "plink.glm"
+    write_text(
+        source,
+        "#CHROM POS ID REF ALT A1 OBS_CT BETA SE P\n"
+        "1 100 rs1 G A G 1000 0.25 0.04 0.001\n"
+        "1 200 rs2 G A A 1000 0.1 0.04 0.01\n",
+    )
+
+    result = normalize_sumstats_for_ldsc(str(source), str(tmp_path))
+
+    assert result["valid"] is True
+    rows = read_normalized(tmp_path / result["normalized_filename"])
+    assert rows[0] == {"SNP": "rs1", "A1": "G", "A2": "A", "N": "1000", "P": "0.001", "BETA": "0.25"}
+    assert rows[1] == {"SNP": "rs2", "A1": "A", "A2": "G", "N": "1000", "P": "0.01", "BETA": "0.1"}
+
+
+def test_plink_a2_rejects_a1_matching_neither_ref_nor_alt(tmp_path):
+    source = tmp_path / "plink.glm"
+    write_text(source, "ID REF ALT A1 OBS_CT BETA SE P\nrs1 G A T 1000 0.25 0.04 0.001\n")
+
+    result = normalize_sumstats_for_ldsc(str(source), str(tmp_path))
+
+    assert result["valid"] is False
+    assert "matches neither REF" in result["errors"][0]
+
+
+def test_plink_a2_rejects_a1_equal_alt_without_ref_column(tmp_path):
+    source = tmp_path / "plink.glm"
+    write_text(source, "ID A1 ALT OBS_CT BETA SE P\nrs1 A A 1000 0.25 0.04 0.001\n")
+
+    result = normalize_sumstats_for_ldsc(str(source), str(tmp_path))
+
+    assert result["valid"] is False
+    assert "cannot determine A2 without a REF column" in result["errors"][0]
+
+
 def test_selected_raw_format_must_match_uploaded_schema(tmp_path):
     source = tmp_path / "plink.glm"
     write_text(source, "ID A1 REF OBS_CT BETA SE P\nrs1 A G 1000 0.25 0.04 0.001\n")

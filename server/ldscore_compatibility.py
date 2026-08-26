@@ -306,26 +306,52 @@ def validate_ldscore_output_set(file_dir: str, filerootlist: List[str], referenc
     return result
 
 
+_CHROMOSOME_NUMBERS = {str(chromosome) for chromosome in range(1, 23)}
+
+
+def _find_unambiguous_chromosome_token(basename: str) -> Optional[str]:
+    """Returns the single chromosome number this fileroot unambiguously refers to, or
+    None if it cannot be determined without guessing. Explicit "chrN" tokens (e.g.
+    "chr22") take precedence over bare numeric tokens, since a bare number such as
+    "10" or "2" in a name like "cohort.10.2" is frequently an unrelated run/cohort
+    identifier rather than a chromosome. If more than one distinct chromosome number
+    is implied (explicit or bare), the name is ambiguous and None is returned rather
+    than silently picking one, since guessing wrong would duplicate/mislabel another
+    chromosome's LD scores (see prepare_ldsc_ref_dir)."""
+    parts = basename.replace("_", ".").replace("-", ".").split(".")
+
+    explicit_matches = set()
+    for part in parts:
+        if part[:3].lower() == "chr" and part[3:] in _CHROMOSOME_NUMBERS:
+            explicit_matches.add(part[3:])
+    if explicit_matches:
+        return explicit_matches.pop() if len(explicit_matches) == 1 else None
+
+    bare_matches = {part for part in parts if part in _CHROMOSOME_NUMBERS}
+    return bare_matches.pop() if len(bare_matches) == 1 else None
+
+
 def _detect_chromosome_coverage(fileroot: str) -> str:
     basename = os.path.basename(fileroot)
     if any(token in basename for token in ("{chr}", "{chrom}", "@")):
         return "template"
-    parts = basename.replace("_", ".").replace("-", ".").split(".")
-    chromosomes = {str(chromosome) for chromosome in range(1, 23)}
-    if any(part in chromosomes for part in parts):
+    if _find_unambiguous_chromosome_token(basename) is not None:
         return "single_chromosome"
     return "unknown"
 
 
 def extract_chromosome_tokens(fileroot: str) -> List[str]:
-    """Returns the chromosome number token(s) (e.g. ["20"]) found in a bfile/LD score
-    fileroot name, using the same tokenization as _detect_chromosome_coverage. Used to
-    map a custom LD score run onto the per-chromosome-numbered directory layout LDSC
-    expects (e.g. /data/ldscore/<pop>/<chr>.l2.ldscore.gz)."""
+    """Returns the chromosome number token (e.g. ["20"]) unambiguously identified in a
+    bfile/LD score fileroot name, using the same tokenization as
+    _detect_chromosome_coverage. Used to map a custom LD score run onto the
+    per-chromosome-numbered directory layout LDSC expects (e.g.
+    /data/ldscore/<pop>/<chr>.l2.ldscore.gz). Returns at most one token: a fileroot
+    that implies more than one distinct chromosome number is ambiguous and yields no
+    tokens rather than risk copying one chromosome's data into another chromosome's
+    slot."""
     basename = os.path.basename(fileroot)
-    parts = basename.replace("_", ".").replace("-", ".").split(".")
-    chromosomes = {str(chromosome) for chromosome in range(1, 23)}
-    return [part for part in parts if part in chromosomes]
+    chromosome_token = _find_unambiguous_chromosome_token(basename)
+    return [chromosome_token] if chromosome_token is not None else []
 
 
 def _normalize_valid_bfile_result(raw_validity: object) -> Dict[str, object]:
