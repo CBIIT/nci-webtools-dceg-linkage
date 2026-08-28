@@ -455,7 +455,7 @@ export default function Correlation() {
               </Form.Select>
               <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat1?.message}</Form.Text>
             </Form.Group>
-            <Form.Group controlId="file" className="mb-3">
+            <Form.Group controlId="file1" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
                 <div className="form-control bg-light">{exampleFile1}</div>

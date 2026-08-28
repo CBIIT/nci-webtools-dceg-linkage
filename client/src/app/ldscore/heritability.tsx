@@ -333,7 +333,7 @@ export default function Heritability() {
                   }}
                 />
                   <HoverUnderlineLink href="/help#LDscore">
-                  Click here for sample format
+                  View sample format
                 </HoverUnderlineLink>
               </div>
                 <br />
@@ -361,7 +361,7 @@ export default function Heritability() {
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFilename === "string" && exampleFilename !== "" ? (
-                <div className="form-control bg-light">{exampleFilename}</div>
+                <div className="form-control bg-light" style={{ maxWidth: "400px" }}>{exampleFilename}</div>
               ) : (
                 <Form.Control 
                   type="file" 

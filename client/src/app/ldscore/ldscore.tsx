@@ -290,7 +290,7 @@ export default function LDScore() {
                   }}
                 />
                   <HoverUnderlineLink href="/help#LDscore">
-                  Click here for sample format
+                  View sample format
                 </HoverUnderlineLink>
               </div>
             <Form.Group controlId="ldfiles" className="mb-3">
