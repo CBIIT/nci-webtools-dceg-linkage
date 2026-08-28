@@ -397,8 +397,10 @@ export default function Heritability() {
                 {(exampleFilename || uploadedFilename) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
                     <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
-
-                    <a
+                    <div>
+                      <span style={{ fontWeight: 600 }}>Format:</span> {sumstatsFormatLabels[heritabilityForm.getValues("sumstatsFormat")] || "Not selected"}
+                      {"  "}
+                      <a
                       href={exampleFilename
                         ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
                         : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFilename)}`}
@@ -409,8 +411,6 @@ export default function Heritability() {
                     >
                       {exampleFilename || uploadedFilename}
                     </a>
-                    <div>
-                      <span style={{ fontWeight: 600 }}>Selected format:</span> {sumstatsFormatLabels[heritabilityForm.getValues("sumstatsFormat")] || "Not selected"}
                     </div>
                     {!useExample && renameWarnings.length > 0 && (
                       <Alert variant="warning" className="mt-2">

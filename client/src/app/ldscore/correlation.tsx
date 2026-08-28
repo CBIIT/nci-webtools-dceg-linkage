@@ -367,7 +367,7 @@ export default function Correlation() {
                 }}
               />
                 <HoverUnderlineLink href="/help#LDscore">
-                Click here for sample format
+                View sample format
               </HoverUnderlineLink>
             </div>
           </Col>
@@ -455,7 +455,7 @@ export default function Correlation() {
               </Form.Select>
               <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat1?.message}</Form.Text>
             </Form.Group>
-            <Form.Group controlId="file1" className="mb-3">
+            <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
                 <div className="form-control bg-light">{exampleFile1}</div>
@@ -787,11 +787,8 @@ export default function Correlation() {
                   <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
                   <div>
                     <span style={{ fontWeight: 600 }}>Trait 1 format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat1")] || "Not selected"}
-                  </div>
-                  <div>
-                    <span style={{ fontWeight: 600 }}>Trait 2 format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat2")] || "Not selected"}
-                  </div>
-                  {(exampleFile1 || uploadedFile1) && (
+                  {"  "}
+                         {(exampleFile1 || uploadedFile1) && (
                     <>
                           <a
                         href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile1)}`}
@@ -805,7 +802,11 @@ export default function Correlation() {
                       <br />
                     </>
                   )}
-                  {(exampleFile2 || uploadedFile2) && (
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 600 }}>Trait 2 format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat2")] || "Not selected"}
+                    {"  "}
+                    {(exampleFile2 || uploadedFile2) && (
                     <>
                       <a
                         href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile2)}`}
@@ -819,6 +820,9 @@ export default function Correlation() {
                       <br />
                     </>
                   )}
+                  </div>
+           
+            
                   {!useExampleCorrelation && renameWarnings.length > 0 && (
                     <Alert variant="warning" className="mt-2">
                       {renameWarnings}
