@@ -458,7 +458,7 @@ export default function Correlation() {
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
-                <div className="form-control bg-light">{exampleFile1}</div>
+                <div className="form-control bg-light" style={{ maxWidth: "400px" }}>{exampleFile1}</div>
               ) : (
                 <Form.Control 
                   type="file" 
@@ -598,7 +598,7 @@ export default function Correlation() {
             <Form.Group controlId="file2" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
-                <div className="form-control bg-light">{exampleFile2}</div>
+                <div className="form-control bg-light" style={{ maxWidth: "400px" }}>{exampleFile2}</div>
               ) : (
                 <Form.Control 
                   type="file" 
