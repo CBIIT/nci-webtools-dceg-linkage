@@ -1,25 +1,20 @@
 """Persistent registry of successfully computed custom LD scores.
 
 Lets a browser session reuse an LD score it previously computed (via the `ldscore`
-endpoint) as input to a later Heritability or Genetic Correlation analysis, beyond
-the 1-hour lifetime of the ephemeral tmp/uploads/{reference} working directory.
+endpoint) as input to a later Heritability or Genetic Correlation analysis within
+this app's normal 1-hour tmp file lifetime (see Cleanup.schedule_tmp_cleanup_ldscore).
 Entries are scoped to the session_id derived from the caller's signed browser
 session cookie (see LDlink.py internal_auth_guard) so one session can never list
 or reuse another session's LD score run.
 """
-import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 from ldscore_compatibility import extract_chromosome_tokens
-from ldscore_storage import store_run_files
+from ldscore_storage import get_persist_dir, store_run_files
 
-RETENTION_DAYS = 7
+RETENTION_HOURS = 1
 PERSISTED_OUTPUT_SUFFIXES = (".l2.ldscore.gz", ".l2.M", ".l2.M_5_50", ".log")
-
-
-def get_persist_dir() -> str:
-    return os.environ.get("LDSCORE_PERSIST_DIR", "/data/ldscore_runs")
 
 
 def ensure_indexes(db) -> None:
@@ -38,6 +33,8 @@ def persist_ldscore_run(
     chromosome_coverage: str,
     source_filenames: List[str],
     label: Optional[str] = None,
+    window_size: Optional[str] = None,
+    window_unit: Optional[str] = None,
 ) -> Optional[Dict[str, object]]:
     """Stores computed LD score output files (local disk, or S3 when configured via
     LDSCORE_S3_BUCKET) and records a registry entry. Anonymous requests (no
@@ -70,9 +67,11 @@ def persist_ldscore_run(
         "file_sizes": file_sizes,
         "total_size_bytes": total_size_bytes,
         "label": label or fileroot,
+        "window_size": window_size,
+        "window_unit": window_unit,
         "status": "ready",
         "created_at": now,
-        "expires_at": now + timedelta(days=RETENTION_DAYS),
+        "expires_at": now + timedelta(hours=RETENTION_HOURS),
     }
     db.ldscore_runs.update_one({"reference": reference}, {"$set": doc}, upsert=True)
     return doc
@@ -104,6 +103,8 @@ def public_run_view(doc: Dict[str, object]) -> Dict[str, object]:
         "genomeBuild": doc.get("genome_build"),
         "chromosomeCoverage": doc.get("chromosome_coverage"),
         "sourceFilenames": doc.get("source_filenames", []),
+        "windowSize": doc.get("window_size"),
+        "windowUnit": doc.get("window_unit"),
         "outputFiles": [{"name": name, "size": file_sizes.get(name, 0)} for name in doc.get("output_files", [])],
         "totalSizeBytes": doc.get("total_size_bytes", 0),
         "backend": doc.get("backend", "local"),

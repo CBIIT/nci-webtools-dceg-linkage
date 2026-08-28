@@ -139,6 +139,8 @@ export interface LdScoreRunSummary {
   genomeBuild: string;
   chromosomeCoverage: string;
   sourceFilenames: string[];
+  windowSize?: string | null;
+  windowUnit?: string | null;
   outputFiles?: LdScoreOutputFile[];
   totalSizeBytes?: number;
   backend?: string;

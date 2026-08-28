@@ -56,7 +56,7 @@ from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlat
 from sumstats_normalizer import normalize_sumstats_for_ldsc
 from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, validate_ldscore_source_compatibility, validate_ldscore_output, validate_ldscore_output_set, write_compatibility_metadata, validate_ldscore_import_files, _detect_chromosome_coverage, LDSCORE_OUTPUT_SUFFIX, SUPPORTED_LDSC_GENOME_BUILDS
 from ldscore_runs import ensure_indexes as ensure_ldscore_runs_indexes, persist_ldscore_run, list_ldscore_runs, get_ldscore_run, public_run_view as ldscore_run_public_view
-from ldscore_storage import resolve_local_path as resolve_ldscore_local_path, prepare_ldsc_ref_dir, get_local_path_base as get_ldscore_local_path_base
+from ldscore_storage import resolve_local_path as resolve_ldscore_local_path, prepare_ldsc_ref_dir, get_local_path_base as get_ldscore_local_path_base, get_persist_dir as get_ldscore_persist_dir
 from session_auth import COOKIE_NAME as BROWSER_SESSION_COOKIE_NAME, derive_session_id_from_cookie
 import zipfile
 import shutil
@@ -2384,7 +2384,13 @@ def ldscore():
                 genome_build,
                 compatibility.get("chromosome_coverage", "unknown"),
                 filenames if filename else [],
+                window_size=ldwindow,
+                window_unit=windUnit,
             )
+            # Persisted files now live under the tmp-based ldscore_runs dir (not a
+            # long-lived location), so schedule the same 1-hour deletion used for the
+            # ephemeral upload working directory.
+            schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=get_ldscore_persist_dir())
         except Exception as persist_error:
             app.logger.error(f"Failed to persist LD score run {reference} for later reuse: {persist_error}")
 
@@ -2504,6 +2510,7 @@ def ldscore_runs_import():
             chromosome_coverage,
             [f"{fileroot}{LDSCORE_OUTPUT_SUFFIX}"],
         )
+        schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=get_ldscore_persist_dir())
     except Exception as persist_error:
         app.logger.error(f"Failed to persist imported LD score run {reference}: {persist_error}")
         return _validation_response("Unable to save the imported LD score run.", status_code=500)

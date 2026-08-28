@@ -21,7 +21,8 @@ export const defaultLdscoreSourceValue: LdscoreSourceValue = {
 function formatRunLabel(run: LdScoreRunSummary): string {
   const when = run.createdAt ? new Date(run.createdAt).toLocaleString() : "";
   const files = run.sourceFilenames?.length ? run.sourceFilenames.join(", ") : run.label;
-  return [files, when].filter(Boolean).join(" — ");
+  const window = run.windowSize ? `Window: ${run.windowSize}${run.windowUnit || ""}` : "";
+  return [files, window, when].filter(Boolean).join(" — ");
 }
 
 export default function LdscoreSourceSelect({
@@ -55,7 +56,7 @@ export default function LdscoreSourceSelect({
           type="radio"
           id="ldscore-source-reference"
           name="ldscore-source-mode"
-          label="Reference population LD scores"
+          label="Reference population LD score"
           checked={value.mode === "reference"}
           disabled={disabled}
           onChange={() => onChange({ ...value, mode: "reference" })}

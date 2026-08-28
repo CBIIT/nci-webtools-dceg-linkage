@@ -17,7 +17,8 @@ except ImportError:  # pragma: no cover - boto3 is already a project dependency
 
 
 def get_persist_dir() -> str:
-    return os.environ.get("LDSCORE_PERSIST_DIR", "/data/ldscore_runs")
+    default_dir = os.path.join(os.environ.get("TMP_DIR", "/data/tmp/"), "ldscore_runs")
+    return os.environ.get("LDSCORE_PERSIST_DIR", default_dir)
 
 
 def get_s3_bucket() -> Optional[str]:
