@@ -94,7 +94,7 @@ export default function LdscoreSourceSelect({
       )}
 
       {value.mode !== "reference" && (
-        <div className="ps-1">
+        <div className="ps-4">
           <div className="mb-2">
             {/* <Form.Check
               type="radio"
