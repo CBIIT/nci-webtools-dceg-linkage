@@ -462,7 +462,7 @@ export default function Heritability() {
 
             {selectedScale === "liability" && (
               <>
-                <Row>
+                <Row style={{ marginTop: "-4.4px" }}>
                   <Col md={6}>
                     <Form.Group controlId="samplePrev" className="mb-3">
                       <Form.Label>
