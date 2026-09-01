@@ -14,7 +14,7 @@ from threading import Thread
 from pathlib import Path
 from functools import wraps
 from socket import gethostname
-from flask import Flask, request, jsonify, current_app, send_from_directory, send_file
+from flask import Flask, request, jsonify, current_app, send_from_directory, send_file, g
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
 from LDpair import calculate_pair
@@ -53,6 +53,11 @@ from ApiAccess import (
 )
 import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command, validBfile
+from sumstats_normalizer import normalize_sumstats_for_ldsc
+from ldscore_compatibility import validate_bfile_compatibility, validate_sumstats_preanalysis, validate_ldscore_source_compatibility, validate_ldscore_output, validate_ldscore_output_set, write_compatibility_metadata, validate_ldscore_import_files, _detect_chromosome_coverage, LDSCORE_OUTPUT_SUFFIX, SUPPORTED_LDSC_GENOME_BUILDS
+from ldscore_runs import ensure_indexes as ensure_ldscore_runs_indexes, persist_ldscore_run, list_ldscore_runs, get_ldscore_run, public_run_view as ldscore_run_public_view
+from ldscore_storage import resolve_local_path as resolve_ldscore_local_path, prepare_ldsc_ref_dir, get_local_path_base as get_ldscore_local_path_base, get_persist_dir as get_ldscore_persist_dir
+from session_auth import COOKIE_NAME as BROWSER_SESSION_COOKIE_NAME, derive_session_id_from_cookie
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
@@ -68,6 +73,7 @@ WEB_COMPUTE_ENDPOINTS = {
     "ldpop",
     "ldproxy",
     "ldscore",
+    "ldscore_runs",
     "ldherit",
     "ldcorrelation",
     "ldtrait",
@@ -114,6 +120,11 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
+
+try:
+    ensure_ldscore_runs_indexes(connectMongoDBReadOnly(False, True))
+except Exception as index_error:
+    app.logger.error(f"Failed to ensure ldscore_runs indexes at startup: {index_error}")
 
 
 # Flask Limiter initialization
@@ -247,6 +258,19 @@ def internal_auth_guard():
         response.status_code = 403
         return response
 
+    # Derived (sha256 hex) per-browser identifier forwarded by the Next.js proxy from its
+    # signed session cookie; used to scope/authorize reusable resources (e.g. saved LD score
+    # runs). Never trust a session id from anywhere else (e.g. query/form params).
+    provided_session_id = request.headers.get("X-Session-Id", "").strip()
+    if provided_session_id and SESSION_ID_RE.match(provided_session_id):
+        g.session_id = provided_session_id
+    else:
+        if provided_session_id:
+            app.logger.warning(
+                f"Malformed X-Session-Id on LDlinkRestWeb compute request for {request.path} from {request_source}."
+            )
+        g.session_id = ""
+
     return None
 
 
@@ -258,6 +282,7 @@ SAFE_SNP_RE = re.compile(r"^[A-Za-z0-9_:.+\-\s\r\n,;|]{1,200000}$")
 SAFE_SNP_PAIR_RE = re.compile(r"^[A-Za-z0-9_:.+\-\s]{1,128}$")
 POP_RE = re.compile(r"^[A-Za-z0-9_+,-]{1,512}$")
 LDSC_POP_RE = re.compile(r"^[A-Za-z0-9_+-]{1,64}$")
+SESSION_ID_RE = re.compile(r"^[a-f0-9]{64}$")
 
 ANCESTRAL_POP_ENDPOINTS = {
     "ldassoc",
@@ -374,6 +399,67 @@ def _validation_error(parameter, reason):
         f"Rejected structural input: method={request.method}, path={request.path}, endpoint={request.endpoint}, parameter={parameter}, reason={reason}{marker_log}"
     )
     return _validation_response(f"Invalid {parameter} parameter.")
+
+
+def _require_session_id():
+    """Returns the validated per-browser session id set by internal_auth_guard, or a
+    403 error response if the request arrived without a valid X-Session-Id header."""
+    session_id = getattr(g, "session_id", "")
+    if not session_id:
+        app.logger.warning(
+            f"Missing/invalid X-Session-Id on session-scoped request: method={request.method}, path={request.path}"
+        )
+        return None, _validation_response("A valid browser session is required for this request.", status_code=403)
+    return session_id, None
+
+
+def _authorize_ldscore_run(reference):
+    """Resolves and authorizes a persisted LD score run for the caller's own session.
+    Returns (run_doc, error_response); error_response is None on success."""
+    if not reference or not _is_valid_uuid_reference(reference):
+        return None, _validation_error("reference", "must be a canonical UUIDv4 string")
+
+    session_id, session_error = _require_session_id()
+    if session_error is not None:
+        return None, session_error
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        run_doc = get_ldscore_run(db, reference)
+    except Exception as lookup_error:
+        app.logger.error(f"Failed to look up LD score run {reference}: {lookup_error}")
+        return None, _validation_response("Unable to verify the selected LD score run.", status_code=500)
+
+    if not run_doc or run_doc.get("session_id") != session_id:
+        return None, _validation_response("LD score run not found or not authorized.", status_code=404)
+
+    return run_doc, None
+
+
+def _authorize_ldscore_run_for_download(reference):
+    """Same authorization as _authorize_ldscore_run, but for routes reached via plain
+    browser navigation (e.g. <a href> downloads), which cannot carry the X-Session-Id
+    header. Derives the session id directly from the signed browser session cookie,
+    which the browser does send automatically on same-origin requests."""
+    if not reference or not _is_valid_uuid_reference(reference):
+        return None, _validation_error("reference", "must be a canonical UUIDv4 string")
+
+    cookie_value = request.cookies.get(BROWSER_SESSION_COOKIE_NAME, "")
+    session_id = derive_session_id_from_cookie(cookie_value)
+    if not session_id:
+        return None, _validation_response("A valid browser session is required for this request.", status_code=403)
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        run_doc = get_ldscore_run(db, reference)
+    except Exception as lookup_error:
+        app.logger.error(f"Failed to look up LD score run {reference}: {lookup_error}")
+        return None, _validation_response("Unable to verify the selected LD score run.", status_code=500)
+
+    if not run_doc or run_doc.get("session_id") != session_id:
+        return None, _validation_response("LD score run not found or not authorized.", status_code=404)
+
+    return run_doc, None
 
 
 def _is_missing_optional(value):
@@ -856,6 +942,35 @@ def _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=False):
     return normalized_scale, normalized_samp_prev, normalized_pop_prev
 
 
+def _sanitize_ldsc_pop(pop):
+    """Re-validates the LDSC reference population code against the same allowlist
+    regex structural_input_guard already enforces globally, but inline at the point
+    of use -- run_herit_command/run_correlation_command build a filesystem path from
+    this value (see ldscore_storage.get_ldsc_reference_data_dir), so the sanitizing
+    check needs to be visible in the same function as that sink, not just in a
+    separate before_request hook.
+    Raises ValueError if pop is present but doesn't match the allowlist."""
+    if not pop:
+        return pop
+    normalized = str(pop).strip()
+    if not LDSC_POP_RE.fullmatch(normalized):
+        raise ValueError("Invalid pop parameter.")
+    return normalized
+
+
+def _assert_path_confined(candidate_dir, base_dir, parameter="reference"):
+    """Explicit local barrier-guard check (redundant with, but visible alongside,
+    _resolve_upload_dir's own realpath/commonpath check) confirming a resolved
+    directory is confined to base_dir immediately before it's used to build any file
+    path -- e.g. validate_sumstats_preanalysis/run_herit_command/run_correlation_command.
+    Returns the resolved candidate path for convenience."""
+    real_base = os.path.realpath(base_dir)
+    real_candidate = os.path.realpath(candidate_dir)
+    if os.path.commonpath([real_base, real_candidate]) != real_base:
+        raise ValueError(f"Invalid {parameter} parameter.")
+    return real_candidate
+
+
 LDSCORE_EXAMPLE_DIR = "/data/ldscore"
 
 
@@ -877,6 +992,82 @@ def _resolve_ldscore_example_path(file_name):
         raise FileNotFoundError(f"Example file '{normalized_name}' was not found.")
 
     return normalized_name, real_source_path
+
+
+LDSCORE_SOURCE_VALUES = {"reference", "custom"}
+
+
+def _resolve_ldscore_source(genome_build):
+    """Resolves the caller's requested LD score source for Heritability/Genetic
+    Correlation ("reference" population panel, unchanged default behavior, vs
+    "custom" reuse of a previously computed LD score run owned by this session).
+
+    Returns (ldscore_source, ld_scores_dir_value, compatibility_or_none, error_response).
+    Callers should return `error_response` immediately if it is not None. When
+    `compatibility_or_none` is set, callers should persist it via
+    write_compatibility_metadata(fileDir, compatibility) once fileDir is known.
+    `ld_scores_dir_value` is ready to pass as-is in place of `pop` to
+    run_herit_command/run_correlation_command's ld_scores_dir argument."""
+    ldscore_source = str(request.args.get("ldscoreSource", "reference") or "reference").strip().lower()
+    if ldscore_source not in LDSCORE_SOURCE_VALUES:
+        return None, None, None, _validation_error("ldscoreSource", "value is not in allowlist")
+
+    if ldscore_source != "custom":
+        return "reference", None, None, None
+
+    ldscore_reference = str(request.args.get("ldscoreReference", "") or "").strip()
+    if not ldscore_reference or not _is_valid_uuid_reference(ldscore_reference):
+        return None, None, None, _validation_error("ldscoreReference", "must be a canonical UUIDv4 string")
+
+    session_id, session_error = _require_session_id()
+    if session_error is not None:
+        return None, None, None, session_error
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        run_doc = get_ldscore_run(db, ldscore_reference)
+    except Exception as lookup_error:
+        app.logger.error(f"Failed to look up LD score run {ldscore_reference}: {lookup_error}")
+        return None, None, None, _validation_response("Unable to verify the selected LD score run.", status_code=500)
+
+    compatibility = validate_ldscore_source_compatibility(run_doc, ldscore_reference, session_id, genome_build)
+    if not compatibility.get("valid"):
+        app.logger.warning(f"Blocking custom LD score reuse for {ldscore_reference}: {compatibility}")
+        status_code = 403 if "not authorized" in "; ".join(compatibility.get("errors", [])) else 400
+        error_response = jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility})
+        error_response.status_code = status_code
+        return None, None, compatibility, error_response
+
+    try:
+        ld_scores_dir_value = prepare_ldsc_ref_dir(run_doc)
+    except RuntimeError as prep_error:
+        app.logger.error(f"Failed to prepare custom LD score run {ldscore_reference} for LDSC: {prep_error}")
+        return None, None, compatibility, _validation_response(str(prep_error), status_code=400)
+
+    return "custom", ld_scores_dir_value, compatibility, None
+
+
+def _format_ldscore_provenance_line(ldscore_source, pop, ldscore_source_compatibility):
+    """Builds a human-readable provenance line prepended to Heritability/Genetic
+    Correlation result text so the LD score source used is visible in the output
+    (and in any exported/downloaded copy of it), satisfying result provenance."""
+    if ldscore_source == "custom":
+        ldscore_reference = request.args.get("ldscoreReference", "").strip()
+        coverage = (ldscore_source_compatibility or {}).get("chromosome_coverage", "")
+        coverage_suffix = f", {coverage} coverage" if coverage else ""
+        return f"LD Score Source: Custom LD score run {ldscore_reference}{coverage_suffix}"
+    return f"LD Score Source: Reference population panel ({pop or 'unspecified'})"
+
+
+def _extract_ldsc_command_failure(result_text):
+    """run_herit_command/run_correlation_command (external ldsc package) do not raise
+    on an underlying ldsc.py failure -- they embed 'Second command failed...' plus the
+    error details in the text they return as if it were a normal result (e.g. when the
+    summary statistics share no overlapping SNPs with the selected LD scores). Detects
+    that marker so it can be surfaced as a real error instead of a bogus result."""
+    if not result_text or "Second command failed" not in result_text:
+        return None
+    return result_text.split("Second command failed", 1)[1].strip(" .:\n") or "The LDSC computation failed."
 
 
 def _resolve_upload_dir(reference, create_dir=False):
@@ -1462,7 +1653,16 @@ def send_temp_file(filename):
 @app.route("/LDlinkRestWeb/tmp/uploads/<reference>/<filename>", strict_slashes=False)
 @app.route("/tmp/uploads/<reference>/<filename>", strict_slashes=False)
 def send_temp_file_reference(reference, filename):
-    return send_from_directory(os.path.join(tmp_dir, "uploads", reference), filename)
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    upload_root = os.path.realpath(os.path.join(tmp_dir, "uploads"))
+    target_dir = safe_join(upload_root, reference)
+    if target_dir is None:
+        return _validation_error("reference", "is invalid")
+    target_dir = os.path.realpath(target_dir)
+    if os.path.commonpath([upload_root, target_dir]) != upload_root:
+        return _validation_error("reference", "is invalid")
+    return send_from_directory(target_dir, filename)
 
 
 @app.route("/LDlinkRestWeb/zip", methods=["POST"])
@@ -1547,6 +1747,15 @@ def upload():
             return "No file part..."
     
         reference = request.form.get("reference", None)
+        upload_metadata = {
+            "analysis_type": request.form.get("analysis_type", ""),
+            "analysis_run_id": request.form.get("analysis_run_id", reference or ""),
+            "session_id": request.form.get("session_id", reference or ""),
+            "project_id": request.form.get("project_id", ""),
+            "user_id": request.form.get("user_id", ""),
+            "summary_stats_format": request.form.get("summary_stats_format", ""),
+            "trait": request.form.get("trait", ""),
+        }
         uploaded_files = []
         renamed_notifications = []
         app.logger.debug(f"Upload reference: {reference}")
@@ -1580,6 +1789,33 @@ def upload():
         if reference:
             schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
 
+        metadata = {key: value for key, value in upload_metadata.items() if value}
+        if metadata:
+            if reference:
+                try:
+                    _, uploads_dir = _resolve_upload_dir(reference, create_dir=True)
+                    metadata_path = safe_join(uploads_dir, "upload_metadata.json")
+                    metadata_record = {
+                        "reference": reference,
+                        "uploaded_files": uploaded_files,
+                        "metadata": metadata,
+                    }
+                    with open(metadata_path, "w") as metadata_file:
+                        json.dump(metadata_record, metadata_file, sort_keys=True, indent=2)
+                except (OSError, ValueError) as metadata_error:
+                    app.logger.error(f"Failed to write upload metadata for reference {reference}: {metadata_error}")
+                    return jsonify({"message": "Files were uploaded, but metadata could not be saved."}), 500
+
+            response = {
+                "message": "All files were saved",
+                "uploaded_files": uploaded_files,
+                "metadata": metadata,
+                "reference": reference,
+            }
+            if renamed_notifications:
+                response["renamed"] = renamed_notifications
+            return jsonify(response)
+
         # Return JSON with uploaded filenames and any sanitization notes
         # Only include the `renamed` field when there were actual sanitizations.
         if renamed_notifications:
@@ -1599,45 +1835,89 @@ def validate_sumstats():
     """
     Validates a sumstats file for heritability/correlation analysis.
     Expects 'filename' and 'reference' as query parameters.
-    Returns JSON with 'fileValid' boolean.
+    Returns JSON with normalized filename and validation details.
     """
     start_time = time.time()
     app.logger.info("Starting sumstats validation request")
     
     filename = request.args.get("filename", None)
     reference = request.args.get("reference", None)
+    selected_format = request.args.get("summary_stats_format", None)
+    trait = request.args.get("trait", "")
     
     if not filename:
         app.logger.warning("Validation request missing filename")
-        return jsonify({"fileValid": False, "error": "Missing filename parameter"})
+        return jsonify({"fileValid": {"valid": False, "errors": ["Missing filename parameter"], "warnings": []}})
     
     try:
-        filename, file_path, _ = _resolve_upload_file_path(filename, reference)
+        filename, file_path, upload_dir = _resolve_upload_file_path(filename, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid sumstats validation input: {validation_error}")
-        return jsonify({"fileValid": False, "error": str(validation_error)})
+        return jsonify({"fileValid": {"valid": False, "errors": ["Invalid filename or reference parameter."], "warnings": []}})
     
     app.logger.debug(f"Validating sumstats file: {file_path}")
     
     # Check if file exists
     if not os.path.exists(file_path):
         app.logger.warning(f"File not found for validation: {file_path}")
-        return jsonify({"fileValid": False, "error": "File not found"})
+        return jsonify({"fileValid": {"valid": False, "errors": ["File not found"], "warnings": []}})
     
-    # Validate using ldsc_utils
     try:
-        from ldscore.ldsc_utils import validSumstats
-        file_valid = validSumstats(file_path)
+        file_valid = normalize_sumstats_for_ldsc(file_path, upload_dir, selected_format=selected_format)
+        validation_record = {
+            "analysis_run_id": reference,
+            "source_file": filename,
+            "trait": trait,
+            "selected_format": selected_format,
+            "detected_format": file_valid.get("detected_format"),
+            "pipeline_version": file_valid.get("pipeline_version"),
+            "status": "validated" if file_valid.get("valid") else "failed",
+            "output_location": file_valid.get("normalized_filename") if file_valid.get("valid") else "",
+            "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "validation_result": file_valid,
+        }
+        if reference:
+            validation_metadata_path = safe_join(upload_dir, "sumstats_validation_metadata.json")
+            existing_records = []
+            if os.path.exists(validation_metadata_path):
+                try:
+                    with open(validation_metadata_path) as existing_metadata_file:
+                        existing_metadata = json.load(existing_metadata_file)
+                    existing_records = existing_metadata.get("validations", [])
+                except (OSError, json.JSONDecodeError):
+                    existing_records = []
+            existing_records = [
+                record for record in existing_records
+                if not (record.get("source_file") == filename and record.get("trait", "") == trait)
+            ]
+            existing_records.append(validation_record)
+            with open(validation_metadata_path, "w") as metadata_file:
+                json.dump({"analysis_run_id": reference, "validations": existing_records}, metadata_file, sort_keys=True, indent=2)
+        app.logger.info(f"Sumstats validation metadata for analysis run {reference}: {validation_record}")
+
+        # Keep this disabled for now: running LDSC's validator before/inside upload validation
+        # can reject raw PLINK/REGENIE/SAIGE files before users submit the normalized file.
+        # If we need stricter checks later, run them against file_valid["normalizedFilename"].
+        # if file_valid.get("valid") and file_valid.get("detected_format") == "LDSC-ready":
+        #     from ldscore.ldsc_utils import validSumstats
+        #     ldsc_valid = validSumstats(file_path)
+        #     if isinstance(ldsc_valid, dict):
+        #         file_valid["valid"] = bool(ldsc_valid.get("valid"))
+        #         file_valid.setdefault("errors", []).extend(ldsc_valid.get("errors", []))
+        #         file_valid.setdefault("warnings", []).extend(ldsc_valid.get("warnings", []))
+        #     else:
+        #         file_valid["valid"] = bool(ldsc_valid)
+
         app.logger.info(f"Sumstats validation result for {filename}: {file_valid}")
-        
+
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Validation completed ({execution_time}s)")
-        
+
         return jsonify({"fileValid": file_valid})
     except Exception as e:
         app.logger.error(f"Error validating sumstats file: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"fileValid": False, "error": str(e)})
+        return jsonify({"fileValid": {"valid": False, "errors": ["An error occurred while validating the file."], "warnings": []}})
 
 
 @app.route("/LDlinkRestWeb/validate_bfile", methods=["GET"])
@@ -1669,43 +1949,26 @@ def validate_bfile():
         fileroot = filename
 
     try:
-        _, bfile_path, _ = _resolve_upload_file_path(fileroot, reference)
+        _, bfile_path, upload_dir = _resolve_upload_file_path(fileroot, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid bfile validation input: {validation_error}")
-        return jsonify({"fileValid": False, "error": str(validation_error)})
+        return jsonify({"fileValid": False, "error": "Invalid filename or reference parameter."})
     
     app.logger.debug(f"Validating bfile: {bfile_path}")
     
-    # Check if all required files exist (.bed, .bim, .fam)
-    required_extensions = [".bed", ".bim", ".fam"]
-    missing_files = []
-    for ext in required_extensions:
-        try:
-            _, component_path, _ = _resolve_upload_file_path(f"{fileroot}{ext}", reference)
-        except ValueError as validation_error:
-            app.logger.warning(f"Invalid bfile component path: {validation_error}")
-            return jsonify({"fileValid": False, "error": str(validation_error)})
-
-        if not os.path.exists(component_path):
-            missing_files.append(fileroot + ext)
-    
-    if missing_files:
-        app.logger.warning(f"Missing bfile components: {missing_files}")
-        return jsonify({"fileValid": False, "error": f"Missing files: {', '.join(missing_files)}"})
-    
-    # Validate using ldsc_utils
     try:
-        file_valid = validBfile(bfile_path)
-        app.logger.info(f"Bfile validation result for {filename}: {file_valid}")
+        compatibility = validate_bfile_compatibility(fileroot, reference, _resolve_upload_file_path, validBfile)
+        write_compatibility_metadata(upload_dir, compatibility)
+        app.logger.info(f"Bfile compatibility validation result for {filename}: {compatibility}")
         
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Bfile validation completed ({execution_time}s)")
         
-        return jsonify({"fileValid": file_valid})
+        return jsonify({"fileValid": compatibility})
     except Exception as e:
         app.logger.error(f"Error validating bfile: {e}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"fileValid": False, "error": str(e)})
+        return jsonify({"fileValid": False, "error": "An error occurred while validating the file."})
 
 
 @app.route("/LDlinkRestWeb/copy_and_download/<filename>", methods=["GET"])
@@ -1715,14 +1978,18 @@ def copy_and_download(filename):
     and serves it for download.
     """
     start_time = time.time()
-    app.logger.info(f"Starting file copy and download: {filename}")
+    safe_filename = secure_filename(filename)
+    app.logger.info(f"Starting file copy and download: {safe_filename}")
+
+    if not safe_filename:
+        return _validation_error("filename", "is invalid")
 
     try:
         # Define source and destination paths
         source_dir = os.path.join(param_list["data_dir"], "ldscore")
         destination_dir = os.path.join(tmp_dir, "uploads")
-        source_file = os.path.join(source_dir, filename)
-        destination_file = os.path.join(destination_dir, filename)
+        source_file = _assert_path_confined(os.path.join(source_dir, safe_filename), source_dir, "filename")
+        destination_file = _assert_path_confined(os.path.join(destination_dir, safe_filename), destination_dir, "filename")
 
         # Ensure the destination directory exists
         os.makedirs(destination_dir, exist_ok=True)
@@ -1733,15 +2000,18 @@ def copy_and_download(filename):
 
         # Serve the file for download
         execution_time = round(time.time() - start_time, 2)
-        app.logger.info(f"File download completed ({execution_time}s): {filename}")
-        return send_from_directory(destination_dir, filename, as_attachment=True)
+        app.logger.info(f"File download completed ({execution_time}s): {safe_filename}")
+        return send_from_directory(destination_dir, safe_filename, as_attachment=True)
 
     except FileNotFoundError:
-        app.logger.error(f"File not found: {filename} in {source_dir}")
-        return f"File {filename} not found in {source_dir}", 404
+        app.logger.error(f"File not found: {safe_filename} in {source_dir}")
+        return _validation_response("Requested file was not found.", status_code=404)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid copy_and_download request: {validation_error}")
+        return _validation_error("filename", "is invalid")
     except Exception as e:
         app.logger.error(f"File copy/download failed: {str(e)}")
-        return f"An error occurred: {e}", 500
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
 
 
 # Route for LDassoc example GWAS data
@@ -1943,7 +2213,12 @@ def ldassoc():
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
         web = True
-        reference = request.args.get("reference", False)
+        reference = request.args.get("reference") or generate_reference()
+        if not _is_valid_uuid_reference(str(reference)):
+            return _validation_error("reference", "must be a canonical UUIDv4 string")
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+            return _validation_error("reference", "must be a canonical UUIDv4 string")
         app.logger.debug(f"LDassoc reference: {reference}")
         app.logger.debug(
             "ldassoc params "
@@ -2004,7 +2279,12 @@ def ldscore():
     )
 
     try:
+        pop = _sanitize_ldsc_pop(pop)
         reference, fileDir = _resolve_upload_dir(reference)
+        _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+            raise ValueError("Invalid reference parameter.")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDscore reference: {validation_error}")
         return sendTraceback(str(validation_error))
@@ -2071,10 +2351,49 @@ def ldscore():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
  
+        compatibility = validate_bfile_compatibility(inputfilename, reference, _resolve_upload_file_path, validBfile, genome_build=genome_build)
+        write_compatibility_metadata(fileDir, compatibility)
+        if not compatibility.get("valid"):
+            app.logger.warning(f"Blocking LDscore calculation for incompatible LD score inputs: {compatibility}")
+            return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
         result = run_ldsc_command(pop, genome_build, inputfilename, ldwindow, windUnit, isExample, reference)
         app.logger.debug("LDscore calculation completed, processing result")
         # print(result)
-   
+
+        # A missing/empty/malformed output must block success, even if run_ldsc_command
+        # itself did not raise -- verify the expected variant-level output file exists.
+        output_validation = validate_ldscore_output(fileDir, inputfilename, reference)
+        write_compatibility_metadata(fileDir, output_validation)
+        if not output_validation.get("valid"):
+            app.logger.error(f"Blocking LDscore result: expected output missing/invalid: {output_validation}")
+            return jsonify({"error": "; ".join(output_validation.get("errors", [])), "compatibility": output_validation}), 500
+
+        # Persist the computed LD score (scoped to the caller's browser session) so it
+        # can be reused later for Heritability/Genetic Correlation without recomputing.
+        # No-ops silently if the request has no valid session id (e.g. bare API access).
+        try:
+            session_id = getattr(g, "session_id", "")
+            db = connectMongoDBReadOnly(False, True)
+            persist_ldscore_run(
+                db,
+                reference,
+                session_id,
+                fileDir,
+                inputfilename,
+                genome_build,
+                compatibility.get("chromosome_coverage", "unknown"),
+                filenames if filename else [],
+                window_size=ldwindow,
+                window_unit=windUnit,
+            )
+            # Persisted files now live under the tmp-based ldscore_runs dir (not a
+            # long-lived location), so schedule the same 1-hour deletion used for the
+            # ephemeral upload working directory.
+            schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=get_ldscore_persist_dir())
+        except Exception as persist_error:
+            app.logger.error(f"Failed to persist LD score run {reference} for later reuse: {persist_error}")
+
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -2112,6 +2431,177 @@ def ldscore():
     return jsonify(out_json)
 
 
+# Lists LD score runs previously computed and persisted by the caller's own browser
+# session, for reuse as input to Heritability/Genetic Correlation analyses.
+@app.route("/LDlinkRestWeb/ldscore_runs", methods=["GET"])
+def ldscore_runs_list():
+    session_id, error_response = _require_session_id()
+    if error_response is not None:
+        return error_response
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        runs = list_ldscore_runs(db, session_id)
+    except Exception as list_error:
+        # Degrade gracefully: an unreachable/misconfigured run registry should not
+        # break the page -- it just means no prior-run reuse options are available.
+        app.logger.error(f"Failed to list LD score runs (returning empty list): {list_error}")
+        runs = []
+
+    return jsonify({"runs": runs})
+
+
+# Registers a previously-computed LD score output (.l2.ldscore.gz + its companion
+# .l2.M/.l2.M_5_50 SNP-count files), uploaded directly via /LDlinkRestWeb/upload, as a
+# reusable custom LD score run -- for callers who already have LDSC output from
+# elsewhere and want to skip the bed/bim/fam upload + compute step. All three files
+# are required (see validate_ldscore_import_files): M/M_5_50 can't be reliably derived
+# from the ldscore file's row count alone, and a wrong count would silently bias the
+# downstream heritability/genetic correlation regression.
+@app.route("/LDlinkRestWeb/ldscore_runs/import", methods=["GET"])
+def ldscore_runs_import():
+    session_id, error_response = _require_session_id()
+    if error_response is not None:
+        return error_response
+
+    reference = str(request.args.get("reference", "") or "").strip()
+    filename = str(request.args.get("filename", "") or "").strip()
+    genome_build = str(request.args.get("genome_build", "") or "").strip().lower()
+
+    if not reference or not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    if not filename:
+        return _validation_error("filename", "is required")
+    if genome_build not in SUPPORTED_LDSC_GENOME_BUILDS:
+        return _validation_error("genome_build", "value is not in allowlist")
+
+    try:
+        fileroot, file_path, file_dir = _resolve_upload_file_path(filename, reference)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid LD score import filename for {reference}: {validation_error}")
+        return _validation_error("filename", "is invalid")
+
+    if fileroot.endswith(LDSCORE_OUTPUT_SUFFIX):
+        fileroot = fileroot[: -len(LDSCORE_OUTPUT_SUFFIX)]
+
+    output_validation = validate_ldscore_output(file_dir, fileroot, reference)
+    if not output_validation.get("valid"):
+        app.logger.warning(f"Rejected LD score import for {reference}: {output_validation}")
+        return jsonify({"error": "; ".join(output_validation.get("errors", [])), "compatibility": output_validation}), 400
+
+    import_files_validation = validate_ldscore_import_files(file_dir, fileroot)
+    if not import_files_validation.get("valid"):
+        app.logger.warning(f"Rejected LD score import for {reference}: {import_files_validation}")
+        return jsonify({"error": "; ".join(import_files_validation.get("errors", [])), "compatibility": import_files_validation}), 400
+
+    chromosome_coverage = _detect_chromosome_coverage(fileroot)
+    if chromosome_coverage == "unknown":
+        return _validation_error("filename", "chromosome coverage could not be inferred from the file name")
+
+    try:
+        db = connectMongoDBReadOnly(False, True)
+        run_doc = persist_ldscore_run(
+            db,
+            reference,
+            session_id,
+            file_dir,
+            fileroot,
+            genome_build,
+            chromosome_coverage,
+            [f"{fileroot}{LDSCORE_OUTPUT_SUFFIX}"],
+        )
+        schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=get_ldscore_persist_dir())
+    except Exception as persist_error:
+        app.logger.error(f"Failed to persist imported LD score run {reference}: {persist_error}")
+        return _validation_response("Unable to save the imported LD score run.", status_code=500)
+
+    if not run_doc:
+        return _validation_response("Unable to save the imported LD score run.", status_code=500)
+
+    schedule_tmp_cleanup_ldscore(reference, app.logger, tmp_dir=app.config["UPLOAD_DIR"])
+
+    return jsonify({"run": ldscore_run_public_view(run_doc)})
+
+
+# Detail view of one persisted LD score run (session-scoped), listing its output
+# files with sizes for display on the results page.
+@app.route("/LDlinkRestWeb/ldscore_runs/<reference>", methods=["GET"])
+def ldscore_run_detail(reference):
+    run_doc, error_response = _authorize_ldscore_run(reference)
+    if error_response is not None:
+        return error_response
+    return jsonify(ldscore_run_public_view(run_doc))
+
+
+# Downloads a single output file from a persisted LD score run. Deliberately NOT
+# under the /LDlinkRestWeb/ldscore_runs prefix (and not in WEB_COMPUTE_ENDPOINTS) so
+# it is reachable via plain <a href> navigation; authorized via the signed browser
+# session cookie directly instead of the internal-auth-gated JSON API headers.
+@app.route("/LDlinkRestWeb/ldscore_run_files/<reference>/<path:filename>", methods=["GET"])
+def ldscore_run_download_file(reference, filename):
+    run_doc, error_response = _authorize_ldscore_run_for_download(reference)
+    if error_response is not None:
+        return error_response
+
+    safe_filename = secure_filename(filename)
+    if safe_filename not in (run_doc.get("output_files") or []):
+        return _validation_response("Requested file is not part of this LD score run.", status_code=404)
+
+    try:
+        local_path = resolve_ldscore_local_path(run_doc, safe_filename)
+    except RuntimeError as storage_error:
+        app.logger.error(f"Failed to resolve LD score run file {reference}/{safe_filename}: {storage_error}")
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
+
+    # Redundant inline confinement recheck (defense in depth): the check inside
+    # resolve_ldscore_local_path() is not a visible barrier for this function.
+    _local_path_base = os.path.normpath(get_ldscore_local_path_base(run_doc))
+    _normalized_local_path = os.path.normpath(local_path)
+    if _normalized_local_path != _local_path_base and not _normalized_local_path.startswith(_local_path_base + os.sep):
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
+
+    if not os.path.exists(_normalized_local_path):
+        return _validation_response("The requested LD score output file is no longer available.", status_code=404)
+
+    return send_file(_normalized_local_path, as_attachment=True, download_name=safe_filename)
+
+
+# Downloads the complete set of output files from a persisted LD score run as a zip.
+@app.route("/LDlinkRestWeb/ldscore_run_files/<reference>/zip", methods=["GET"])
+def ldscore_run_download_set(reference):
+    run_doc, error_response = _authorize_ldscore_run_for_download(reference)
+    if error_response is not None:
+        return error_response
+
+    output_files = run_doc.get("output_files") or []
+    if not output_files:
+        return _validation_response("No output files are available for this LD score run.", status_code=404)
+
+    zip_filepath = os.path.join(tmp_dir, f"ldscore_run_{reference}.zip")
+    _local_path_base = os.path.normpath(get_ldscore_local_path_base(run_doc))
+    try:
+        with zipfile.ZipFile(zip_filepath, "w") as zipf:
+            for output_filename in output_files:
+                # Re-sanitize each recorded filename (defense in depth, matching the
+                # single-file download route) even though these were only ever
+                # populated by our own persist_ldscore_run/store_run_files.
+                safe_output_filename = secure_filename(output_filename)
+                if safe_output_filename not in output_files:
+                    continue
+                local_path = resolve_ldscore_local_path(run_doc, safe_output_filename)
+                # Redundant inline confinement recheck (defense in depth): the check
+                # inside resolve_ldscore_local_path() is not a visible barrier here.
+                _normalized_local_path = os.path.normpath(local_path)
+                if _normalized_local_path != _local_path_base and not _normalized_local_path.startswith(_local_path_base + os.sep):
+                    continue
+                if os.path.exists(_normalized_local_path):
+                    zipf.write(_normalized_local_path, safe_output_filename)
+    except RuntimeError as storage_error:
+        app.logger.error(f"Failed to build LD score run zip for {reference}: {storage_error}")
+        return _validation_response("Unable to prepare the requested download.", status_code=500)
+
+    return send_file(zip_filepath, as_attachment=True, download_name=f"ldscore_{reference}.zip")
+
 
 @app.route("/LDlinkRest/ldscoreapi", methods=["POST"])
 @requires_token
@@ -2127,6 +2617,11 @@ def ldscoreapi():
     ldwindow = request.args.get("ldwindow", "1")
     windUnit = request.args.get("windUnit", "cm")
     isExample = request.args.get("isExample", False)
+
+    try:
+        pop = _sanitize_ldsc_pop(pop)
+    except ValueError as validation_error:
+        return sendTraceback(str(validation_error))
 
     if filename:
         filename = secure_filename(filename)
@@ -2230,9 +2725,10 @@ def ldherit():
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
     try:
+        pop = _sanitize_ldsc_pop(pop)
         scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev)
     except ValueError as validation_error:
-        app.logger.warning(f"Invalid LDherit prevalence input: {validation_error}")
+        app.logger.warning(f"Invalid LDherit input: {validation_error}")
         return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, scale: {scale}"
@@ -2243,9 +2739,17 @@ def ldherit():
 
     try:
         reference, fileDir = _resolve_upload_dir(reference)
+        _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+            raise ValueError("Invalid reference parameter.")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit reference: {validation_error}")
         return sendTraceback(str(validation_error))
+
+    ldscore_source, ld_scores_dir_value, ldscore_source_compatibility, ldscore_source_error = _resolve_ldscore_source(genome_build)
+    if ldscore_source_error is not None:
+        return ldscore_source_error
 
     app.logger.debug(f"LDherit processing filename: {filename}")
     # Handle file copying based on example vs uploaded
@@ -2283,9 +2787,37 @@ def ldherit():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(filename, fileDir, pop, isexample, scale=scale, samp_prev=samp_prev, pop_prev=pop_prev)
+        if str(isexample).lower() != "true":
+            compatibility = validate_sumstats_preanalysis([filename], reference, fileDir)
+            write_compatibility_metadata(fileDir, compatibility)
+            if not compatibility.get("valid"):
+                app.logger.warning(f"Blocking LDherit calculation before downstream processing: {compatibility}")
+                return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
+        if ldscore_source_compatibility is not None:
+            write_compatibility_metadata(fileDir, ldscore_source_compatibility)
+
+        result = run_herit_command(
+            filename,
+            fileDir,
+            ld_scores_dir_value if ldscore_source == "custom" else pop,
+            isexample,
+            scale=scale,
+            samp_prev=samp_prev,
+            pop_prev=pop_prev,
+        )
+
+        ldsc_failure = _extract_ldsc_command_failure(result)
+        if ldsc_failure is not None:
+            app.logger.error(f"LDherit LDSC computation failed for reference {reference}: {ldsc_failure}")
+            return jsonify({
+                "error": "The heritability calculation failed. This can happen when the selected LD score source does not overlap with the summary statistics (e.g. different chromosome coverage or genome build).",
+                "details": ldsc_failure,
+            }), 422
+
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
+            filtered_result = f"{_format_ldscore_provenance_line(ldscore_source, pop, ldscore_source_compatibility)}\n\n{filtered_result}"
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
@@ -2311,6 +2843,9 @@ def ldherit():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit request error: {e}")
+        out_json = {"error": str(e)}
+    except RuntimeError as e:
+        app.logger.error(f"LDherit custom LD score source error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -2441,9 +2976,10 @@ def ldcorrelation():
     samp_prev = request.args.get("samp_prev", "")
     pop_prev = request.args.get("pop_prev", "")
     try:
+        pop = _sanitize_ldsc_pop(pop)
         scale, samp_prev, pop_prev = _validate_ldsc_scale_params(scale, samp_prev, pop_prev, require_pair=True)
     except ValueError as validation_error:
-        app.logger.warning(f"Invalid LDcorrelation prevalence input: {validation_error}")
+        app.logger.warning(f"Invalid LDcorrelation input: {validation_error}")
         return sendTraceback(str(validation_error))
     app.logger.debug(
         f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}, reference: {reference}, scale: {scale}"
@@ -2455,10 +2991,18 @@ def ldcorrelation():
 
     try:
         reference, fileDir = _resolve_upload_dir(reference)
+        _assert_path_confined(fileDir, app.config["UPLOAD_DIR"], "reference")
+        _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+        if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+            raise ValueError("Invalid reference parameter.")
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDcorrelation reference: {validation_error}")
         return sendTraceback(str(validation_error))
-    
+
+    ldscore_source, ld_scores_dir_value, ldscore_source_compatibility, ldscore_source_error = _resolve_ldscore_source(genome_build)
+    if ldscore_source_error is not None:
+        return ldscore_source_error
+
     # Handle file copying based on example vs uploaded
     for fname in [filename, filename2]:
         if fname:
@@ -2490,18 +3034,38 @@ def ldcorrelation():
                     app.logger.error(f"Uploaded file not found at {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
+        if str(isexample).lower() != "true":
+            compatibility = validate_sumstats_preanalysis([filename, filename2], reference, fileDir)
+            write_compatibility_metadata(fileDir, compatibility)
+            if not compatibility.get("valid"):
+                app.logger.warning(f"Blocking LDcorrelation calculation before downstream processing: {compatibility}")
+                return jsonify({"error": "; ".join(compatibility.get("errors", [])), "compatibility": compatibility}), 400
+
+        if ldscore_source_compatibility is not None:
+            write_compatibility_metadata(fileDir, ldscore_source_compatibility)
+
         result = run_correlation_command(
             filename,
             filename2,
             fileDir,
-            pop,
+            ld_scores_dir_value if ldscore_source == "custom" else pop,
             isexample,
             scale=scale,
             samp_prev=samp_prev,
             pop_prev=pop_prev,
         )
+
+        ldsc_failure = _extract_ldsc_command_failure(result)
+        if ldsc_failure is not None:
+            app.logger.error(f"LDcorrelation LDSC computation failed for reference {reference}: {ldsc_failure}")
+            return jsonify({
+                "error": "The genetic correlation calculation failed. This can happen when the selected LD score source does not overlap with the summary statistics (e.g. different chromosome coverage or genome build).",
+                "details": ldsc_failure,
+            }), 422
+
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
+            filtered_result = f"{_format_ldscore_provenance_line(ldscore_source, pop, ldscore_source_compatibility)}\n\n{filtered_result}"
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
@@ -2529,6 +3093,9 @@ def ldcorrelation():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDcorrelation request error: {e}")
+        out_json = {"error": str(e)}
+    except RuntimeError as e:
+        app.logger.error(f"LDcorrelation custom LD score source error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -2559,6 +3126,11 @@ def ldexpress():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2735,6 +3307,11 @@ def ldhap():
     genome_build = request.args.get("genome_build", "grch37")
     web = False
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -2867,6 +3444,11 @@ def ldmatrix():
     web = False
     if reference is False:
         reference = generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3016,6 +3598,11 @@ def ldpair():
         if request.headers.get("User-Agent"):
             web = True
             reference = request.args.get("reference") or generate_reference()
+            if not _is_valid_uuid_reference(str(reference)):
+                return _validation_error("reference", "must be a canonical UUIDv4 string")
+            _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+            if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+                return _validation_error("reference", "must be a canonical UUIDv4 string")
             app.logger.debug(
                 "ldpair params "
                 + json.dumps(
@@ -3127,6 +3714,11 @@ def ldpop():
     genome_build = request.args.get("genome_build", "grch37")
     web = False
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3237,6 +3829,11 @@ def ldproxy():
     # annotateText = request.args.get('annotate', False)
     web = False
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3359,6 +3956,11 @@ def ldtrait():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -3561,6 +4163,11 @@ def ldtraitgwas():
     window = request.args.get("window", "500000").replace(",", "")
 
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # Run calculate_trait in a separate thread
     # differentiate web or api request
@@ -3742,6 +4349,11 @@ def ldexpressgwas():
     window = request.args.get("window", "500000")
     genome_build = request.args.get("genome_build", "grch37")
     reference = request.args.get("reference") or generate_reference()
+    if not _is_valid_uuid_reference(str(reference)):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
@@ -3892,6 +4504,11 @@ def snpchip():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
@@ -4002,6 +4619,11 @@ def snpclip():
     reference = (
         str(data["reference"]) if "reference" in data else generate_reference()
     )
+    if not _is_valid_uuid_reference(reference):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
+    _reference_path = os.path.normpath(os.path.join(tmp_dir, str(reference)))
+    if _reference_path != os.path.normpath(tmp_dir) and not _reference_path.startswith(os.path.normpath(tmp_dir) + os.sep):
+        return _validation_error("reference", "must be a canonical UUIDv4 string")
 
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:

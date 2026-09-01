@@ -6,7 +6,7 @@ export interface LdscorePopOption {
   label: string;
 }
 
-const ldscorePopOptions: LdscorePopOption[] = [
+export const ldscorePopOptions: LdscorePopOption[] = [
   { value: "EUR", label: "(EUR) European" },
   { value: "EAS", label: "(EAS) East Asian" },
   { value: "AFR", label: "(AFR) African American" },

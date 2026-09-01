@@ -1,5 +1,5 @@
 import { populations } from "@/components/select/pop-select";
-import { AxiosError } from "axios";
+import { AxiosError, isAxiosError } from "axios";
 
 export const rsChrRegex = /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/;
 
@@ -52,6 +52,17 @@ export function parseRateLimitError(error: AxiosError): string {
     }
   }
   return "Too many requests. Please try again later.";
+}
+
+// Extracts the backend's "error" message from a failed LDscore/Heritability/Genetic
+// Correlation calculation request (e.g. LDSC failures returned as 422 JSON), falling
+// back to a generic message when the response didn't include one.
+export function parseLdScoreCalculationError(error: unknown, fallback: string): string {
+  if (isAxiosError(error)) {
+    const data = error.response?.data as { error?: string } | undefined;
+    if (data?.error) return data.error;
+  }
+  return fallback;
 }
 
 
