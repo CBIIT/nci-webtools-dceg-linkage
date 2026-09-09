@@ -44,21 +44,25 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
     file_infos = []
     persist_root = get_persist_dir()
     os.makedirs(persist_root, exist_ok=True)
-    persisted_dir = os.path.normpath(os.path.join(persist_root, reference))
-    if not _is_path_confined(persisted_dir, persist_root):
+    # Resolve and check containment inline, on the exact values used by the
+    # file operations below, so the guards are visible to static analysis.
+    persist_base = os.path.realpath(persist_root)
+    persisted_dir = os.path.realpath(os.path.join(persist_base, reference))
+    if not persisted_dir.startswith(persist_base + os.sep):
         raise RuntimeError("Invalid reference parameter.")
     os.makedirs(persisted_dir, exist_ok=True)
 
+    source_base = os.path.realpath(source_dir)
     for filename in filenames:
         if not filename or os.path.basename(filename) != filename:
             continue
-        source_path = os.path.normpath(os.path.join(source_dir, filename))
-        if not _is_path_confined(source_path, source_dir):
+        source_path = os.path.realpath(os.path.join(source_base, filename))
+        if not source_path.startswith(source_base + os.sep):
             continue
         if not os.path.exists(source_path):
             continue
-        destination_path = os.path.normpath(os.path.join(persisted_dir, filename))
-        if not _is_path_confined(destination_path, persisted_dir):
+        destination_path = os.path.realpath(os.path.join(persisted_dir, filename))
+        if not destination_path.startswith(persisted_dir + os.sep):
             continue
         shutil.copyfile(source_path, destination_path)
         file_infos.append({"name": filename, "size": os.path.getsize(destination_path)})

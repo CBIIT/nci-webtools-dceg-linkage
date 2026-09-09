@@ -590,12 +590,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         # print('output_table["aaData"]', output_table["aaData"])
         for row in output_table["aaData"]:
             ldpop_out.write(str(location_data[row[0]]["location"] + "\t" + row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\n")
-        if "error" in output_table:
+        if "error" in output:
             ldpop_out.write("\n")
-            ldpop_out.write(output_table["error"])
-        if "warning" in output_table:
+            ldpop_out.write(output["error"])
+        if "warning" in output:
             ldpop_out.write("\n")
-            ldpop_out.write(output_table["warning"])
+            ldpop_out.write(output["warning"])
 
     # Change manipulate output data for frontend only if accessed via Web instance
     # if web:

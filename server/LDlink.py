@@ -2667,8 +2667,8 @@ def ldscoreapi():
         for file_path in glob.glob(pattern):
             extension = file_path.split(".")[-1]
             new_filename = f"{file_chromo}.{extension}"
-            new_file_path = os.path.join(fileDir, new_filename)
-            os.rename(file_path, new_file_path)
+            new_file_path = get_secure_path(fileDir, new_filename)
+            os.rename(get_secure_path(fileDir, os.path.basename(file_path)), new_file_path)
             app.logger.info(f"Renamed {file_path} to {new_file_path}")
 
     try:

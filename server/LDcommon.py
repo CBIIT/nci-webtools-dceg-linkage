@@ -82,14 +82,22 @@ def resolve_allowed_path(file_path, allowed_dirs):
             return real_path
     raise ValueError("File path is outside of the allowed directories.")
 
+# Characters that need no shell quoting (matches the set shlex.quote leaves
+# untouched). The mapping is used to rebuild values from these fixed characters.
+_SHELL_SAFE_CHAR_MAP = {character: character for character in
+                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        "0123456789_@%+=:,./-"}
+
 def sanitize_shell_arg(value):
-    # Ensure a value is safe to pass on a command line: it must consist only of
-    # characters that need no shell quoting.
+    # Rebuild a value from an allowlist of characters that need no shell
+    # quoting; reject it if any other character is present.
     value = str(value)
-    quoted = shlex.quote(value)
-    if quoted != value:
+    if value == "":
+        raise ValueError("Empty command line argument.")
+    try:
+        return "".join([_SHELL_SAFE_CHAR_MAP[character] for character in value])
+    except KeyError:
         raise ValueError("Unsupported characters in command line argument.")
-    return quoted
 
 # Constant lookup used to replace externally supplied chromosome names with
 # fixed values before they are used in database queries.
