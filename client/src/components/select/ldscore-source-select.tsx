@@ -111,18 +111,6 @@ export default function LdscoreSourceSelect({
             /> */}
             <Form.Check
               type="radio"
-              id="ldscore-source-import"
-              name="ldscore-source-custom-mode"
-              label="Upload existing LD score result (.l2.ldscore.gz)"
-              checked={value.mode === "customImport"}
-              disabled={disabled}
-              onChange={() => {
-                onChange({ ...value, mode: "customImport", ldscoreReference: null });
-                onRequestImport?.();
-              }}
-            />
-            <Form.Check
-              type="radio"
               id="ldscore-source-session"
               name="ldscore-source-custom-mode"
               label={`Use a result from this session${currentSessionRuns.length ? ` (${currentSessionRuns.length})` : ""}`}
@@ -138,6 +126,19 @@ export default function LdscoreSourceSelect({
               checked={value.mode === "customPrior"}
               disabled={disabled || (!priorRunsLoading && priorRuns.length === 0)}
               onChange={() => onChange({ ...value, mode: "customPrior", ldscoreReference: priorRuns[0]?.reference ?? null })}
+            />
+            {/* Placed last so it sits directly above its own upload input, which is rendered by the parent right after this component. */}
+            <Form.Check
+              type="radio"
+              id="ldscore-source-import"
+              name="ldscore-source-custom-mode"
+              label="Upload existing LD score result"
+              checked={value.mode === "customImport"}
+              disabled={disabled}
+              onChange={() => {
+                onChange({ ...value, mode: "customImport", ldscoreReference: null });
+                onRequestImport?.();
+              }}
             />
           </div>
 
