@@ -5,6 +5,7 @@ import os
 import sys
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords,get_query_variant_c
+from LDcommon import get_secure_path
 from LDutilites import get_config
 
 # Create LDpop function
@@ -170,7 +171,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     adds = ["CHROM", "POS", "ID", "REF", "ALT"]
     
     for pop_i in pop_split:        
-        with open(data_dir + population_samples_dir + pop_i + ".txt", "r") as f:
+        with open(get_secure_path(data_dir + population_samples_dir, pop_i + ".txt"), "r") as f:
             # print pop_dir + pop_i + ".txt"
             for line in f:
                 cleanedLine = line.strip()
@@ -583,7 +584,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     if "error" in output:
         output_table["error"] = output["error"]
     # Generate output file
-    with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
+    with open(get_secure_path(tmp_dir, "LDpop_" + request + ".txt"), "w") as ldpop_out:
         ldpop_out.write("\t".join(["Population", "Abbrev", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'", "Chisq", "P"]) + "\n")
         # print("output_table", output_table)
         # print('output_table["aaData"]', output_table["aaData"])
