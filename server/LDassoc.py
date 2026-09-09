@@ -14,6 +14,7 @@ from pathlib import Path
 from multiprocessing.dummy import Pool
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly, tabix
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
+from LDcommon import get_secure_path, sanitize_shell_arg, resolve_allowed_path
 from LDutilites import get_config,array_split
 
 # Configure module logger
@@ -51,7 +52,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
     # Create JSON output
-    out_json = open(tmp_dir+'assoc'+request+".json","w")
+    out_json = open(get_secure_path(tmp_dir, 'assoc'+request+".json"),"w")
     output = {}
 
     # Validate genome build param
@@ -426,9 +427,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
                 genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0],
                 cwd=data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],
             )
-            Path(tmp_dir, "snp_no_dups_" + request + ".vcf").write_text("\n".join(line for line in vcf_output if "END" not in line))
+            Path(get_secure_path(tmp_dir, "snp_no_dups_" + request + ".vcf")).write_text("\n".join(line for line in vcf_output if "END" not in line))
             # Check lowest P SNP is in the 1000G population and not monoallelic
-            vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+            vcf=open(get_secure_path(tmp_dir, "snp_no_dups_"+request+".vcf")).readlines()
             h = 0
             while vcf[h][0:2] == "##":
                 h += 1
@@ -531,7 +532,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     logger.debug("Creating LDassoc_sub subprocesses")
 
     for subprocess_id in range(num_subprocesses):
-        commands.append(["python3", "LDassoc_sub.py", str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
+        commands.append(["python3", "LDassoc_sub.py", sanitize_shell_arg(snp), sanitize_shell_arg(chromosome), sanitize_shell_arg("_".join(assoc_coords_subset_chunks[subprocess_id])), sanitize_shell_arg(request), sanitize_shell_arg(genome_build), str(subprocess_id)])
         logger.debug(f"Subprocess {subprocess_id}: {len(assoc_coords_subset_chunks[subprocess_id])} coordinates")
     
     subprocess_start_time = time.time()
@@ -580,7 +581,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     # Populate JSON and text output
     from math import log10
 
-    outfile=open(tmp_dir+"assoc"+request+".txt","w")
+    outfile=open(get_secure_path(tmp_dir, "assoc"+request+".txt"),"w")
     header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","P-value","FORGEdb","RegulomeDB","Function"]
     print("\t".join(header), file=outfile)
 
@@ -688,7 +689,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
             else:
                 ucsc_track["not_sig"].append(temp2)
 
-    track=open(tmp_dir+"track"+request+".txt","w")
+    track=open(get_secure_path(tmp_dir, "track"+request+".txt"),"w")
     print("browser position chr"+str(chromosome)+":"+str(coord1)+"-"+str(coord2), file=track)
     print("", file=track)
 
@@ -894,7 +895,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     assoc_plot.title.align="center"
 
     # Add recombination rate
-    recomb_file = tmp_dir + "recomb_" + request + ".json"
+    recomb_file = get_secure_path(tmp_dir, "recomb_" + request + ".json")
     db = connectMongoDBReadOnly(True)
     recomb_json = getRecomb(db, recomb_file, chromosome, coord1 - whitespace, coord2 + whitespace, genome_build)
 
@@ -961,7 +962,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
     if myargs.transcript==True:
         # Gene Plot (All Transcripts)
-        genes_file = tmp_dir + "genes_" + request + ".json"
+        genes_file = get_secure_path(tmp_dir, "genes_" + request + ".json")
         genes_json = getRefGene(db, genes_file, chromosome, coord1, coord2, genome_build, False)
 
         genes_plot_start=[]
@@ -1090,7 +1091,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
         out_grid = gridplot([assoc_plot, rug, gene_plot], ncols=1, toolbar_options=dict(logo=None))
 
-        with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
+        with open(get_secure_path(tmp_dir, 'assoc_args' + request + ".json"), "w") as out_args:
             json.dump(vars(myargs), out_args)
         out_args.close()
 
@@ -1125,7 +1126,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
     # Gene Plot (Collapsed)
     else:
-        genes_c_file = tmp_dir + "genes_c_" + request + ".json"
+        genes_c_file = get_secure_path(tmp_dir, "genes_c_" + request + ".json")
         genes_c_json = getRefGene(db, genes_c_file, chromosome, coord1, coord2, genome_build, True)
 
         genes_c_plot_start=[]
@@ -1239,7 +1240,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
         out_grid = gridplot([assoc_plot, rug, gene_c_plot], ncols=1, toolbar_options=dict(logo=None))
 
 
-        with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
+        with open(get_secure_path(tmp_dir, 'assoc_args' + request + ".json"), "w") as out_args:
             json.dump(vars(myargs), out_args)
         out_args.close()
 
@@ -1299,7 +1300,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
     # save json embedding
     jsonEmbed = f"ldassoc_plot_{request}.json"
     logger.debug(f"Saving JSON embedding: {jsonEmbed}")
-    with open(tmp_dir + jsonEmbed, "w") as f_json:
+    with open(get_secure_path(tmp_dir, jsonEmbed), "w") as f_json:
         json.dump(json_item(out_grid), f_json)
 
     # Calculate and log final statistics
@@ -1371,7 +1372,7 @@ def main():
         out_script,out_div=calculate_assoc(args.file, region, args.pop, args.request, genome_build, web, args)
 
         # Print output
-        with open(tmp_dir+"assoc"+args.request+".json") as f:
+        with open(get_secure_path(tmp_dir, "assoc"+args.request+".json")) as f:
             json_dict=json.load(f)
 
             try:
