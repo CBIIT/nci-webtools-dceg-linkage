@@ -47,7 +47,10 @@ def get_window_variants(db, chromosome, position, window, genome_build):
     chromosome = normalize_chromosome(chromosome)
     if chromosome is None:
         return []
-    position = int(position)
+    try:
+        position = int(position)
+    except (TypeError, ValueError):
+        return []
     query_results = db.gwas_catalog.find({
         "chromosome": chromosome, 
         genome_build_vars[genome_build]['position']: {

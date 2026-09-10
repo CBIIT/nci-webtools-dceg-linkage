@@ -14,7 +14,7 @@ from pathlib import Path
 from multiprocessing.dummy import Pool
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly, tabix
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
-from LDcommon import get_secure_path, sanitize_shell_arg, resolve_allowed_path
+from LDcommon import get_secure_path, sanitize_shell_arg
 from LDutilites import get_config,array_split
 
 # Configure module logger
