@@ -1043,7 +1043,9 @@ def _resolve_ldscore_source(genome_build):
         ld_scores_dir_value = prepare_ldsc_ref_dir(run_doc)
     except RuntimeError as prep_error:
         app.logger.error(f"Failed to prepare custom LD score run {ldscore_reference} for LDSC: {prep_error}")
-        return None, None, compatibility, _validation_response(str(prep_error), status_code=400)
+        return None, None, compatibility, _validation_response(
+            "The selected LD score run could not be prepared for this analysis.", status_code=400
+        )
 
     return "custom", ld_scores_dir_value, compatibility, None
 
@@ -1728,10 +1730,13 @@ def zip_files():
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename} in {uploads_dir}")
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid zip file creation input: {validation_error}")
+        return jsonify({"error": "Invalid request input."}), 400
     except Exception as e:
         app.logger.error(f"Zip file creation failed: {str(e)}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "An internal error occurred while creating the zip file."}), 500
 
 
 # File upload route
@@ -2431,7 +2436,7 @@ def ldscore():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDscore request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The LD score calculation service could not be reached. Please try again later."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -2701,7 +2706,7 @@ def ldscoreapi():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDscore API request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The LD score calculation service could not be reached. Please try again later."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -2852,10 +2857,10 @@ def ldherit():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The heritability calculation service could not be reached. Please try again later."}
     except RuntimeError as e:
         app.logger.error(f"LDherit custom LD score source error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "An internal error occurred while running the heritability analysis."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -2883,7 +2888,7 @@ def ldheritAPI():
         reference, fileDir = _resolve_upload_dir(reference, create_dir=True)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit API reference: {validation_error}")
-        return jsonify({"error": str(validation_error)}), 400
+        return jsonify({"error": "Invalid reference parameter."}), 400
 
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
@@ -2896,7 +2901,7 @@ def ldheritAPI():
         _, saved_file_path, _ = _resolve_upload_file_path(uploaded_filename, reference, create_dir=True)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit API filename: {validation_error}")
-        return jsonify({"error": str(validation_error)}), 400
+        return jsonify({"error": "Invalid filename parameter."}), 400
 
     file.save(saved_file_path)
 
@@ -2955,7 +2960,7 @@ def ldheritAPI():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit API request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The heritability calculation service could not be reached. Please try again later."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -3102,10 +3107,10 @@ def ldcorrelation():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDcorrelation request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The genetic correlation calculation service could not be reached. Please try again later."}
     except RuntimeError as e:
         app.logger.error(f"LDcorrelation custom LD score source error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "An internal error occurred while running the genetic correlation analysis."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
