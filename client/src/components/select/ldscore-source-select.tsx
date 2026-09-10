@@ -20,7 +20,10 @@ export const defaultLdscoreSourceValue: LdscoreSourceValue = {
 
 function formatRunLabel(run: LdScoreRunSummary): string {
   const when = run.createdAt ? new Date(run.createdAt).toLocaleString() : "";
-  const files = run.sourceFilenames?.length ? run.sourceFilenames.join(", ") : run.label;
+  // Just the base name of the first input file (e.g. "22.bed" -> "22"), not every
+  // matching file's full name -- the suffix is implied and clutters the dropdown.
+  const firstFilename = run.sourceFilenames?.[0] || run.label;
+  const files = firstFilename ? firstFilename.split(".")[0] : "";
   const window = run.windowSize ? `Window: ${run.windowSize}${run.windowUnit || ""}` : "";
   return [files, window, when].filter(Boolean).join(" — ");
 }
