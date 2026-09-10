@@ -62,7 +62,7 @@ export default function LdscoreSourceSelect({
           type="radio"
           id="ldscore-source-reference"
           name="ldscore-source-mode"
-          label="Reference population LD score"
+          label="Reference population LD scores"
           checked={value.mode === "reference"}
           disabled={disabled}
           onChange={() => onChange({ ...value, mode: "reference" })}
@@ -71,7 +71,7 @@ export default function LdscoreSourceSelect({
           type="radio"
           id="ldscore-source-custom"
           name="ldscore-source-mode"
-          label="Custom LD score"
+          label="Custom LD scores"
           checked={value.mode !== "reference"}
           disabled={disabled}
           onChange={() => {
@@ -140,18 +140,21 @@ export default function LdscoreSourceSelect({
           </div>
 
           {value.mode === "customSession" && sessionRuns.length > 0 && (
-            <Form.Select
-              aria-label="Select an LD score run from this session"
-              value={value.ldscoreReference ?? ""}
-              disabled={disabled}
-              onChange={(e) => onChange({ ...value, ldscoreReference: e.target.value })}
-            >
-              {sessionRuns.map((run) => (
-                <option key={run.reference} value={run.reference}>
-                  {formatRunLabel(run)}
-                </option>
-              ))}
-            </Form.Select>
+            <>
+              <Form.Select
+                aria-label="Select an LD score run from this session"
+                value={value.ldscoreReference ?? ""}
+                disabled={disabled}
+                onChange={(e) => onChange({ ...value, ldscoreReference: e.target.value })}
+              >
+                {sessionRuns.map((run) => (
+                  <option key={run.reference} value={run.reference}>
+                    {formatRunLabel(run)}
+                  </option>
+                ))}
+              </Form.Select>
+              <div style={{ fontSize: "0.85rem" }}>Results get deleted after one hour.</div>
+            </>
           )}
         </div>
       )}

@@ -696,7 +696,7 @@ export default function Correlation() {
         <Row>
            <Col s={12} sm={12} md={6} lg={7} className="ps-4">
             <Form.Group controlId="ldscoreSource" className="mb-3">
-              <Form.Label>LD Score Source</Form.Label>
+              <Form.Label>LD Score Sources</Form.Label>
               <LdscoreSourceSelect
                 value={ldscoreSourceValue}
                 onChange={setLdscoreSourceValue}
