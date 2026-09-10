@@ -86,7 +86,7 @@ def resolve_allowed_path(file_path, allowed_dirs):
 # untouched). The mapping is used to rebuild values from these fixed characters.
 _SHELL_SAFE_CHAR_MAP = {character: character for character in
                         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        "0123456789_@%+=:,./-"}
+                        "0123456789_@%+=:,.-"}
 
 def sanitize_shell_arg(value):
     # Rebuild a value from an allowlist of characters that need no shell

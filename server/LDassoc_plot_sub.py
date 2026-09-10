@@ -50,7 +50,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         None
     """
     request = sanitize_shell_arg(request)
-    file = resolve_allowed_path(file, [get_config()['tmp_dir'], get_config()['data_dir']])
+    config = get_config()
+    file = resolve_allowed_path(file, [config['tmp_dir'], config['data_dir']])
 
     # Log function entry and parameters
     logger.info(f'ldassoc_plot_sub params {{"file": "{file}", "region": "{region}", "pop": "{pop}", "request": "{request}", "genome_build": "{genome_build}", "myargsName": "{myargsName}", "myargsOrigin": "{myargsOrigin}"}}')
