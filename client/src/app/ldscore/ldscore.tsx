@@ -40,6 +40,10 @@ export default function LDScore() {
   const [ldscoreLoading, setLdscoreLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
+  // Server persists each calculation under its own fresh reference (distinct from the
+  // upload reference, which recomputes may reuse) -- used only for the reusable
+  // "LD Score Output Files" download panel, not the text result/raw input downloads.
+  const [ldscorePersistedRef, setLdscorePersistedRef] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [fileError, setFileError] = useState<string>("");
   const [reference, setReference] = useState<string>("");
@@ -172,14 +176,19 @@ export default function LDScore() {
     
     try {
       setLdscoreLoading(true);
-      await fetchLdScoreCalculationResult(params);
+      const response = await fetchLdScoreCalculationResult(params);
       setLdscoreResultRef(reference);
+      // Server persists each calculation under its own fresh reference (distinct from
+      // the upload reference, which recomputes may reuse) so downloads/reuse below
+      // must target that persisted reference, not the local upload `reference` state.
+      const persistedReference = response?.reference || reference;
+      setLdscorePersistedRef(persistedReference);
 
       // Make this run instantly reusable (as a custom LD score source) in the
       // Heritability/Genetic Correlation tabs for the rest of this page visit.
       try {
         const { runs } = await fetchLdScoreRuns();
-        const justComputed = runs.find((run) => run.reference === reference);
+        const justComputed = runs.find((run) => run.reference === persistedReference);
         if (justComputed) {
           addLdScoreRun(justComputed);
         }
@@ -200,6 +209,7 @@ export default function LDScore() {
       windowUnit: "cM"
     });
     setLdscoreResultRef(null);
+    setLdscorePersistedRef(null);
     setExampleBed("");
     setExampleBim("");
     setExampleFam("");
@@ -518,6 +528,7 @@ export default function LDScore() {
          <hr />
         <LdScoreResults
           reference={ldscoreResultRef}
+          persistedReference={ldscorePersistedRef || ldscoreResultRef}
           type="ldscore"
           uploads={
             [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(',')

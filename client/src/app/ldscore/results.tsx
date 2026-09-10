@@ -667,7 +667,7 @@ function renderLdScoreTable(section: string, opts?: { ignoreAnalysisFinished?: b
   );
 }
 
-export default function LdScoreResults({ reference, type, uploads }: { reference: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
+export default function LdScoreResults({ reference, persistedReference, type, uploads }: { reference: string, persistedReference?: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
@@ -782,7 +782,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         <h5 style={{ fontWeight: 'bold' }}>MAF/LD Score Correlation Matrix</h5>
         {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
         <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} reference={reference} />
-        <LdScoreOutputFilesPanel reference={reference} />
+        <LdScoreOutputFilesPanel reference={persistedReference || reference} />
         <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
       </Container>
     );
