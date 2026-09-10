@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import os
 import sys
@@ -20,10 +20,38 @@ errFilename = "ldtrait_error_snps.json"
 param_list = get_config()
 tmp_dir = param_list['tmp_dir']
 ldtrait_src = param_list['ldtrait_src']
+data_dir = param_list['data_dir']
+api_users_backup_dir = os.path.join(data_dir, "backups", "api_users")
+api_users_backup_retention_days = 7
 
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
+
+# export api_users collection to a dated JSON file on the EFS-backed data dir, as a backup
+def backupApiUsers():
+    os.makedirs(api_users_backup_dir, exist_ok=True)
+    backup_path = os.path.join(api_users_backup_dir, "api_users_" + datetime.today().strftime('%Y-%m-%d') + ".json")
+
+    db = connectMongoDBReadOnly()
+    users = list(db.api_users.find())
+    # default=str handles ObjectId/datetime fields, which json.dump can't serialize directly
+    with open(backup_path, 'w') as f:
+        json.dump(users, f, indent=2, default=str)
+
+    print(f"Backed up {len(users)} api_users records to {backup_path}")
+    deleteExpiredApiUsersBackups()
+
+# delete api_users backup files older than the retention window
+def deleteExpiredApiUsersBackups():
+    cutoff = datetime.today() - timedelta(days=api_users_backup_retention_days)
+    for entry in os.listdir(api_users_backup_dir):
+        if not entry.startswith("api_users_") or not entry.endswith(".json"):
+            continue
+        entry_path = os.path.join(api_users_backup_dir, entry)
+        if datetime.fromtimestamp(os.path.getmtime(entry_path)) < cutoff:
+            os.remove(entry_path)
+            print(f"Deleted expired api_users backup: {entry_path}")
 
 # download daily update of GWAS Catalog
 def downloadGWASCatalog():
@@ -62,6 +90,13 @@ def downloadGWASCatalog():
     return filename
 
 def main():
+    try:
+        print("Backing up api_users collection...")
+        backupApiUsers()
+    except Exception as backup_error:
+        # Non-fatal: a failed backup shouldn't block the daily GWAS catalog update below.
+        print(f"Failed to back up api_users collection: {backup_error}")
+
     print("Downloading GWAS catalog...")
     filename = downloadGWASCatalog()
     print(filename + " downloaded.")
