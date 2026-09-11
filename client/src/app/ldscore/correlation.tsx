@@ -699,7 +699,10 @@ export default function Correlation() {
               <Form.Label>LD Score Sources</Form.Label>
               <LdscoreSourceSelect
                 value={ldscoreSourceValue}
-                onChange={setLdscoreSourceValue}
+                onChange={(v) => {
+                  setLdscoreSourceValue(v);
+                  setLdscoreSourceError("");
+                }}
                 currentSessionRuns={currentSessionLdScoreRuns}
                 priorRuns={priorLdScoreRuns}
                 priorRunsLoading={priorRunsLoading}
@@ -722,6 +725,7 @@ export default function Correlation() {
                           const computedRun = await ldScoreUpload.computeLdScore(uploadResult);
                           if (computedRun) {
                             setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
+                            setLdscoreSourceError("");
                           }
                         }
                       }
@@ -751,6 +755,7 @@ export default function Correlation() {
                         const importedRun = await ldScoreUpload.importPrecomputedLdScore(input.files, genome_build || "grch37");
                         if (importedRun) {
                           setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: importedRun.reference }));
+                          setLdscoreSourceError("");
                         }
                       }
                     }}
@@ -768,7 +773,7 @@ export default function Correlation() {
               <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
                 Reset
               </Button>
-              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>
+              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading || ldScoreUpload.uploading || ldScoreUpload.computing || ldScoreUpload.importing}>
                {geneticLoading ? "Loading..." : "Calculate"}
               </Button>
             </div>

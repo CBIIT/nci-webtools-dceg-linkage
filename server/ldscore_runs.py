@@ -96,6 +96,11 @@ def get_ldscore_run(db, reference: str) -> Optional[Dict[str, object]]:
 
 def public_run_view(doc: Dict[str, object]) -> Dict[str, object]:
     created_at = doc.get("created_at")
+    # pymongo returns naive datetimes (UTC-valued, no tzinfo) even though this was stored
+    # tz-aware, so isoformat() would omit the offset and the browser's Date parser would
+    # then treat it as local time instead of UTC -- attach the offset back before sending.
+    if isinstance(created_at, datetime) and created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
     file_sizes = doc.get("file_sizes", {}) or {}
     return {
         "reference": doc.get("reference"),

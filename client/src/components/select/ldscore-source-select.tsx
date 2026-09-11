@@ -78,7 +78,7 @@ export default function LdscoreSourceSelect({
           checked={value.mode !== "reference"}
           disabled={disabled}
           onChange={() => {
-            // Default to "Upload existing LD score result" regardless of prior/session
+            // Default to "Upload your own LD score reference" regardless of prior/session
             // runs being available -- the sub-radio itself won't fire onChange here since
             // `checked` is already true as soon as mode matches, so it never gets
             // clicked by the user.
@@ -122,7 +122,7 @@ export default function LdscoreSourceSelect({
               type="radio"
               id="ldscore-source-session"
               name="ldscore-source-custom-mode"
-              label={`Use a result from this session${priorRunsLoading ? " (loading...)" : sessionRuns.length ? ` (${sessionRuns.length})` : ""}`}
+              label={`Use Score Calculation result from this session${priorRunsLoading ? "" : sessionRuns.length ? ` (${sessionRuns.length})` : ""}`}
               checked={value.mode === "customSession"}
               disabled={disabled || (!priorRunsLoading && sessionRuns.length === 0)}
               onChange={() => onChange({ ...value, mode: "customSession", ldscoreReference: sessionRuns[0]?.reference ?? null })}
@@ -132,7 +132,7 @@ export default function LdscoreSourceSelect({
               type="radio"
               id="ldscore-source-import"
               name="ldscore-source-custom-mode"
-              label="Upload existing LD score result"
+              label="Upload your own LD score reference"
               checked={value.mode === "customImport"}
               disabled={disabled}
               onChange={() => {

@@ -526,7 +526,10 @@ export default function Heritability() {
               <Form.Label>LD Score Sources</Form.Label>
               <LdscoreSourceSelect
                 value={ldscoreSourceValue}
-                onChange={setLdscoreSourceValue}
+                onChange={(v) => {
+                  setLdscoreSourceValue(v);
+                  setLdscoreSourceError("");
+                }}
                 currentSessionRuns={currentSessionLdScoreRuns}
                 priorRuns={priorLdScoreRuns}
                 priorRunsLoading={priorRunsLoading}
@@ -549,6 +552,7 @@ export default function Heritability() {
                           const computedRun = await ldScoreUpload.computeLdScore(uploadResult);
                           if (computedRun) {
                             setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
+                            setLdscoreSourceError("");
                           }
                         }
                       }
@@ -578,6 +582,7 @@ export default function Heritability() {
                         const importedRun = await ldScoreUpload.importPrecomputedLdScore(input.files, genome_build || "grch37");
                         if (importedRun) {
                           setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: importedRun.reference }));
+                          setLdscoreSourceError("");
                         }
                       }
                     }}
@@ -599,7 +604,7 @@ export default function Heritability() {
               <Button 
                 type="submit" 
                 variant={ "primary"}
-                disabled={heritabilityMutation.isPending || heritabilityLoading}
+                disabled={heritabilityMutation.isPending || heritabilityLoading || ldScoreUpload.uploading || ldScoreUpload.computing || ldScoreUpload.importing}
               >
                 {heritabilityLoading ? "Loading..." : "Calculate"}
               </Button>
