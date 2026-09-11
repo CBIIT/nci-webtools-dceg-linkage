@@ -734,6 +734,10 @@ export default function Correlation() {
                           if (computedRun) {
                             setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
                             setLdscoreSourceError("");
+                          } else {
+                            // Don't let a stale reference from an earlier successful upload silently
+                            // get reused now that this attempt failed.
+                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
                           }
                         }
                       }
@@ -764,6 +768,10 @@ export default function Correlation() {
                         if (importedRun) {
                           setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: importedRun.reference }));
                           setLdscoreSourceError("");
+                        } else {
+                          // Don't let a stale reference from an earlier successful import silently
+                          // get reused now that this attempt failed.
+                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
                         }
                       }
                     }}
@@ -781,7 +789,18 @@ export default function Correlation() {
               <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
                 Reset
               </Button>
-              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading || ldScoreUpload.uploading || ldScoreUpload.computing || ldScoreUpload.importing}>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={
+                  geneticMutation.isPending ||
+                  geneticLoading ||
+                  ldScoreUpload.uploading ||
+                  ldScoreUpload.computing ||
+                  ldScoreUpload.importing ||
+                  (ldscoreSourceValue.mode !== "reference" && !!ldScoreUpload.fileError)
+                }
+              >
                {geneticLoading ? "Loading..." : "Calculate"}
               </Button>
             </div>
