@@ -196,16 +196,24 @@ export default function Heritability() {
     },
   });
 
-  const onHeritabilitySubmit = async (data: HeritabilityFormData) => {
+  // Runs on every submit attempt, including when other RHF-registered fields (file,
+  // sumstatsFormat, etc.) fail their own validation -- otherwise this error would
+  // never surface since RHF only calls onHeritabilitySubmit once all of its fields pass.
+  const validateLdscoreSource = (): boolean => {
     if (ldscoreSourceValue.mode === "reference" && !ldscoreSourceValue.pop) {
       setLdscoreSourceError("Population is required");
-      return;
+      return false;
     }
     if (ldscoreSourceValue.mode !== "reference" && !ldscoreSourceValue.ldscoreReference) {
       setLdscoreSourceError("Select an LD score run to reuse, or *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files to upload");
-      return;
+      return false;
     }
     setLdscoreSourceError("");
+    return true;
+  };
+
+  const onHeritabilitySubmit = async (data: HeritabilityFormData) => {
+    if (!validateLdscoreSource()) return;
     setHeritabilityResultRef(null);
     setHeritabilityError("");
     setHeritabilityLoading(true);
@@ -288,7 +296,7 @@ export default function Heritability() {
 
 
 
-      <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
+      <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit, validateLdscoreSource)} onReset={onHeritabilityReset} noValidate>
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
             <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
@@ -306,7 +314,7 @@ export default function Heritability() {
                       // Generate a new reference for example data
                       const newReference = generateReference();
                       setReference(newReference);
-                          heritabilityForm.setValue("sumstatsFormat", "pre_munged");
+                      heritabilityForm.setValue("sumstatsFormat", "pre_munged", { shouldValidate: true });
                       setExampleFilename("");
                       setUploadedFilename("");
                       heritabilityForm.clearErrors("file");

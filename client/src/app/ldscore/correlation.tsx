@@ -227,16 +227,24 @@ export default function Correlation() {
     },
   });
 
-  const onGeneticSubmit = async (data: CorrelationFormData) => {
+  // Runs on every submit attempt, including when other RHF-registered fields (file,
+  // sumstatsFormat1/2, etc.) fail their own validation -- otherwise this error would
+  // never surface since RHF only calls onGeneticSubmit once all of its fields pass.
+  const validateLdscoreSource = (): boolean => {
     if (ldscoreSourceValue.mode === "reference" && !ldscoreSourceValue.pop) {
       setLdscoreSourceError("Population is required");
-      return;
+      return false;
     }
     if (ldscoreSourceValue.mode !== "reference" && !ldscoreSourceValue.ldscoreReference) {
       setLdscoreSourceError("Select an LD score run to reuse, or upload *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files");
-      return;
+      return false;
     }
     setLdscoreSourceError("");
+    return true;
+  };
+
+  const onGeneticSubmit = async (data: CorrelationFormData) => {
+    if (!validateLdscoreSource()) return;
     setGeneticCorrelationResultRef(null);
     setGeneticError("");
     setGeneticLoading(true);
@@ -324,7 +332,7 @@ export default function Correlation() {
         </div>
       )}
 
-      <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
+      <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit, validateLdscoreSource)} onReset={onGeneticReset} noValidate>
         <Row className="align-items-start">
         <Col s={12} sm={12} md={12} lg={7}>
         <Row>
@@ -346,8 +354,8 @@ export default function Correlation() {
                     setReference(newReference);
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
-                    geneticForm.setValue("sumstatsFormat1", "pre_munged");
-                    geneticForm.setValue("sumstatsFormat2", "pre_munged");
+                    geneticForm.setValue("sumstatsFormat1", "pre_munged", { shouldValidate: true });
+                    geneticForm.setValue("sumstatsFormat2", "pre_munged", { shouldValidate: true });
                     setUploadedFile1("");
                     setUploadedFile2("");
                     setValidationError1("");
