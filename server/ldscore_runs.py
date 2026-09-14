@@ -10,6 +10,8 @@ or reuse another session's LD score run.
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
+from pymongo.errors import DuplicateKeyError
+
 from ldscore_compatibility import extract_chromosome_tokens
 from ldscore_storage import get_persist_dir, store_run_files
 
@@ -21,6 +23,10 @@ def ensure_indexes(db) -> None:
     """Self-expiring TTL index so expired runs are dropped from Mongo automatically."""
     db.ldscore_runs.create_index("expires_at", expireAfterSeconds=0)
     db.ldscore_runs.create_index("session_id")
+    # Unique so a caller who supplies someone else's reference gets a duplicate-key
+    # failure (see persist_ldscore_run) instead of the upsert silently reassigning
+    # ownership or creating a second doc with the same reference.
+    db.ldscore_runs.create_index("reference", unique=True)
 
 
 def persist_ldscore_run(
@@ -41,6 +47,13 @@ def persist_ldscore_run(
     session_id) are not eligible for reuse and are silently skipped -- they simply
     fall back to the existing 1-hour tmp behavior with no reuse capability."""
     if not session_id:
+        return None
+
+    # Reject up front, before touching storage, if this reference is already owned by
+    # a different session -- otherwise store_run_files below would overwrite the
+    # owner's physical output files even if the later DB upsert is correctly scoped.
+    existing_doc = db.ldscore_runs.find_one({"reference": reference})
+    if existing_doc and existing_doc.get("session_id") != session_id:
         return None
 
     candidate_filenames = [f"{fileroot}{suffix}" for suffix in PERSISTED_OUTPUT_SUFFIXES]
@@ -73,7 +86,14 @@ def persist_ldscore_run(
         "created_at": now,
         "expires_at": now + timedelta(hours=RETENTION_HOURS),
     }
-    db.ldscore_runs.update_one({"reference": reference}, {"$set": doc}, upsert=True)
+    try:
+        # Scoped to (reference, session_id) so a reference already owned by a
+        # different session can never be rebound here -- the unique index on
+        # `reference` (see ensure_indexes) turns that case into a DuplicateKeyError
+        # instead of silently reassigning ownership or creating a second doc.
+        db.ldscore_runs.update_one({"reference": reference, "session_id": session_id}, {"$set": doc}, upsert=True)
+    except DuplicateKeyError:
+        return None
     return doc
 
 

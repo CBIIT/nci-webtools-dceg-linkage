@@ -1,6 +1,7 @@
 #!flask/bin/python3
 import os
 import re
+import io
 import traceback
 import collections
 import argparse
@@ -2484,6 +2485,16 @@ def ldscore_runs_import():
         return _validation_error("genome_build", "value is not in allowlist")
 
     try:
+        db = connectMongoDBReadOnly(False, True)
+        existing_run = get_ldscore_run(db, reference)
+    except Exception as lookup_error:
+        app.logger.error(f"Failed to look up LD score run {reference}: {lookup_error}")
+        return _validation_response("Unable to verify the requested reference.", status_code=500)
+    if existing_run and existing_run.get("session_id") != session_id:
+        app.logger.warning(f"Rejected LD score import for {reference}: reference is owned by a different session")
+        return _validation_response("This reference is not available.", status_code=403)
+
+    try:
         fileroot, file_path, file_dir = _resolve_upload_file_path(filename, reference)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LD score import filename for {reference}: {validation_error}")
@@ -2507,7 +2518,6 @@ def ldscore_runs_import():
         return _validation_error("filename", "chromosome coverage could not be inferred from the file name")
 
     try:
-        db = connectMongoDBReadOnly(False, True)
         run_doc = persist_ldscore_run(
             db,
             reference,
@@ -2585,10 +2595,13 @@ def ldscore_run_download_set(reference):
     if not output_files:
         return _validation_response("No output files are available for this LD score run.", status_code=404)
 
-    zip_filepath = os.path.join(tmp_dir, f"ldscore_run_{reference}.zip")
+    # Built in memory (files are small) rather than a shared tmp_dir path -- avoids both
+    # a leftover file with no cleanup path, and two concurrent downloads of the same
+    # reference truncating/corrupting each other's on-disk zip.
     _local_path_base = os.path.normpath(get_ldscore_local_path_base(run_doc))
+    zip_buffer = io.BytesIO()
     try:
-        with zipfile.ZipFile(zip_filepath, "w") as zipf:
+        with zipfile.ZipFile(zip_buffer, "w") as zipf:
             for output_filename in output_files:
                 # Re-sanitize each recorded filename (defense in depth, matching the
                 # single-file download route) even though these were only ever
@@ -2604,11 +2617,12 @@ def ldscore_run_download_set(reference):
                     continue
                 if os.path.exists(_normalized_local_path):
                     zipf.write(_normalized_local_path, safe_output_filename)
-    except RuntimeError as storage_error:
+    except (RuntimeError, OSError) as storage_error:
         app.logger.error(f"Failed to build LD score run zip for {reference}: {storage_error}")
         return _validation_response("Unable to prepare the requested download.", status_code=500)
 
-    return send_file(zip_filepath, as_attachment=True, download_name=f"ldscore_{reference}.zip")
+    zip_buffer.seek(0)
+    return send_file(zip_buffer, as_attachment=True, download_name=f"ldscore_{reference}.zip", mimetype="application/zip")
 
 
 @app.route("/LDlinkRest/ldscoreapi", methods=["POST"])
