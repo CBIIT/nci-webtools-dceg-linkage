@@ -8,6 +8,7 @@ from pathlib import Path
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import get_coords, replace_coords_rsid_list, validsnp, get_population, get_1000g_data, parse_vcf
 from LDcommon import set_alleles, get_forgeDB
+from LDcommon import get_secure_path, sanitize_shell_arg
 from LDutilites import get_config
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -36,6 +37,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     Returns:
         None
     """
+    request = sanitize_shell_arg(request)
 
     # Set data directories using config.yml
     param_list = get_config()
@@ -627,7 +629,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
     if collapseTranscript == "false":
         # Gene Plot (All Transcripts)
-        genes_file = tmp_dir + "genes_" + request + ".json"
+        genes_file = get_secure_path(tmp_dir, "genes_" + request + ".json")
         genes_raw = open(genes_file).readlines()
 
         genes_plot_start = []
@@ -797,7 +799,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
     # Gene Plot (Collapsed)
     else:
-        genes_c_file = tmp_dir + "genes_c_" + request + ".json"
+        genes_c_file = get_secure_path(tmp_dir, "genes_c_" + request + ".json")
         genes_c_raw = open(genes_c_file).readlines()
 
         genes_c_plot_start = []
@@ -987,12 +989,12 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     # Export to JPEG
     subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "matrix_plot_scaled_" + request + ".svg", tmp_dir + "matrix_plot_" + request + ".jpeg"])
     # Remove individual SVG files after they are combined
-    Path(tmp_dir, "matrix_plot_1_" + request + ".svg").unlink(missing_ok=True)
-    Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
-    Path(tmp_dir, "rug_1_" + request + ".svg").unlink(missing_ok=True)
-    Path(tmp_dir, "connector_1_" + request + ".svg").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "matrix_plot_1_" + request + ".svg")).unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "gene_plot_1_" + request + ".svg")).unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "rug_1_" + request + ".svg")).unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "connector_1_" + request + ".svg")).unlink(missing_ok=True)
     # Remove scaled SVG file after it is converted to png and jpeg
-    Path(tmp_dir, "matrix_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "matrix_plot_scaled_" + request + ".svg")).unlink(missing_ok=True)
     # Remove temporary file(s)
     for path in Path(tmp_dir).glob("genes_*" + request + "*.json"):
         path.unlink(missing_ok=True)

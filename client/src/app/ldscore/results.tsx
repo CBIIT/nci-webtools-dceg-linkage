@@ -187,7 +187,7 @@ function renderKeyValueTable(section: string) {
   
   lines.forEach(line => {
     let found = false;
-    const colonPairs = line.matchAll(/([\w\s²\*\-0-9\^]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
+    const colonPairs = line.matchAll(/([\w\s²*^-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
     for (const pair of colonPairs) {
       const key = pair[1].trim();
       const value = pair[2].trim();
