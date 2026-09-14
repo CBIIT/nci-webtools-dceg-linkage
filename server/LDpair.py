@@ -6,6 +6,7 @@ import time
 import re
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,validsnp
 from LDcommon import replace_coord_rsid, get_coords,get_population,get_query_variant_c,check_allele
+from LDcommon import get_secure_path
 from LDutilites import get_config
 # Create LDpair function
 
@@ -345,7 +346,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
        
     # Generate output file only for single SNP pair inputs
     if len(snp_pairs) == 1 and len(output_list) == 1:
-        ldpair_out = open(tmp_dir + "LDpair_" + request + ".txt", "w")
+        ldpair_out = open(get_secure_path(tmp_dir, "LDpair_" + request + ".txt"), "w")
         print("Query SNPs:", file=ldpair_out)
         print(output_list[0]["snp1"]["rsnum"] + \
             " (" + output_list[0]["snp1"]["coord"] + ")", file=ldpair_out)

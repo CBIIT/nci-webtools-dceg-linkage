@@ -28,6 +28,7 @@ from LDassoc import calculate_assoc
 from LDscore import calculate_ldscore
 from LDutilites import get_config, unlock_stale_tokens
 from LDcommon import genome_build_vars, connectMongoDBReadOnly
+from LDcommon import get_secure_path
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import (
@@ -1042,7 +1043,9 @@ def _resolve_ldscore_source(genome_build):
         ld_scores_dir_value = prepare_ldsc_ref_dir(run_doc)
     except RuntimeError as prep_error:
         app.logger.error(f"Failed to prepare custom LD score run {ldscore_reference} for LDSC: {prep_error}")
-        return None, None, compatibility, _validation_response(str(prep_error), status_code=400)
+        return None, None, compatibility, _validation_response(
+            "The selected LD score run could not be prepared for this analysis.", status_code=400
+        )
 
     return "custom", ld_scores_dir_value, compatibility, None
 
@@ -1727,10 +1730,13 @@ def zip_files():
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename} in {uploads_dir}")
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
+    except ValueError as validation_error:
+        app.logger.warning(f"Invalid zip file creation input: {validation_error}")
+        return jsonify({"error": "Invalid request input."}), 400
     except Exception as e:
         app.logger.error(f"Zip file creation failed: {str(e)}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "An internal error occurred while creating the zip file."}), 500
 
 
 # File upload route
@@ -2408,7 +2414,7 @@ def ldscore():
 
             # Write result to file for frontend to fetch, like ldpop
             if reference:
-                result_filename = os.path.join(tmp_dir, f"ldscore_{reference}.txt")
+                result_filename = get_secure_path(tmp_dir, f"ldscore_{reference}.txt")
                 with open(result_filename, "w") as f:
                     f.write(filtered_result)
         else:
@@ -2430,7 +2436,7 @@ def ldscore():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDscore request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The LD score calculation service could not be reached. Please try again later."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -2585,7 +2591,7 @@ def ldscore_run_download_set(reference):
     if not output_files:
         return _validation_response("No output files are available for this LD score run.", status_code=404)
 
-    zip_filepath = os.path.join(tmp_dir, f"ldscore_run_{reference}.zip")
+    zip_filepath = get_secure_path(tmp_dir, f"ldscore_run_{reference}.zip")
     _local_path_base = os.path.normpath(get_ldscore_local_path_base(run_doc))
     try:
         with zipfile.ZipFile(zip_filepath, "w") as zipf:
@@ -2666,8 +2672,8 @@ def ldscoreapi():
         for file_path in glob.glob(pattern):
             extension = file_path.split(".")[-1]
             new_filename = f"{file_chromo}.{extension}"
-            new_file_path = os.path.join(fileDir, new_filename)
-            os.rename(file_path, new_file_path)
+            new_file_path = get_secure_path(fileDir, new_filename)
+            os.rename(get_secure_path(fileDir, os.path.basename(file_path)), new_file_path)
             app.logger.info(f"Renamed {file_path} to {new_file_path}")
 
     try:
@@ -2700,7 +2706,7 @@ def ldscoreapi():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDscore API request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The LD score calculation service could not be reached. Please try again later."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -2829,7 +2835,7 @@ def ldherit():
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
-                result_filename = os.path.join(tmp_dir, f"ldherit_{reference}.txt")
+                result_filename = get_secure_path(tmp_dir, f"ldherit_{reference}.txt")
                 with open(result_filename, "w") as f:
                     f.write(filtered_result)
         else:
@@ -2851,10 +2857,10 @@ def ldherit():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The heritability calculation service could not be reached. Please try again later."}
     except RuntimeError as e:
         app.logger.error(f"LDherit custom LD score source error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "An internal error occurred while running the heritability analysis."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -2882,7 +2888,7 @@ def ldheritAPI():
         reference, fileDir = _resolve_upload_dir(reference, create_dir=True)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit API reference: {validation_error}")
-        return jsonify({"error": str(validation_error)}), 400
+        return jsonify({"error": "Invalid reference parameter."}), 400
 
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
@@ -2895,7 +2901,7 @@ def ldheritAPI():
         _, saved_file_path, _ = _resolve_upload_file_path(uploaded_filename, reference, create_dir=True)
     except ValueError as validation_error:
         app.logger.warning(f"Invalid LDherit API filename: {validation_error}")
-        return jsonify({"error": str(validation_error)}), 400
+        return jsonify({"error": "Invalid filename parameter."}), 400
 
     file.save(saved_file_path)
 
@@ -2954,7 +2960,7 @@ def ldheritAPI():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit API request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The heritability calculation service could not be reached. Please try again later."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -3077,7 +3083,7 @@ def ldcorrelation():
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
-                result_filename = os.path.join(tmp_dir, f"ldcorrelation_{reference}.txt")
+                result_filename = get_secure_path(tmp_dir, f"ldcorrelation_{reference}.txt")
                 with open(result_filename, "w") as f:
                     f.write(filtered_result)
         else:
@@ -3101,10 +3107,10 @@ def ldcorrelation():
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDcorrelation request error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "The genetic correlation calculation service could not be reached. Please try again later."}
     except RuntimeError as e:
         app.logger.error(f"LDcorrelation custom LD score source error: {e}")
-        out_json = {"error": str(e)}
+        out_json = {"error": "An internal error occurred while running the genetic correlation analysis."}
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
@@ -3190,7 +3196,7 @@ def ldexpress():
                 if "error" in errors_warnings:
                     express["error"] = errors_warnings["error"]
                 else:
-                    with open(tmp_dir + "express_variants_annotated" + reference + ".txt", "w") as f:
+                    with open(get_secure_path(tmp_dir, "express_variants_annotated" + reference + ".txt"), "w") as f:
                         f.write(
                             "Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n"
                         )
@@ -3202,7 +3208,7 @@ def ldexpress():
                             f.write("Warning(s):\n")
                             f.write(express["warning"])
                 out_json = json.dumps(express, sort_keys=False)
-                with open(tmp_dir + "ldexpress" + reference + ".json", "w") as f:
+                with open(get_secure_path(tmp_dir, "ldexpress" + reference + ".json"), "w") as f:
                     f.write(out_json)
             except Exception as e:
                 exc_obj = e
@@ -3258,7 +3264,7 @@ def ldexpress():
                 toggleLocked(token, 0)
                 return sendTraceback(errors_warnings["error"])
             else:
-                with open(tmp_dir + "express_variants_annotated" + reference + ".txt", "w") as f:
+                with open(get_secure_path(tmp_dir, "express_variants_annotated" + reference + ".txt"), "w") as f:
                     f.write(
                         "Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n"
                     )
@@ -3271,7 +3277,7 @@ def ldexpress():
                         f.write(errors_warnings["warning"])
                 # display api out
                 try:
-                    with open(tmp_dir + "express_variants_annotated" + reference + ".txt", "r") as fp:
+                    with open(get_secure_path(tmp_dir, "express_variants_annotated" + reference + ".txt"), "r") as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     end_time = time.time()
@@ -3341,12 +3347,12 @@ def ldhap():
                     sort_keys=True,
                 )
             )
-            snplst = tmp_dir + "snps" + reference + ".txt"
+            snplst = get_secure_path(tmp_dir, "snps" + reference + ".txt")
             with open(snplst, "w") as f:
                 f.write(snps.lower())
             try:
                 out_json = calculate_hap(snplst, pop, reference, web, genome_build)
-                with open(tmp_dir + "ldhap" + reference + ".json", "w") as f:
+                with open(get_secure_path(tmp_dir, "ldhap" + reference + ".json"), "w") as f:
                     json.dump(json.loads(out_json), f)
             except Exception as e:
                 exc_obj = e
@@ -3374,7 +3380,7 @@ def ldhap():
                 sort_keys=True,
             )
         )
-        snplst = tmp_dir + "snps" + reference + ".txt"
+        snplst = get_secure_path(tmp_dir, "snps" + reference + ".txt")
         with open(snplst, "w") as f:
             f.write(snps.lower())
         try:
@@ -3388,8 +3394,8 @@ def ldhap():
             # display api out
             try:
                 # unlock token then display api output
-                resultFile1 = tmp_dir + "snps_" + reference + ".txt"
-                resultFile2 = tmp_dir + "haplotypes_" + reference + ".txt"
+                resultFile1 = get_secure_path(tmp_dir, "snps_" + reference + ".txt")
+                resultFile2 = get_secure_path(tmp_dir, "haplotypes_" + reference + ".txt")
                 with open(resultFile1, "r") as fp:
                     content1 = fp.read()
                 with open(resultFile2, "r") as fp:
@@ -3482,7 +3488,7 @@ def ldmatrix():
                     sort_keys=True,
                 )
             )
-            snplst = tmp_dir + "snps" + str(reference) + ".txt"
+            snplst = get_secure_path(tmp_dir, "snps" + str(reference) + ".txt")
             with open(snplst, "w") as f:
                 f.write(snps.lower())
             try:
@@ -3518,7 +3524,7 @@ def ldmatrix():
             )
         )
         # print('request: ' + str(reference))
-        snplst = tmp_dir + "snps" + str(reference) + ".txt"
+        snplst = get_secure_path(tmp_dir, "snps" + str(reference) + ".txt")
         with open(snplst, "w") as f:
             f.write(snps.lower())
         try:
@@ -3528,7 +3534,7 @@ def ldmatrix():
             out_script, out_div = calculate_matrix(
                 snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript
             )
-            with open(tmp_dir + "matrix" + reference + ".json") as f:
+            with open(get_secure_path(tmp_dir, "matrix" + reference + ".json")) as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
                 toggleLocked(token, 0)
@@ -3538,9 +3544,9 @@ def ldmatrix():
                 # unlock token then display api output
                 resultFile = ""
                 if r2_d == "d":
-                    resultFile = tmp_dir + "d_prime_" + reference + ".txt"
+                    resultFile = get_secure_path(tmp_dir, "d_prime_" + reference + ".txt")
                 else:
-                    resultFile = tmp_dir + "r2_" + reference + ".txt"
+                    resultFile = get_secure_path(tmp_dir, "r2_" + reference + ".txt")
                 with open(resultFile, "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
@@ -3549,7 +3555,7 @@ def ldmatrix():
                 return content
             except Exception as e:
                 # unlock token then display error message
-                with open(tmp_dir + "matrix" + reference + ".json") as f:
+                with open(get_secure_path(tmp_dir, "matrix" + reference + ".json")) as f:
                     json_dict = json.load(f)
                 toggleLocked(token, 0)
                 exc_obj = e
@@ -3630,7 +3636,7 @@ def ldpair():
             # print('request: ' + str(reference))
             try:
                 out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
-                with open(tmp_dir + "ldpair" + reference + ".json", "w") as f:
+                with open(get_secure_path(tmp_dir, "ldpair" + reference + ".json"), "w") as f:
                     json.dump(json.loads(out_json)[0], f)
             except Exception as e:
                 exc_obj = e
@@ -3681,7 +3687,7 @@ def ldpair():
                     return current_app.response_class(out_json, mimetype="application/json")
                 else:
                     # right inputs output as text
-                    with open(tmp_dir + "LDpair_" + reference + ".txt", "r") as fp:
+                    with open(get_secure_path(tmp_dir, "LDpair_" + reference + ".txt"), "r") as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     end_time = time.time()
@@ -3752,7 +3758,7 @@ def ldpop():
             # print('request: ' + str(reference))
             try:
                 out_json = calculate_pop(var1, var2, pop, r2_d, web, genome_build, reference)
-                with open(tmp_dir + "ldpop" + reference + ".json", "w") as f:
+                with open(get_secure_path(tmp_dir, "ldpop" + reference + ".json"), "w") as f:
                     json.dump(json.loads(out_json), f)
             except Exception as e:
                 exc_obj = e
@@ -3793,7 +3799,7 @@ def ldpop():
             # display api out
             try:
                 # unlock token then display api output
-                with open(tmp_dir + "LDpop_" + reference + ".txt", "r") as fp:
+                with open(get_secure_path(tmp_dir, "LDpop_" + reference + ".txt"), "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
                 end_time = time.time()
@@ -3910,7 +3916,7 @@ def ldproxy():
             out_script, out_div = calculate_proxy(
                 var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript
             )
-            with open(tmp_dir + "proxy" + reference + ".json") as f:
+            with open(get_secure_path(tmp_dir, "proxy" + reference + ".json")) as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
                 # display api out w/ error
@@ -3919,7 +3925,7 @@ def ldproxy():
             # display api out
             try:
                 # unlock token then display api output
-                with open(tmp_dir + "proxy" + reference + ".txt", "r") as fp:
+                with open(get_secure_path(tmp_dir, "proxy" + reference + ".txt"), "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
                 end_time = time.time()
@@ -3927,7 +3933,7 @@ def ldproxy():
                 return content
             except Exception as e:
                 # unlock token then display error message
-                with open(tmp_dir + "proxy" + reference + ".json") as f:
+                with open(get_secure_path(tmp_dir, "proxy" + reference + ".json")) as f:
                     json_dict = json.load(f)
                 toggleLocked(token, 0)
                 exc_obj = e
@@ -3998,7 +4004,7 @@ def ldtrait():
                     sort_keys=True,
                 )
             )
-            snpfile = str(tmp_dir + "snps" + reference + ".txt")
+            snpfile = get_secure_path(tmp_dir, "snps" + reference + ".txt")
             snplist = snps.splitlines()
             with open(snpfile, "w") as f:
                 for s in snplist:
@@ -4015,12 +4021,12 @@ def ldtrait():
                 trait["thinned_snps"] = thinned_snps
                 trait["details"] = details
 
-                with open(tmp_dir + "trait" + reference + ".json") as f:
+                with open(get_secure_path(tmp_dir, "trait" + reference + ".json")) as f:
                     json_dict = json.load(f)
                 if "error" in json_dict:
                     trait["error"] = json_dict["error"]
                 else:
-                    with open(tmp_dir + "trait_variants_annotated" + reference + ".txt", "w") as f:
+                    with open(get_secure_path(tmp_dir, "trait_variants_annotated" + reference + ".txt"), "w") as f:
                         f.write(
                             "Query\tGWAS Trait\tPMID\tRS Number\tPosition ("
                             + genome_build_vars[genome_build]["title"]
@@ -4040,7 +4046,7 @@ def ldtrait():
                             f.write("Warning(s):\n")
                             f.write(trait["warning"])
                 out_json = json.dumps(trait, sort_keys=False)
-                with open(tmp_dir + "ldtrait" + reference + ".json", "w") as f:
+                with open(get_secure_path(tmp_dir, "ldtrait" + reference + ".json"), "w") as f:
                     f.write(out_json)
             except Exception as e:
                 exc_obj = e
@@ -4071,7 +4077,7 @@ def ldtrait():
                 sort_keys=True,
             )
         )
-        snpfile = str(tmp_dir + "snps" + reference + ".txt")
+        snpfile = get_secure_path(tmp_dir, "snps" + reference + ".txt")
         snplist = snps.splitlines()
         with open(snpfile, "w") as f:
             for s in snplist:
@@ -4094,14 +4100,14 @@ def ldtrait():
             except:
                 app.logger.debug("timeout error")
 
-            with open(tmp_dir + "trait" + reference + ".json") as f:
+            with open(get_secure_path(tmp_dir, "trait" + reference + ".json")) as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
                 # display api out w/ error
                 toggleLocked(token, 0)
                 return sendTraceback(json_dict["error"])
             else:
-                with open(tmp_dir + "trait_variants_annotated" + reference + ".txt", "w") as f:
+                with open(get_secure_path(tmp_dir, "trait_variants_annotated" + reference + ".txt"), "w") as f:
                     f.write(
                         "Query\tGWAS Trait\tPMID\tRS Number\tPosition ("
                         + genome_build_vars[genome_build]["title"]
@@ -4120,7 +4126,7 @@ def ldtrait():
                         f.write(json_dict["warning"])
                 # display api out
                 try:
-                    with open(tmp_dir + "trait_variants_annotated" + reference + ".txt", "r") as fp:
+                    with open(get_secure_path(tmp_dir, "trait_variants_annotated" + reference + ".txt"), "r") as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     end_time = time.time()
@@ -4182,7 +4188,7 @@ def ldtraitgwas():
     if "LDlinkRestWeb" in request.path:
         if request.user_agent.browser is not None:
             web = True
-            snpfile = str(tmp_dir + "snps" + reference + ".txt")
+            snpfile = get_secure_path(tmp_dir, "snps" + reference + ".txt")
             snplist = snps.splitlines()
             with open(snpfile, "w") as f:
                 for s in snplist:
@@ -4200,12 +4206,12 @@ def ldtraitgwas():
                 trait["thinned_snps"] = thinned_snps
                 trait["details"] = details
 
-                with open(tmp_dir + "trait" + reference + ".json") as f:
+                with open(get_secure_path(tmp_dir, "trait" + reference + ".json")) as f:
                     json_dict = json.load(f)
                 if "error" in json_dict:
                     trait["error"] = json_dict["error"]
                 else:
-                    with open(tmp_dir + "trait_variants_annotated" + reference + ".txt", "w") as f:
+                    with open(get_secure_path(tmp_dir, "trait_variants_annotated" + reference + ".txt"), "w") as f:
                         f.write(
                             "Query\tGWAS Trait\tPMID\tRS Number\tPosition ("
                             + genome_build_vars[genome_build]["title"]
@@ -4256,7 +4262,7 @@ def ldtraitgwas():
                 sort_keys=True,
             )
         )
-        snpfile = str(tmp_dir + "snps" + reference + ".txt")
+        snpfile = get_secure_path(tmp_dir, "snps" + reference + ".txt")
         snplist = snps.splitlines()
         with open(snpfile, "w") as f:
             for s in snplist:
@@ -4279,14 +4285,14 @@ def ldtraitgwas():
             except:
                 app.logger.debug("timeout error")
 
-            with open(tmp_dir + "trait" + reference + ".json") as f:
+            with open(get_secure_path(tmp_dir, "trait" + reference + ".json")) as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
                 # display api out w/ error
                 toggleLocked(token, 0)
                 return sendTraceback(json_dict["error"])
             else:
-                with open(tmp_dir + "trait_variants_annotated" + reference + ".txt", "w") as f:
+                with open(get_secure_path(tmp_dir, "trait_variants_annotated" + reference + ".txt"), "w") as f:
                     f.write(
                         "Query\tGWAS Trait\tPMID\tRS Number\tPosition ("
                         + genome_build_vars[genome_build]["title"]
@@ -4305,7 +4311,7 @@ def ldtraitgwas():
                         f.write(json_dict["warning"])
                 # display api out
                 try:
-                    with open(tmp_dir + "trait_variants_annotated" + reference + ".txt", "r") as fp:
+                    with open(get_secure_path(tmp_dir, "trait_variants_annotated" + reference + ".txt"), "r") as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     end_time = time.time()
@@ -4394,7 +4400,7 @@ def ldexpressgwas():
                 if "error" in errors_warnings:
                     express["error"] = errors_warnings["error"]
                 else:
-                    with open(tmp_dir + "express_variants_annotated" + reference + ".txt", "w") as f:
+                    with open(get_secure_path(tmp_dir, "express_variants_annotated" + reference + ".txt"), "w") as f:
                         f.write(
                             "Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n"
                         )
@@ -4460,7 +4466,7 @@ def ldexpressgwas():
                 toggleLocked(token, 0)
                 return sendTraceback(errors_warnings["error"])
             else:
-                with open(tmp_dir + "express_variants_annotated" + reference + ".txt", "w") as f:
+                with open(get_secure_path(tmp_dir, "express_variants_annotated" + reference + ".txt"), "w") as f:
                     f.write(
                         "Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n"
                     )
@@ -4473,7 +4479,7 @@ def ldexpressgwas():
                         f.write(errors_warnings["warning"])
                 # display api out
                 try:
-                    with open(tmp_dir + "express_variants_annotated" + reference + ".txt", "r") as fp:
+                    with open(get_secure_path(tmp_dir, "express_variants_annotated" + reference + ".txt"), "r") as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     end_time = time.time()
@@ -4537,13 +4543,13 @@ def snpchip():
                 sort_keys=True,
             )
         )
-        snplst = tmp_dir + "snps" + reference + ".txt"
+        snplst = get_secure_path(tmp_dir, "snps" + reference + ".txt")
         with open(snplst, "w") as f:
             f.write(snps.lower())
         try:
             snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
-            with open(tmp_dir + "snpchip" + reference + ".json", "w") as f:
+            with open(get_secure_path(tmp_dir, "snpchip" + reference + ".json"), "w") as f:
                 f.write(out_json)
         except Exception as e:
             exc_obj = e
@@ -4567,7 +4573,7 @@ def snpchip():
                 sort_keys=True,
             )
         )
-        snplst = tmp_dir + "snps" + reference + ".txt"
+        snplst = get_secure_path(tmp_dir, "snps" + reference + ".txt")
         with open(snplst, "w") as f:
             f.write(snps.lower())
         try:
@@ -4581,7 +4587,7 @@ def snpchip():
             # display api out
             try:
                 # unlock token then display api output
-                resultFile = tmp_dir + "details" + reference + ".txt"
+                resultFile = get_secure_path(tmp_dir, "details" + reference + ".txt")
                 with open(resultFile, "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
@@ -4591,7 +4597,7 @@ def snpchip():
             except Exception as e:
                 # unlock token then display error message
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
-                with open(tmp_dir + "snpchip" + reference + ".json", "w") as f:
+                with open(get_secure_path(tmp_dir, "snpchip" + reference + ".json"), "w") as f:
                     f.write(out_json)
                 output = json.loads(out_json)
                 toggleLocked(token, 0)
@@ -4656,7 +4662,7 @@ def snpclip():
                     sort_keys=True,
                 )
             )
-            snpfile = str(tmp_dir + "snps" + reference + ".txt")
+            snpfile = get_secure_path(tmp_dir, "snps" + reference + ".txt")
             snplist = snps.splitlines()
             with open(snpfile, "w") as f:
                 for s in snplist:
@@ -4672,7 +4678,7 @@ def snpclip():
                 clip["details"] = details
                 clip["snps"] = snps
                 clip["filtered"] = collections.OrderedDict()
-                with open(tmp_dir + "clip" + reference + ".json") as f:
+                with open(get_secure_path(tmp_dir, "clip" + reference + ".json")) as f:
                     json_dict = json.load(f)
                 if "error" in json_dict:
                     clip["error"] = json_dict["error"]
@@ -4681,17 +4687,17 @@ def snpclip():
                         clip["filtered"][snp[0]] = details[snp[0]]
                     if "warning" in json_dict:
                         clip["warning"] = json_dict["warning"]
-                with open(tmp_dir + "snp_list" + reference + ".txt", "w") as f:
+                with open(get_secure_path(tmp_dir, "snp_list" + reference + ".txt"), "w") as f:
                     for rs_number in snp_list:
                         f.write(rs_number + "\n")
-                with open(tmp_dir + "details" + reference + ".txt", "w") as f:
+                with open(get_secure_path(tmp_dir, "details" + reference + ".txt"), "w") as f:
                     f.write("RS Number\tPosition\tAlleles\tDetails\n")
                     if type(details) is collections.OrderedDict:
                         for snp in snps:
                             f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
                             f.write("\n")
                 out_json = json.dumps(clip, sort_keys=False)
-                with open(tmp_dir + "snpclip" + reference + ".json", "w") as f:
+                with open(get_secure_path(tmp_dir, "snpclip" + reference + ".json"), "w") as f:
                     f.write(out_json)
             except Exception as e:
                 exc_obj = e
@@ -4721,7 +4727,7 @@ def snpclip():
                 sort_keys=True,
             )
         )
-        snpfile = str(tmp_dir + "snps" + reference + ".txt")
+        snpfile = get_secure_path(tmp_dir, "snps" + reference + ".txt")
         snplist = snps.splitlines()
         with open(snpfile, "w") as f:
             for s in snplist:
@@ -4735,12 +4741,12 @@ def snpclip():
             (snps, snp_list, details) = calculate_clip(
                 snpfile, pop, reference, web, genome_build, float(r2_threshold), float(maf_threshold)
             )
-            with open(tmp_dir + "clip" + reference + ".json") as f:
+            with open(get_secure_path(tmp_dir, "clip" + reference + ".json")) as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
                 toggleLocked(token, 0)
                 return sendTraceback(json_dict["error"])
-            with open(tmp_dir + "details" + reference + ".txt", "w") as f:
+            with open(get_secure_path(tmp_dir, "details" + reference + ".txt"), "w") as f:
                 f.write("RS Number\tPosition\tAlleles\tDetails\n")
                 if type(details) is collections.OrderedDict:
                     for snp in snps:
@@ -4749,10 +4755,10 @@ def snpclip():
             # display api out
             try:
                 # unlock token then display api output
-                resultFile = tmp_dir + "details" + reference + ".txt"
+                resultFile = get_secure_path(tmp_dir, "details" + reference + ".txt")
                 with open(resultFile, "r") as fp:
                     content = fp.read()
-                with open(tmp_dir + "clip" + reference + ".json") as f:
+                with open(get_secure_path(tmp_dir, "clip" + reference + ".json")) as f:
                     json_dict = json.load(f)
                     if "error" in json_dict:
                         toggleLocked(token, 0)
