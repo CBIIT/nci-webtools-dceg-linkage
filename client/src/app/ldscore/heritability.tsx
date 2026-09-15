@@ -3,19 +3,19 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { fetchHeritabilityResult, upload, validateSumstats } from "@/services/queries";
-import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
+import { fetchHeritabilityResult, fetchLdScoreRuns, upload, validateSumstats, LdScoreRunSummary } from "@/services/queries";
+import LdscoreSourceSelect, { LdscoreSourceValue, defaultLdscoreSourceValue } from "@/components/select/ldscore-source-select";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
-import { generateReference } from "@/services/utils";
-import { useState } from "react";
+import { generateReference, parseLdScoreCalculationError } from "@/services/utils";
+import { useEffect, useState } from "react";
 import LdScoreResults from "./results";
+import { useLdScoreUpload } from "./useLdScoreUpload";
 
 interface HeritabilityFormData {
   file?: File;
   sumstatsFormat: SumstatsFormat;
-  pop: LdscorePopOption | null;
   scale: "observed" | "liability";
   samplePrev?: string;
   popPrev?: string;
@@ -38,7 +38,6 @@ const sumstatsFormatLabels = sumstatsFormatOptions.reduce<Record<string, string>
 const defaultHeritabilityForm: HeritabilityFormData = {
   file: undefined,
   sumstatsFormat: "",
-  pop: null,
   scale: "observed",
   samplePrev: "0.5",
   popPrev: "0.01",
@@ -57,7 +56,8 @@ export default function Heritability() {
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
-  
+  const currentSessionLdScoreRuns = useStore((state) => state.ldScoreRuns);
+
   const [exampleFilename, setExampleFilename] = useState<string>("");
   const [uploadedFilename, setUploadedFilename] = useState<string>("");
   const [renameWarnings, setRenameWarnings] = useState<string>("");
@@ -65,7 +65,31 @@ export default function Heritability() {
   const [useExample, setUseExample] = useState(false);
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
+  const [heritabilityError, setHeritabilityError] = useState<string>("");
   const [reference, setReference] = useState<string>("");
+  const [ldscoreSourceValue, setLdscoreSourceValue] = useState<LdscoreSourceValue>(defaultLdscoreSourceValue);
+  const [ldscoreSourceError, setLdscoreSourceError] = useState<string>("");
+  const [priorLdScoreRuns, setPriorLdScoreRuns] = useState<LdScoreRunSummary[]>([]);
+  const [priorRunsLoading, setPriorRunsLoading] = useState(false);
+  const ldScoreUpload = useLdScoreUpload();
+
+  useEffect(() => {
+    let cancelled = false;
+    setPriorRunsLoading(true);
+    fetchLdScoreRuns()
+      .then(({ runs }) => {
+        if (!cancelled) setPriorLdScoreRuns(runs);
+      })
+      .catch(() => {
+        if (!cancelled) setPriorLdScoreRuns([]);
+      })
+      .finally(() => {
+        if (!cancelled) setPriorRunsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const heritabilityForm = useForm<HeritabilityFormData>({
     defaultValues: defaultHeritabilityForm,
@@ -142,7 +166,9 @@ export default function Heritability() {
 
   const selectedScale = heritabilityForm.watch("scale");
   const fileRegistration = heritabilityForm.register("file", {
-    required: "File is required",
+    // required is enforced inside validate so it can be bypassed once example/uploaded
+    // data is present; RHF would otherwise fail the standalone `required` rule first
+    // (before validate runs) since the file input unmounts and never holds a value.
     validate: (file: File | FileList | undefined) => {
       // If we already have an uploaded filename or example filename, validation passes
       if (uploadedFilename || exampleFilename) return true;
@@ -170,21 +196,45 @@ export default function Heritability() {
     },
   });
 
+  // Runs on every submit attempt, including when other RHF-registered fields (file,
+  // sumstatsFormat, etc.) fail their own validation -- otherwise this error would
+  // never surface since RHF only calls onHeritabilitySubmit once all of its fields pass.
+  const validateLdscoreSource = (): boolean => {
+    if (ldscoreSourceValue.mode === "reference" && !ldscoreSourceValue.pop) {
+      setLdscoreSourceError("Population is required");
+      return false;
+    }
+    if (ldscoreSourceValue.mode !== "reference" && !ldscoreSourceValue.ldscoreReference) {
+      setLdscoreSourceError("Select an LD score run to reuse, or *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files to upload");
+      return false;
+    }
+    setLdscoreSourceError("");
+    return true;
+  };
+
   const onHeritabilitySubmit = async (data: HeritabilityFormData) => {
+    if (!validateLdscoreSource()) return;
     setHeritabilityResultRef(null);
+    setHeritabilityError("");
     setHeritabilityLoading(true);
-    const pop = data.pop?.value || '';
     const genomeBuild = genome_build || "grch37";
     const isExample = !!exampleFilename;
     const filename = exampleFilename || uploadedFilename;
     const params = new URLSearchParams({
       filename,
-      pop,
       genome_build: genomeBuild,
       isExample: isExample ? "true" : "false",
       reference,
       summary_stats_format: data.sumstatsFormat,
     });
+
+    if (ldscoreSourceValue.mode === "reference") {
+      params.append("pop", ldscoreSourceValue.pop?.value || "");
+      params.append("ldscoreSource", "reference");
+    } else {
+      params.append("ldscoreSource", "custom");
+      params.append("ldscoreReference", ldscoreSourceValue.ldscoreReference || "");
+    }
 
     if (data.scale === "liability") {
       params.append("scale", "liability");
@@ -199,6 +249,7 @@ export default function Heritability() {
       setHeritabilityResultRef(reference);
     } catch (error) {
       console.error("Heritability calculation error:", error);
+      setHeritabilityError(parseLdScoreCalculationError(error, "Failed to process heritability calculation. Please check your input and try again."));
     } finally {
       setHeritabilityLoading(false);
     }
@@ -207,11 +258,14 @@ export default function Heritability() {
   const onHeritabilityReset = () => {
     heritabilityForm.reset(defaultHeritabilityForm);
     setHeritabilityResultRef(null);
+    setHeritabilityError("");
     setExampleFilename("");
     setUploadedFilename("");
     setUseExample(false);
     setReference("");
     setRenameWarnings("");
+    setLdscoreSourceValue(defaultLdscoreSourceValue);
+    setLdscoreSourceError("");
     heritabilityForm.clearErrors("file");
   };
 
@@ -242,9 +296,55 @@ export default function Heritability() {
 
 
 
-      <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
+      <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit, validateLdscoreSource)} onReset={onHeritabilityReset} noValidate>
         <Row>
           <Col s={12} sm={12} md={6} lg={4}>
+            <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
+              
+                <Form.Check 
+                  type="switch"
+                  id="use-example-heritability"
+                  label="Use example data"
+                  checked={useExample}
+                  disabled={heritabilityLoading}
+                  onChange={async (e) => {
+                    setUseExample(e.target.checked);
+                    setHeritabilityResultRef(null);
+                    if (e.target.checked) {
+                      // Generate a new reference for example data
+                      const newReference = generateReference();
+                      setReference(newReference);
+                      heritabilityForm.setValue("sumstatsFormat", "pre_munged", { shouldValidate: true });
+                      setExampleFilename("");
+                      setUploadedFilename("");
+                      heritabilityForm.clearErrors("file");
+                      try {
+                        const response = await fetch("/LDlinkRestWeb/ldherit_example");
+                        if (response.ok) {
+                          const data = await response.json();
+                          setExampleFilename(data.filenames || "");
+                        } else {
+                          setExampleFilename("");
+                          console.error("Failed to fetch example data");
+                        }
+                      } catch (error) {
+                        setExampleFilename("");
+                        console.error("Error fetching example data:", error);
+                      }
+                    } else {
+                      setExampleFilename("");
+                      setUploadedFilename("");
+                      setReference("");
+                      heritabilityForm.setValue("sumstatsFormat", "");
+                      //heritabilityForm.setValue("pop", null);
+                    }
+                  }}
+                />
+                  <HoverUnderlineLink href="/help#LDscore">
+                  View sample format
+                </HoverUnderlineLink>
+              </div>
+                <br />
             <Form.Group controlId="sumstatsFormat" className="mb-3">
               <Form.Label>Summary statistics format</Form.Label>
               <Form.Select
@@ -269,7 +369,7 @@ export default function Heritability() {
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFilename === "string" && exampleFilename !== "" ? (
-                <div className="form-control bg-light">{exampleFilename}</div>
+                <div className="form-control bg-light" style={{ maxWidth: "400px" }}>{exampleFilename}</div>
               ) : (
                 <Form.Control 
                   type="file" 
@@ -297,61 +397,18 @@ export default function Heritability() {
               )}
               <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Upload PLINK, REGENIE, SAIGE, or LDSC-ready summary statistics. Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
-              <div className="mt-2">
-                <HoverUnderlineLink href="/help#LDscore">
-                  Click here for sample format
-                </HoverUnderlineLink>
-              </div>
               {heritabilityForm.formState.errors?.file?.type !== "server" && (
                 <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
               )}
             </Form.Group>
             <Form.Group controlId="useEx" className="mb-3">
-              <div className="mt-2">
-                <Form.Check 
-                  type="switch"
-                  id="use-example-heritability"
-                  label="Use example data"
-                  checked={useExample}
-                  disabled={heritabilityLoading}
-                  onChange={async (e) => {
-                    setUseExample(e.target.checked);
-                    setHeritabilityResultRef(null);
-                    if (e.target.checked) {
-                      // Generate a new reference for example data
-                      const newReference = generateReference();
-                      setReference(newReference);
-                          heritabilityForm.setValue("sumstatsFormat", "pre_munged");
-                      setExampleFilename("");
-                      setUploadedFilename("");
-                      heritabilityForm.clearErrors("file");
-                      try {
-                        const response = await fetch("/LDlinkRestWeb/ldherit_example");
-                        if (response.ok) {
-                          const data = await response.json();
-                          setExampleFilename(data.filenames || "");
-                        } else {
-                          setExampleFilename("");
-                          console.error("Failed to fetch example data");
-                        }
-                      } catch (error) {
-                        setExampleFilename("");
-                        console.error("Error fetching example data:", error);
-                      }
-                    } else {
-                      setExampleFilename("");
-                      setUploadedFilename("");
-                      setReference("");
-                      heritabilityForm.setValue("sumstatsFormat", "");
-                      //heritabilityForm.setValue("pop", null);
-                    }
-                  }}
-                />
                 {(exampleFilename || uploadedFilename) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
                     <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
-
-                    <a
+                    <div>
+                      <span style={{ fontWeight: 600 }}>Format:</span> {sumstatsFormatLabels[heritabilityForm.getValues("sumstatsFormat")] || "Not selected"}
+                      {"  "}
+                      <a
                       href={exampleFilename
                         ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
                         : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFilename)}`}
@@ -362,8 +419,6 @@ export default function Heritability() {
                     >
                       {exampleFilename || uploadedFilename}
                     </a>
-                    <div>
-                      <span style={{ fontWeight: 600 }}>Selected format:</span> {sumstatsFormatLabels[heritabilityForm.getValues("sumstatsFormat")] || "Not selected"}
                     </div>
                     {!useExample && renameWarnings.length > 0 && (
                       <Alert variant="warning" className="mt-2">
@@ -372,11 +427,10 @@ export default function Heritability() {
                     )}
                   </div>
                 )}
-              </div>
             </Form.Group>
           </Col>
 
-          <Col s={12} sm={12} md={6} lg={4}>
+          <Col s={12} sm={12} md={6} lg={3}>
             <Form.Group controlId="scale" className="mb-3">
               <Form.Label className="d-block">Scale</Form.Label>
               <ButtonGroup>
@@ -416,7 +470,7 @@ export default function Heritability() {
 
             {selectedScale === "liability" && (
               <>
-                <Row>
+                <Row style={{ marginTop: "-4.4px" }}>
                   <Col md={6}>
                     <Form.Group controlId="samplePrev" className="mb-3">
                       <Form.Label>
@@ -475,11 +529,86 @@ export default function Heritability() {
             )}
           </Col>
 
-          <Col s={12} sm={12} md={6} lg={2}>
-            <Form.Group controlId="pop" className="mb-3">
-              <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={heritabilityForm.control} isLoading={heritabilityLoading} rules={{ required: "Population is required" }} />
-              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
+          <Col s={12} sm={12} md={6} lg={3} className="ps-4">
+            <Form.Group controlId="ldscoreSource" className="mb-3">
+              <Form.Label>LD Score Sources</Form.Label>
+              <LdscoreSourceSelect
+                value={ldscoreSourceValue}
+                onChange={(v) => {
+                  setLdscoreSourceValue(v);
+                  setLdscoreSourceError("");
+                }}
+                currentSessionRuns={currentSessionLdScoreRuns}
+                priorRuns={priorLdScoreRuns}
+                priorRunsLoading={priorRunsLoading}
+                disabled={heritabilityLoading}
+                onRequestUpload={() => ldScoreUpload.reset()}
+                onRequestImport={() => ldScoreUpload.reset()}
+              />
+              {ldscoreSourceValue.mode === "customUpload" && (
+                <div className="mt-2">
+                  <Form.Control
+                    type="file"
+                    multiple
+                    accept=".bed,.bim,.fam"
+                    disabled={heritabilityLoading || ldScoreUpload.uploading || ldScoreUpload.computing}
+                    onChange={async (e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (input.files && input.files.length === 3) {
+                        const uploadResult = await ldScoreUpload.uploadFiles(input.files);
+                        if (uploadResult) {
+                          const computedRun = await ldScoreUpload.computeLdScore(uploadResult);
+                          if (computedRun) {
+                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
+                            setLdscoreSourceError("");
+                          } else {
+                            // Don't let a stale reference from an earlier successful upload silently
+                            // get reused now that this attempt failed.
+                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
+                          }
+                        }
+                      }
+                    }}
+                  />
+                  {/* <div style={{ fontSize: "0.85rem" }}>Upload matching *.bed, *.bim, *.fam files (same base name). The LD score will be computed automatically before running this analysis.</div>
+                  {(ldScoreUpload.uploading || ldScoreUpload.computing) && (
+                    <div className="mt-1">{ldScoreUpload.uploading ? "Uploading files..." : "Computing LD score..."}</div>
+                  )} */}
+                  {ldScoreUpload.fileError && <Form.Text className="text-danger">{ldScoreUpload.fileError}</Form.Text>}
+                </div>
+              )}
+              {ldscoreSourceValue.mode === "customImport" && (
+                <div className="mt-2">
+                  <Form.Control
+                    type="file"
+                    multiple
+                    accept=".gz,.M,.M_5_50"
+                    disabled={heritabilityLoading || ldScoreUpload.uploading || ldScoreUpload.importing}
+                    onChange={async (e) => {
+                      const input = e.target as HTMLInputElement;
+                      // Validate on every selection change (not just when exactly 3 files are
+                      // chosen) so a stale error from a prior attempt is replaced immediately --
+                      // each file dialog invocation replaces the whole selection, so a fix-up
+                      // pick of just the missing file would otherwise leave the old error stuck.
+                      if (input.files && input.files.length > 0) {
+                        const importedRun = await ldScoreUpload.importPrecomputedLdScore(input.files, genome_build || "grch37");
+                        if (importedRun) {
+                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: importedRun.reference }));
+                          setLdscoreSourceError("");
+                        } else {
+                          // Don't let a stale reference from an earlier successful import silently
+                          // get reused now that this attempt failed.
+                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
+                        }
+                      }
+                    }}
+                  />
+                  <div style={{ fontSize: "0.85rem" }}>Upload matching *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files (same base name).</div>
+                  {ldScoreUpload.importing && <div className="mt-1">Importing LD score files...</div>}
+                  {ldScoreUpload.fileError && <Form.Text className="text-danger">{ldScoreUpload.fileError}</Form.Text>}
+                </div>
+              )}
+              {ldscoreSourceError && <Form.Text className="text-danger d-block">{ldscoreSourceError}</Form.Text>}
             </Form.Group>
           </Col>
 
@@ -491,7 +620,14 @@ export default function Heritability() {
               <Button 
                 type="submit" 
                 variant={ "primary"}
-                disabled={heritabilityMutation.isPending || heritabilityLoading}
+                disabled={
+                  heritabilityMutation.isPending ||
+                  heritabilityLoading ||
+                  ldScoreUpload.uploading ||
+                  ldScoreUpload.computing ||
+                  ldScoreUpload.importing ||
+                  (ldscoreSourceValue.mode !== "reference" && !!ldScoreUpload.fileError)
+                }
               >
                 {heritabilityLoading ? "Loading..." : "Calculate"}
               </Button>
@@ -526,6 +662,12 @@ export default function Heritability() {
               The uploaded file has the following issues:<br />
             {heritabilityForm.formState.errors.file.message}
           </Alert>
+      )}
+
+      {heritabilityError && (
+        <Alert variant="danger" className="mt-2">
+          {heritabilityError}
+        </Alert>
       )}
 
       {heritabilityResultRef && (

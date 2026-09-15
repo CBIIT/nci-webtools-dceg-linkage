@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Container, Row, Col, Alert, Spinner } from "react-bootstrap";
+import { fetchLdScoreRunDetail, LdScoreRunSummary } from "@/services/queries";
 
 // Helper functions for parsing and rendering results (copied from form.tsx, can be improved)
 function parseEstimateAndSE(value: string) {
@@ -186,7 +187,7 @@ function renderKeyValueTable(section: string) {
   
   lines.forEach(line => {
     let found = false;
-    const colonPairs = line.matchAll(/([\w\s²\*\-0-9\^]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
+    const colonPairs = line.matchAll(/([\w\s²*^-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
     for (const pair of colonPairs) {
       const key = pair[1].trim();
       const value = pair[2].trim();
@@ -445,15 +446,111 @@ function formatSummarySection(section: string) {
   return [headerLine, ...rowLines].join('\n');
 }
 
+// Derive the shared base filename (without .bim/.bed/.fam extension) from a comma-separated input filename list
+function getLdScoreInputBaseFilename(inputFilename: string) {
+  const firstFile = inputFilename.split(',').map(f => f.trim()).filter(Boolean)[0] || '';
+  return firstFile.replace(/\.(bim|bed|fam)$/i, '');
+}
+
+function formatFileSize(bytes?: number) {
+  if (!bytes || bytes <= 0) return '';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+  return `${size.toFixed(size >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+// Lists the persisted variant-level LD score output files for a run (name, size,
+// chromosome/set designation) with per-file downloads and a complete-set zip download.
+function LdScoreOutputFilesPanel({ reference }: { reference: string }) {
+  const [run, setRun] = useState<LdScoreRunSummary | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchLdScoreRunDetail(reference)
+      .then((data) => {
+        if (!cancelled) {
+          setRun(data);
+          setStatus(data?.outputFiles?.length ? 'ready' : 'unavailable');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setStatus('unavailable');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reference]);
+
+  if (status === 'loading') return null;
+
+  if (status === 'unavailable') {
+    return (
+      <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6 }}>
+        <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd' }}>LD Score Output Files</div>
+        <div className="panel-body" style={{ padding: '12px' }}>
+          <span className="text-muted">These LD score output files are unavailable or have expired.</span>
+        </div>
+      </div>
+    );
+  }
+
+  const outputFiles = run?.outputFiles || [];
+  return (
+    <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6 }}>
+      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span>LD Score Output Files</span>
+        {outputFiles.length > 1 && (
+          <a className="btn btn-sm btn-outline-primary" href={`/LDlinkRestWeb/ldscore_run_files/${reference}/zip`} download>
+            Download complete set
+          </a>
+        )}
+      </div>
+      <div className="panel-body" style={{ padding: '12px' }}>
+        <TableContainer>
+          <table className="table table-bordered table-sm mb-0" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid black', padding: '4px 8px', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>File</th>
+                <th style={{ border: '1px solid black', padding: '4px 8px', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>Chromosome/Set</th>
+                <th style={{ border: '1px solid black', padding: '4px 8px', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>Size</th>
+                <th style={{ border: '1px solid black', padding: '4px 8px', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {outputFiles.map((file) => (
+                <tr key={file.name}>
+                  <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{file.name}</td>
+                  <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{run?.chromosomeCoverage || ''}</td>
+                  <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{formatFileSize(file.size)}</td>
+                  <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>
+                    <a href={`/LDlinkRestWeb/ldscore_run_files/${reference}/${encodeURIComponent(file.name)}`} download>Download</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableContainer>
+      </div>
+    </div>
+  );
+}
+
 function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename, parsedTableText, reference }: { result: string; filename?: string; inputFilename?: string; parsedTableText?: string; reference?: string }) {
   const [zipping, setZipping] = useState(false);
+  const inputldFilename = inputFilename ? getLdScoreInputBaseFilename(inputFilename) : '';
   return (
     <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
       <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
         Download Options <span style={{ fontSize: '0.85em', fontWeight: 400 }}> (these results will be deleted after one hour)</span>
       </div>
       <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          {inputFilename && ((filename.includes('correlation') && inputFilename.split(',').length > 1) || (filename.includes('ldscore') && inputFilename.split(';').length > 1)) ? (
+          {inputFilename && ((filename.includes('correlation') || filename.includes('ldscore')) && inputFilename.split(',').length > 1) ? (
           <button
             id="download-zip-input-btn"
             type="button"
@@ -461,9 +558,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
             style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
             disabled={zipping}
             onClick={async () => {
-              const files = filename.includes('ldscore')
-                ? inputFilename.split(';').map(f => f.trim()).filter(Boolean)
-                : inputFilename.split(',').map(f => f.trim()).filter(Boolean);
+              const files = inputFilename.split(',').map(f => f.trim()).filter(Boolean);
               setZipping(true);
               try {
                 const res = await fetch('/LDlinkRestWeb/zip', {
@@ -486,9 +581,10 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
               }
             }}
           >
-            {zipping ? 'Zipping...' : 'Download Inputs'}
+           {zipping ? 'Zipping...' : 'Download Inputs'}
           </button>
         ) : inputFilename && (
+          <>
           <button
             id="download-herit-input-btn"
             type="button"
@@ -507,6 +603,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
           >
             Download Input
           </button>
+          </>
         )}
        
         <button
@@ -570,7 +667,7 @@ function renderLdScoreTable(section: string, opts?: { ignoreAnalysisFinished?: b
   );
 }
 
-export default function LdScoreResults({ reference, type, uploads }: { reference: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
+export default function LdScoreResults({ reference, persistedReference, type, uploads }: { reference: string, persistedReference?: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
@@ -685,6 +782,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         <h5 style={{ fontWeight: 'bold' }}>MAF/LD Score Correlation Matrix</h5>
         {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
         <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} reference={reference} />
+        <LdScoreOutputFilesPanel reference={persistedReference || reference} />
         <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
       </Container>
     );

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { LdScoreRunSummary } from "@/services/queries";
 
 export interface StoreState {
   genome_build: string;
@@ -6,12 +7,17 @@ export interface StoreState {
   formDataCache: Record<string, any>;
   setFormData: (ref: string, data: any) => void;
   getFormData: (ref: string) => any;
+  // LD score runs computed earlier in this page visit (LD Score Calculation tab),
+  // available instantly to Heritability/Genetic Correlation without a network round-trip.
+  ldScoreRuns: LdScoreRunSummary[];
+  addLdScoreRun: (run: LdScoreRunSummary) => void;
   resetStore: () => void;
 }
 
 export const defaultState = {
   genome_build: "grch37",
   formDataCache: {},
+  ldScoreRuns: [] as LdScoreRunSummary[],
 };
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -22,6 +28,10 @@ export const useStore = create<StoreState>((set, get) => ({
       formDataCache: { ...state.formDataCache, [ref]: data } 
     })),
   getFormData: (ref: string) => get().formDataCache[ref],
+  addLdScoreRun: (run: LdScoreRunSummary) =>
+    set((state) => ({
+      ldScoreRuns: [run, ...state.ldScoreRuns.filter((existing) => existing.reference !== run.reference)],
+    })),
   resetStore: () => set(() => defaultState),
 }));
 

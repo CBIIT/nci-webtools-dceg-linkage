@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import {
   getSessionCookieName,
   getSessionSigningSecret,
@@ -7,15 +8,23 @@ import {
 
 const HEADER_ALLOWLIST = ["accept", "accept-language", "content-type", "user-agent", "x-request-id"];
 
-function hasValidBrowserSession(request: NextRequest, signingSecret: string): boolean {
+// Returns the raw cookie value only if its signature/expiry checks out, else null.
+function getValidBrowserSessionCookie(request: NextRequest, signingSecret: string): string | null {
   const sessionCookieName = getSessionCookieName();
   const sessionCookie = request.cookies.get(sessionCookieName);
   const value = sessionCookie?.value?.trim();
   if (!value) {
-    return false;
+    return null;
   }
 
-  return isSignedSessionValueValid(value, signingSecret);
+  return isSignedSessionValueValid(value, signingSecret) ? value : null;
+}
+
+// Derives a stable, one-way session identifier from the signed cookie so the backend
+// can scope/authorize per-browser resources (e.g. saved LD score runs) without ever
+// seeing the raw cookie value or signature.
+function deriveSessionId(cookieValue: string): string {
+  return createHash("sha256").update(cookieValue).digest("hex");
 }
 
 function getBackendBaseUrl(): string {
@@ -55,7 +64,7 @@ function buildTargetUrl(request: NextRequest): string | null {
   return `${backendBaseUrl}/LDlinkRestWeb/${target}${query ? `?${query}` : ""}`;
 }
 
-function buildForwardHeaders(request: NextRequest, internalAuthToken: string): Headers {
+function buildForwardHeaders(request: NextRequest, internalAuthToken: string, sessionId: string): Headers {
   const headers = new Headers();
 
   for (const headerName of HEADER_ALLOWLIST) {
@@ -66,6 +75,7 @@ function buildForwardHeaders(request: NextRequest, internalAuthToken: string): H
   }
 
   headers.set("X-Internal-Auth", internalAuthToken);
+  headers.set("X-Session-Id", sessionId);
   headers.set("accept-encoding", "identity");
   return headers;
 }
@@ -88,7 +98,8 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
     );
   }
 
-  if (!hasValidBrowserSession(request, signingSecret)) {
+  const sessionCookieValue = getValidBrowserSessionCookie(request, signingSecret);
+  if (!sessionCookieValue) {
     return NextResponse.json(
       { error: "Forbidden. Valid browser session is required. Please refresh and try again." },
       { status: 403 }
@@ -108,7 +119,7 @@ async function proxyRequest(request: NextRequest): Promise<Response> {
     );
   }
 
-  const headers = buildForwardHeaders(request, internalAuthToken);
+  const headers = buildForwardHeaders(request, internalAuthToken, deriveSessionId(sessionCookieValue));
   const method = request.method.toUpperCase();
 
   const init: RequestInit = {

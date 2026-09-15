@@ -3,20 +3,21 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { fetchGeneticCorrelationResult, upload, validateSumstats } from "@/services/queries";
-import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
+import { fetchGeneticCorrelationResult, fetchLdScoreRuns, upload, validateSumstats, LdScoreRunSummary } from "@/services/queries";
+import LdscoreSourceSelect, { LdscoreSourceValue, defaultLdscoreSourceValue } from "@/components/select/ldscore-source-select";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
-import { generateReference } from "@/services/utils";
-import { useState } from "react";
+import { generateReference, parseLdScoreCalculationError } from "@/services/utils";
+import { useEffect, useState } from "react";
 import LdScoreResults from "./results";
+import { useLdScoreUpload } from "./useLdScoreUpload";
 
 interface CorrelationFormData {
   file?: FileList;
   file2?: FileList;
-  sumstatsFormat: SumstatsFormat;
-  pop: LdscorePopOption | null;
+  sumstatsFormat1: SumstatsFormat;
+  sumstatsFormat2: SumstatsFormat;
   scale: "observed" | "liability";
   samplePrev1?: string;
   popPrev1?: string;
@@ -41,8 +42,8 @@ const sumstatsFormatLabels = sumstatsFormatOptions.reduce<Record<string, string>
 const defaultGeneticForm: CorrelationFormData = {
   file: undefined,
   file2: undefined,
-  sumstatsFormat: "",
-  pop: null,
+  sumstatsFormat1: "",
+  sumstatsFormat2: "",
   scale: "observed",
   samplePrev1: "0.5",
   popPrev1: "0.01",
@@ -63,7 +64,8 @@ export default function Correlation() {
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
-  
+  const currentSessionLdScoreRuns = useStore((state) => state.ldScoreRuns);
+
   const [reference, setReference] = useState<string>("");
   const [exampleFile1, setExampleFile1] = useState<string>("");
   const [exampleFile2, setExampleFile2] = useState<string>("");
@@ -73,12 +75,36 @@ export default function Correlation() {
   const [useExampleCorrelation, setUseExampleCorrelation] = useState(false);
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
+  const [geneticError, setGeneticError] = useState<string>("");
   const [fileError, setFileError] = useState<string>("");
   const [renameWarnings, setRenameWarnings] = useState<string>("");
   const [file1Valid, setFile1Valid] = useState(false);
   const [file2Valid, setFile2Valid] = useState(false);
   const [validationError1, setValidationError1] = useState<string>("");
   const [validationError2, setValidationError2] = useState<string>("");
+  const [ldscoreSourceValue, setLdscoreSourceValue] = useState<LdscoreSourceValue>(defaultLdscoreSourceValue);
+  const [ldscoreSourceError, setLdscoreSourceError] = useState<string>("");
+  const [priorLdScoreRuns, setPriorLdScoreRuns] = useState<LdScoreRunSummary[]>([]);
+  const [priorRunsLoading, setPriorRunsLoading] = useState(false);
+  const ldScoreUpload = useLdScoreUpload();
+
+  useEffect(() => {
+    let cancelled = false;
+    setPriorRunsLoading(true);
+    fetchLdScoreRuns()
+      .then(({ runs }) => {
+        if (!cancelled) setPriorLdScoreRuns(runs);
+      })
+      .catch(() => {
+        if (!cancelled) setPriorLdScoreRuns([]);
+      })
+      .finally(() => {
+        if (!cancelled) setPriorRunsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleFileUpload = async (file: File, fileNumber: 1 | 2, sumstatsFormat: SumstatsFormat) => {
     setFileError(""); // Clear any previous errors
@@ -165,18 +191,22 @@ export default function Correlation() {
   });
 
   const selectedScale = geneticForm.watch("scale");
+  // required is enforced inside validate (rather than via the standalone `required`
+  // rule) so it can be bypassed once example/uploaded data is present; RHF evaluates
+  // `required` before `validate` and would otherwise fail immediately since the file
+  // input is never given a value when using example data.
   const file1Registration = geneticForm.register("file", {
-    required: "File is required",
     validate: (fileList: FileList | undefined) => {
-      if (!fileList || fileList.length === 0) return true;
+      if (uploadedFile1 || exampleFile1) return true;
+      if (!fileList || fileList.length === 0) return "File is required";
       const file = fileList[0];
       return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
     }
   });
   const file2Registration = geneticForm.register("file2", {
-    required: "File is required",
     validate: (fileList: FileList | undefined) => {
-      if (!fileList || fileList.length === 0) return true;
+      if (uploadedFile2 || exampleFile2) return true;
+      if (!fileList || fileList.length === 0) return "File is required";
       const file = fileList[0];
       return hasSupportedSumstatsExtension(file.name) || 'Only .txt, .tsv, .csv, .gz, .sumstats, .glm, .assoc, .regenie, or .saige files are allowed';
     }
@@ -197,10 +227,27 @@ export default function Correlation() {
     },
   });
 
+  // Runs on every submit attempt, including when other RHF-registered fields (file,
+  // sumstatsFormat1/2, etc.) fail their own validation -- otherwise this error would
+  // never surface since RHF only calls onGeneticSubmit once all of its fields pass.
+  const validateLdscoreSource = (): boolean => {
+    if (ldscoreSourceValue.mode === "reference" && !ldscoreSourceValue.pop) {
+      setLdscoreSourceError("Population is required");
+      return false;
+    }
+    if (ldscoreSourceValue.mode !== "reference" && !ldscoreSourceValue.ldscoreReference) {
+      setLdscoreSourceError("Select an LD score run to reuse, or upload *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files");
+      return false;
+    }
+    setLdscoreSourceError("");
+    return true;
+  };
+
   const onGeneticSubmit = async (data: CorrelationFormData) => {
+    if (!validateLdscoreSource()) return;
     setGeneticCorrelationResultRef(null);
+    setGeneticError("");
     setGeneticLoading(true);
-    const pop = data.pop?.value || '';
     const genomeBuild = genome_build || "grch37";
     const isExample = !!exampleFile1;
     const filename = exampleFile1 || uploadedFile1;
@@ -208,12 +255,19 @@ export default function Correlation() {
     const params = new URLSearchParams({
       filename,
       filename2,
-      pop,
       genome_build: genomeBuild,
       isExample: isExample ? "true" : "false",
       reference,
-      summary_stats_format: data.sumstatsFormat,
+      summary_stats_format: `${data.sumstatsFormat1},${data.sumstatsFormat2}`,
     });
+
+    if (ldscoreSourceValue.mode === "reference") {
+      params.append("pop", ldscoreSourceValue.pop?.value || "");
+      params.append("ldscoreSource", "reference");
+    } else {
+      params.append("ldscoreSource", "custom");
+      params.append("ldscoreReference", ldscoreSourceValue.ldscoreReference || "");
+    }
 
     if (data.scale === "liability") {
       params.append("scale", "liability");
@@ -227,6 +281,7 @@ export default function Correlation() {
       setGeneticCorrelationResultRef(reference);
     } catch (error) {
       console.error("Genetic correlation calculation error:", error);
+      setGeneticError(parseLdScoreCalculationError(error, "Failed to process genetic correlation calculation. Please check your input and try again."));
     } finally {
       setGeneticLoading(false);
     }
@@ -235,6 +290,7 @@ export default function Correlation() {
   const onGeneticReset = () => {
     geneticForm.reset(defaultGeneticForm);
     setGeneticCorrelationResultRef(null);
+    setGeneticError("");
     setReference("");
     setExampleFile1("");
     setExampleFile2("");
@@ -247,6 +303,8 @@ export default function Correlation() {
     setValidationError1("");
     setValidationError2("");
     setRenameWarnings("");
+    setLdscoreSourceValue(defaultLdscoreSourceValue);
+    setLdscoreSourceError("");
   };
 
   return (
@@ -274,18 +332,13 @@ export default function Correlation() {
         </div>
       )}
 
-      <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
+      <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit, validateLdscoreSource)} onReset={onGeneticReset} noValidate>
+        <Row className="align-items-start">
+        <Col s={12} sm={12} md={12} lg={7}>
         <Row>
-          <Col s={12} sm={12} md={6} lg={4}>
-            <Form.Group>
-              <div className="mt-2">
-                <HoverUnderlineLink href="/help#LDscore">
-                  Click here for sample format
-                </HoverUnderlineLink>
-              </div>
-           
-            </Form.Group>
-              <div className="mb-3">
+          <Col xs={12} md={8} lg={8}>
+            <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
+
               <Form.Check
                 type="switch"
                 id="use-example-correlation"
@@ -301,7 +354,8 @@ export default function Correlation() {
                     setReference(newReference);
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
-                    geneticForm.setValue("sumstatsFormat", "pre_munged");
+                    geneticForm.setValue("sumstatsFormat1", "pre_munged", { shouldValidate: true });
+                    geneticForm.setValue("sumstatsFormat2", "pre_munged", { shouldValidate: true });
                     setUploadedFile1("");
                     setUploadedFile2("");
                     setValidationError1("");
@@ -314,41 +368,18 @@ export default function Correlation() {
                     setReference("");
                     setExampleFile1("");
                     setExampleFile2("");
-                    geneticForm.setValue("sumstatsFormat", "");
+                    geneticForm.setValue("sumstatsFormat1", "");
+                    geneticForm.setValue("sumstatsFormat2", "");
                     //geneticForm.setValue("pop", null);
                   }
                 }}
               />
+                <HoverUnderlineLink href="/help#LDscore">
+                View sample format
+              </HoverUnderlineLink>
             </div>
-            <Form.Group controlId="sumstatsFormat" className="mb-3">
-              <Form.Label>Summary statistics format</Form.Label>
-              <Form.Select
-                disabled={geneticLoading || useExampleCorrelation}
-                style={{ maxWidth: "400px" }}
-                {...geneticForm.register("sumstatsFormat", { required: "Summary statistics format is required" })}
-                onChange={(e) => {
-                  geneticForm.setValue("sumstatsFormat", e.target.value as SumstatsFormat, { shouldValidate: true });
-                  setGeneticCorrelationResultRef(null);
-                  setUploadedFile1("");
-                  setUploadedFile2("");
-                  setFile1Valid(false);
-                  setFile2Valid(false);
-                  setValidationError1("");
-                  setValidationError2("");
-                  geneticForm.setValue("file", undefined);
-                  geneticForm.setValue("file2", undefined);
-                }}
-              >
-                <option value="">Select format</option>
-                {sumstatsFormatOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </Form.Select>
-              <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat?.message}</Form.Text>
-            </Form.Group>
           </Col>
-        
-           <Col s={12} sm={12} md={6} lg={4}>
+          <Col xs={12} md={4} lg={4}>
             <Form.Group controlId="scale" className="mb-3">
               <Form.Label className="d-block">Scale</Form.Label>
               <ButtonGroup>
@@ -388,48 +419,54 @@ export default function Correlation() {
               </ButtonGroup>
             </Form.Group>
           </Col>
-
-           <Col s={12} sm={12} md={6} lg={2}>
-            <Form.Group controlId="pop" className="mb-3">
-              <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={geneticForm.control} isLoading={geneticLoading} rules={{ required: "Population is required" }} />
-              <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
-            </Form.Group>
-          </Col>
-          <Col s={12} sm={12} md={6} lg={2}>
-            <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
-                Reset
-              </Button>
-              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>
-               {geneticLoading ? "Loading..." : "Calculate"}
-              </Button>
-            </div>
-          </Col>
         </Row>
+        <Row>
 
-           <div className="mb-1 position-relative">
-          {selectedScale === "liability" && ( 
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  bottom: 0,
-                  left: -5,
-                  width: "100%",
-                  border: "1px solid #dee2e6",
-                  borderRadius: "0.375rem",
-                  pointerEvents: "none",
+        <div className="mb-1 position-relative">
+          {selectedScale === "liability" && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: -5,
+                width: "100%",
+                border: "1px solid #dee2e6",
+                borderRadius: "0.375rem",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+  
+        <Row>  
+            <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
+             <Col xs={12} sm={12} md={6} lg={6}>
+            <Form.Group controlId="sumstatsFormat1" className="mb-3">
+              <Form.Label>Summary statistics format</Form.Label>
+              <Form.Select
+                disabled={geneticLoading || useExampleCorrelation}
+                style={{ maxWidth: "400px" }}
+                {...geneticForm.register("sumstatsFormat1", { required: "Summary statistics format is required" })}
+                onChange={(e) => {
+                  geneticForm.setValue("sumstatsFormat1", e.target.value as SumstatsFormat, { shouldValidate: true });
+                  setGeneticCorrelationResultRef(null);
+                  setUploadedFile1("");
+                  setFile1Valid(false);
+                  setValidationError1("");
+                  geneticForm.setValue("file", undefined);
                 }}
-              />
-             )}
-           <Row>
-             <Form.Label className="fw-semibold mb-1">Trait 1</Form.Label>
-            <Col s={12} sm={12} md={6} lg={4}>
+              >
+                <option value="">Select format</option>
+                {sumstatsFormatOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat1?.message}</Form.Text>
+            </Form.Group>
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
-                <div className="form-control bg-light">{exampleFile1}</div>
+                <div className="form-control bg-light" style={{ maxWidth: "400px" }}>{exampleFile1}</div>
               ) : (
                 <Form.Control 
                   type="file" 
@@ -444,26 +481,24 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      const validFormat = await geneticForm.trigger("sumstatsFormat");
+                      const validFormat = await geneticForm.trigger("sumstatsFormat1");
                       if (!validFormat) {
                         input.value = "";
                         geneticForm.setValue("file", undefined, { shouldValidate: true });
                         return;
                       }
-                      await handleFileUpload(file, 1, geneticForm.getValues("sumstatsFormat"));
+                      await handleFileUpload(file, 1, geneticForm.getValues("sumstatsFormat1"));
                       geneticForm.clearErrors("file");
                     }
                   }}
                 />
               )}
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
-           
             </Form.Group>
-
-            </Col>
-              {selectedScale === "liability" && (
-              <>
-              <Col s={12} sm={12} md={6} lg={5}>
+          </Col>
+          {selectedScale === "liability" && (
+            <>
+              <Col xs={12} sm={12} md={6} lg={6}>
                 <Row>
                   <Col xs={6}>
                     <Form.Group controlId="samplePrev1">
@@ -520,11 +555,13 @@ export default function Correlation() {
                     </Form.Group>
                   </Col>
                 </Row>
-                  </Col>       
-              </>
-            )}
-        </Row>
+              </Col>
+            </>
+          )}
+          </Row>
         </div>
+        </Row>
+        <Row>
         <div className="mb-1 position-relative">
           {selectedScale === "liability" && (
             <div
@@ -540,13 +577,36 @@ export default function Correlation() {
               }}
             />
           )}
+  
         <Row>  
            <Form.Label className="fw-semibold mb-1">Trait 2</Form.Label>
-          <Col s={12} sm={12} md={6} lg={4}>
+          <Col xs={12} sm={12} md={6} lg={6}>
+            <Form.Group controlId="sumstatsFormat2" className="mb-3">
+              <Form.Label>Summary statistics format</Form.Label>
+              <Form.Select
+                disabled={geneticLoading || useExampleCorrelation}
+                style={{ maxWidth: "400px" }}
+                {...geneticForm.register("sumstatsFormat2", { required: "Summary statistics format is required" })}
+                onChange={(e) => {
+                  geneticForm.setValue("sumstatsFormat2", e.target.value as SumstatsFormat, { shouldValidate: true });
+                  setGeneticCorrelationResultRef(null);
+                  setUploadedFile2("");
+                  setFile2Valid(false);
+                  setValidationError2("");
+                  geneticForm.setValue("file2", undefined);
+                }}
+              >
+                <option value="">Select format</option>
+                {sumstatsFormatOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-danger">{geneticForm.formState.errors?.sumstatsFormat2?.message}</Form.Text>
+            </Form.Group>
             <Form.Group controlId="file2" className="mb-3">
               <Form.Label>Upload GWAS summary statistics file</Form.Label>
               {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
-                <div className="form-control bg-light">{exampleFile2}</div>
+                <div className="form-control bg-light" style={{ maxWidth: "400px" }}>{exampleFile2}</div>
               ) : (
                 <Form.Control 
                   type="file" 
@@ -561,13 +621,13 @@ export default function Correlation() {
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
-                      const validFormat = await geneticForm.trigger("sumstatsFormat");
+                      const validFormat = await geneticForm.trigger("sumstatsFormat2");
                       if (!validFormat) {
                         input.value = "";
                         geneticForm.setValue("file2", undefined, { shouldValidate: true });
                         return;
                       }
-                      await handleFileUpload(file, 2, geneticForm.getValues("sumstatsFormat"));
+                      await handleFileUpload(file, 2, geneticForm.getValues("sumstatsFormat2"));
                       geneticForm.clearErrors("file2");
                     }
                   }}
@@ -578,7 +638,7 @@ export default function Correlation() {
               </Col>
               {selectedScale === "liability" && (
                 <>
-                <Col s={12} sm={12} md={6} lg={5}>
+                <Col xs={12} sm={12} md={6} lg={6}>
                     <Row>
                       <Col xs={6}>
                         <Form.Group controlId="samplePrev2">
@@ -636,7 +696,118 @@ export default function Correlation() {
                   </Col>
                   </>)}
                 </Row>
+        </div>
+        </Row>
+        </Col>
+
+        <Col s={12} sm={12} md={12} lg={5}>
+        <Row>
+           <Col s={12} sm={12} md={6} lg={7} className="ps-4">
+            <Form.Group controlId="ldscoreSource" className="mb-3">
+              <Form.Label>LD Score Sources</Form.Label>
+              <LdscoreSourceSelect
+                value={ldscoreSourceValue}
+                onChange={(v) => {
+                  setLdscoreSourceValue(v);
+                  setLdscoreSourceError("");
+                }}
+                currentSessionRuns={currentSessionLdScoreRuns}
+                priorRuns={priorLdScoreRuns}
+                priorRunsLoading={priorRunsLoading}
+                disabled={geneticLoading}
+                onRequestUpload={() => ldScoreUpload.reset()}
+                onRequestImport={() => ldScoreUpload.reset()}
+              />
+              {ldscoreSourceValue.mode === "customUpload" && (
+                <div className="mt-2">
+                  <Form.Control
+                    type="file"
+                    multiple
+                    accept=".bed,.bim,.fam"
+                    disabled={geneticLoading || ldScoreUpload.uploading || ldScoreUpload.computing}
+                    onChange={async (e) => {
+                      const input = e.target as HTMLInputElement;
+                      if (input.files && input.files.length === 3) {
+                        const uploadResult = await ldScoreUpload.uploadFiles(input.files);
+                        if (uploadResult) {
+                          const computedRun = await ldScoreUpload.computeLdScore(uploadResult);
+                          if (computedRun) {
+                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
+                            setLdscoreSourceError("");
+                          } else {
+                            // Don't let a stale reference from an earlier successful upload silently
+                            // get reused now that this attempt failed.
+                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
+                          }
+                        }
+                      }
+                    }}
+                  />
+                  {/* <div style={{ fontSize: "0.85rem" }}>Upload matching *.bed, *.bim, *.fam files (same base name). The LD score will be computed automatically before running this analysis.</div>
+                  {(ldScoreUpload.uploading || ldScoreUpload.computing) && (
+                    <div className="mt-1">{ldScoreUpload.uploading ? "Uploading files..." : "Computing LD score..."}</div>
+                  )} */}
+                  {ldScoreUpload.fileError && <Form.Text className="text-danger">{ldScoreUpload.fileError}</Form.Text>}
                 </div>
+              )}
+              {ldscoreSourceValue.mode === "customImport" && (
+                <div className="mt-2">
+                  <Form.Control
+                    type="file"
+                    multiple
+                    accept=".gz,.M,.M_5_50"
+                    disabled={geneticLoading || ldScoreUpload.uploading || ldScoreUpload.importing}
+                    onChange={async (e) => {
+                      const input = e.target as HTMLInputElement;
+                      // Validate on every selection change (not just when exactly 3 files are
+                      // chosen) so a stale error from a prior attempt is replaced immediately --
+                      // each file dialog invocation replaces the whole selection, so a fix-up
+                      // pick of just the missing file would otherwise leave the old error stuck.
+                      if (input.files && input.files.length > 0) {
+                        const importedRun = await ldScoreUpload.importPrecomputedLdScore(input.files, genome_build || "grch37");
+                        if (importedRun) {
+                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: importedRun.reference }));
+                          setLdscoreSourceError("");
+                        } else {
+                          // Don't let a stale reference from an earlier successful import silently
+                          // get reused now that this attempt failed.
+                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
+                        }
+                      }
+                    }}
+                  />
+                  <div style={{ fontSize: "0.85rem" }}>Upload matching *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files (same base name).</div>
+                  {ldScoreUpload.importing && <div className="mt-1">Importing LD score files...</div>}
+                  {ldScoreUpload.fileError && <Form.Text className="text-danger">{ldScoreUpload.fileError}</Form.Text>}
+                </div>
+              )}
+              {ldscoreSourceError && <Form.Text className="text-danger d-block">{ldscoreSourceError}</Form.Text>}
+            </Form.Group>
+          </Col>
+          <Col s={12} sm={12} md={6} lg={5}>
+            <div className="text-end">
+              <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
+                Reset
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={
+                  geneticMutation.isPending ||
+                  geneticLoading ||
+                  ldScoreUpload.uploading ||
+                  ldScoreUpload.computing ||
+                  ldScoreUpload.importing ||
+                  (ldscoreSourceValue.mode !== "reference" && !!ldScoreUpload.fileError)
+                }
+              >
+               {geneticLoading ? "Loading..." : "Calculate"}
+              </Button>
+            </div>
+          </Col>
+        </Row>
+        </Col>
+        </Row>
                  <Row>
                   <Col s={12} sm={12} md={6} lg={4}>
                    <div style={{ fontSize: '0.875rem', fontWeight: 'normal', maxWidth: 400 }}>Upload PLINK, REGENIE, SAIGE, or LDSC-ready summary statistics. Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
@@ -647,9 +818,9 @@ export default function Correlation() {
                 <>
                   <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
                   <div>
-                    <span style={{ fontWeight: 600 }}>Selected format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat")] || "Not selected"}
-                  </div>
-                  {(exampleFile1 || uploadedFile1) && (
+                    <span style={{ fontWeight: 600 }}>Trait 1 format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat1")] || "Not selected"}
+                  {"  "}
+                         {(exampleFile1 || uploadedFile1) && (
                     <>
                           <a
                         href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile1)}`}
@@ -663,7 +834,11 @@ export default function Correlation() {
                       <br />
                     </>
                   )}
-                  {(exampleFile2 || uploadedFile2) && (
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 600 }}>Trait 2 format:</span> {sumstatsFormatLabels[geneticForm.getValues("sumstatsFormat2")] || "Not selected"}
+                    {"  "}
+                    {(exampleFile2 || uploadedFile2) && (
                     <>
                       <a
                         href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(uploadedFile2)}`}
@@ -677,6 +852,9 @@ export default function Correlation() {
                       <br />
                     </>
                   )}
+                  </div>
+           
+            
                   {!useExampleCorrelation && renameWarnings.length > 0 && (
                     <Alert variant="warning" className="mt-2">
                       {renameWarnings}
@@ -684,7 +862,7 @@ export default function Correlation() {
                   )}
                 </>
               )}
-        </Form>
+      </Form>
 
       {fileError && (
         <Row>
@@ -730,6 +908,11 @@ export default function Correlation() {
                   {validationError2}
                 </Alert>
               )}
+      {geneticError && (
+        <Alert variant="danger" className="mt-2">
+          {geneticError}
+        </Alert>
+      )}
       {geneticCorrelationResultRef && (
            <>
          <hr />

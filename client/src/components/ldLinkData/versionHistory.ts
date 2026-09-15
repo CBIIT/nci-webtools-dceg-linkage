@@ -4,6 +4,12 @@ export type NewsEntry = {
 };
 
 export const versionHistory: NewsEntry[] = [
+         { title: "LDlink 7.4.0 Release (09/20/2026)",
+      items: [
+      "Added Pre-munged option to Heritability and Genetic Correlation, letting users upload LDSC-ready summary statistics directly",
+      "Added support for custom LD scores in Heritability and Genetic Correlation",
+      "Session-computed custom LD score runs are retained for reuse for 1 hour" ],
+    },
   {
     title: "LDlink 7.3.0 Release (08/18/2026)",
     items: [

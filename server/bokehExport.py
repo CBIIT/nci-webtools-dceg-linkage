@@ -145,7 +145,7 @@ def ldassocExport():
         execution_time = round(time.time() - start_time, 2)
         app.logger.error(f"[{request_id}] LDassoc SVG export failed ({execution_time}s): {str(e)}")
         app.logger.error(f"[{request_id}] LDassoc error traceback: {traceback.format_exc()}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'An internal error occurred during the export.'}), 500
 
 @app.route("/ldmatrix_svg", methods=['POST'])
 def ldmatrixExport():
@@ -183,7 +183,7 @@ def ldmatrixExport():
         execution_time = round(time.time() - start_time, 2)
         app.logger.error(f"[{request_id}] LDmatrix SVG export failed ({execution_time}s): {str(e)}")
         app.logger.error(f"[{request_id}] LDmatrix error traceback: {traceback.format_exc()}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'An internal error occurred during the export.'}), 500
 
 @app.route("/ldproxy_svg", methods=['POST'])
 def ldproxyExport():
@@ -222,7 +222,7 @@ def ldproxyExport():
         execution_time = round(time.time() - start_time, 2)
         app.logger.error(f"[{request_id}] LDproxy SVG export failed ({execution_time}s): {str(e)}")
         app.logger.error(f"[{request_id}] LDproxy error traceback: {traceback.format_exc()}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'An internal error occurred during the export.'}), 500
 
 if __name__ == '__main__':
     app.logger.info("Starting bokehExport Flask service")
