@@ -603,7 +603,7 @@ export default function Heritability() {
                       }
                     }}
                   />
-                  <div style={{ fontSize: "0.85rem" }}>Upload matching *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files (same base name).</div>
+                  <div style={{ fontSize: "0.85rem" }}>Upload matching *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files (same base name). The base name must contain exactly one chromosome number (1-22, or chrN)</div>
                   {ldScoreUpload.importing && <div className="mt-1">Importing LD score files...</div>}
                   {ldScoreUpload.fileError && <Form.Text className="text-danger">{ldScoreUpload.fileError}</Form.Text>}
                 </div>

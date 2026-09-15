@@ -2521,7 +2521,16 @@ def ldscore_runs_import():
 
     chromosome_coverage = _detect_chromosome_coverage(fileroot)
     if chromosome_coverage == "unknown":
-        return _validation_error("filename", "chromosome coverage could not be inferred from the file name")
+        app.logger.warning(f"Rejected LD score import for {reference}: could not infer chromosome from filename '{fileroot}'")
+        return jsonify({
+            "error": (
+                "Could not determine which chromosome this file covers. The file name (before "
+                ".l2.ldscore.gz/.l2.M/.l2.M_5_50) must contain exactly one number from 1-22 (or "
+                "an explicit chrN, e.g. chr22) -- remove any other numbers, and if your browser "
+                "appended a duplicate-download marker like ' (1)' before the extension, rename "
+                "the file to remove it before uploading."
+            )
+        }), 400
 
     try:
         run_doc = persist_ldscore_run(
