@@ -15,12 +15,12 @@ python-dotenv==1.2.2
 requests==2.33.1
 scipy==1.15.0
 urllib3==2.7.0  # CVE fix: Sensitive headers forwarded, decompression-bomb safeguards
-tornado>=6.5.5  # CVE fix: multipart/form-data parsing DoS in versions <6.5.5
+tornado>=6.5.8  # CVE fix: multipart/form-data parsing DoS <6.5.5; header-forwarding/gzip-bomb <6.5.6; urlencoded-body DoS <6.5.8
 selenium==4.32.0
 httpx==0.28.1
 svgutils==0.3.1
 cairosvg==2.9.0
-Pillow==12.2.0
+Pillow==12.3.0
 pybedtools==0.12.0
 ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc313
 Flask-Limiter[mongodb]==3.11.0
