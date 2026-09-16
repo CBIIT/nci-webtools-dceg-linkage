@@ -163,6 +163,7 @@ def run_files_exist(run_doc: Dict[str, object]) -> bool:
 def get_ldsc_reference_data_dir() -> str:
     # Must match the (hardcoded) fallExampleDir in the external ldsc.ldsc_utils
     # package, which builds ld_scores_dir as f"{fallExampleDir}/{value.lower()}/".
+<<<<<<< HEAD
     # Only used for population-code reuse; custom LD score reuse uses
     # get_ldsc_custom_reference_dir instead (see prepare_ldsc_ref_dir).
     return os.environ.get("LDSC_REFERENCE_DATA_DIR", "/data/ldscore")
@@ -182,6 +183,17 @@ def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
     read-only /data/ldscore/<pop>/ built-in population directories). Returns the
     directory name to pass as their ld_scores_dir argument in place of a population
     code."""
+=======
+    return os.environ.get("LDSC_REFERENCE_DATA_DIR", "/data/ldscore")
+
+
+def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
+    """Materializes a persisted custom LD score run into the per-chromosome-numbered
+    directory layout run_herit_command/run_correlation_command expect (e.g.
+    /data/ldscore/<name>/<chr>.l2.ldscore.gz, mirroring the built-in population
+    directories such as /data/ldscore/eur/). Returns the directory name to pass as
+    their ld_scores_dir argument in place of a population code."""
+>>>>>>> dev_7.4.0_all
     chromosome_numbers = run_doc.get("chromosome_numbers") or []
     if not chromosome_numbers:
         raise RuntimeError(
@@ -190,10 +202,17 @@ def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
 
     reference = run_doc.get("reference", "")
     subdir_name = f"custom_{reference}".lower()
+<<<<<<< HEAD
     ldsc_custom_root = get_ldsc_custom_reference_dir()
     os.makedirs(ldsc_custom_root, exist_ok=True)
     target_dir = os.path.normpath(os.path.join(ldsc_custom_root, subdir_name))
     if not _is_path_confined(target_dir, ldsc_custom_root):
+=======
+    ldsc_reference_root = get_ldsc_reference_data_dir()
+    os.makedirs(ldsc_reference_root, exist_ok=True)
+    target_dir = os.path.normpath(os.path.join(ldsc_reference_root, subdir_name))
+    if not _is_path_confined(target_dir, ldsc_reference_root):
+>>>>>>> dev_7.4.0_all
         raise RuntimeError("Invalid reference parameter.")
     os.makedirs(target_dir, exist_ok=True)
 

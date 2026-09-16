@@ -2521,6 +2521,7 @@ def ldscore_runs_import():
 
     chromosome_coverage = _detect_chromosome_coverage(fileroot)
     if chromosome_coverage == "unknown":
+<<<<<<< HEAD
         app.logger.warning(f"Rejected LD score import for {reference}: could not infer chromosome from filename '{fileroot}'")
         return jsonify({
             "error": (
@@ -2531,6 +2532,9 @@ def ldscore_runs_import():
                 "the file to remove it before uploading."
             )
         }), 400
+=======
+        return _validation_error("filename", "chromosome coverage could not be inferred from the file name")
+>>>>>>> dev_7.4.0_all
 
     try:
         run_doc = persist_ldscore_run(
