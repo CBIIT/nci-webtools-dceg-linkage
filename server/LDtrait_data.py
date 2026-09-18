@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 import requests
 import os
 import sys
 import json
 import zipfile
-import boto3
 from pymongo import ASCENDING
 from timeit import default_timer as timer
 from LDutilites import get_config
@@ -22,68 +21,10 @@ param_list = get_config()
 tmp_dir = param_list['tmp_dir']
 ldtrait_src = param_list['ldtrait_src']
 data_dir = param_list['data_dir']
-api_users_backup_dir = os.path.join(data_dir, "backups", "api_users")
-api_users_backup_retention_days = 7
-# Opt-in: when set, backups go to S3 (SSE-KMS) instead of the shared EFS data dir --
-# e.g. API_USERS_BACKUP_S3_BUCKET=ldlink-data-nonprod, API_USERS_BACKUP_S3_PREFIX=ldlink/backups/api_users
-api_users_backup_s3_bucket = os.environ.get("API_USERS_BACKUP_S3_BUCKET") or None
-api_users_backup_s3_prefix = os.environ.get("API_USERS_BACKUP_S3_PREFIX", "ldlink/backups/api_users").strip("/")
 
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
-
-# export api_users collection to a dated JSON file, as a backup -- to S3 (SSE-KMS) if
-# API_USERS_BACKUP_S3_BUCKET is configured, otherwise to the EFS-backed data dir
-def backupApiUsers():
-    db = connectMongoDBReadOnly()
-    users = list(db.api_users.find())
-    backup_filename = "api_users_" + datetime.today().strftime('%Y-%m-%d') + ".json"
-    # default=str handles ObjectId/datetime fields, which json.dump can't serialize directly
-    backup_body = json.dumps(users, indent=2, default=str)
-
-    if api_users_backup_s3_bucket:
-        key = f"{api_users_backup_s3_prefix}/{backup_filename}"
-        boto3.client("s3").put_object(
-            Bucket=api_users_backup_s3_bucket,
-            Key=key,
-            Body=backup_body.encode("utf-8"),
-            ServerSideEncryption="aws:kms",
-        )
-        print(f"Backed up {len(users)} api_users records to s3://{api_users_backup_s3_bucket}/{key}")
-        deleteExpiredApiUsersBackupsS3()
-        return
-
-    os.makedirs(api_users_backup_dir, exist_ok=True)
-    backup_path = os.path.join(api_users_backup_dir, backup_filename)
-    fd = os.open(backup_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, 'w') as f:
-        f.write(backup_body)
-
-    print(f"Backed up {len(users)} api_users records to {backup_path}")
-    deleteExpiredApiUsersBackups()
-
-# delete api_users backup files older than the retention window
-def deleteExpiredApiUsersBackups():
-    cutoff = datetime.today() - timedelta(days=api_users_backup_retention_days)
-    for entry in os.listdir(api_users_backup_dir):
-        if not entry.startswith("api_users_") or not entry.endswith(".json"):
-            continue
-        entry_path = os.path.join(api_users_backup_dir, entry)
-        if datetime.fromtimestamp(os.path.getmtime(entry_path)) < cutoff:
-            os.remove(entry_path)
-            print(f"Deleted expired api_users backup: {entry_path}")
-
-# delete api_users backup objects older than the retention window from S3
-def deleteExpiredApiUsersBackupsS3():
-    cutoff = datetime.now(timezone.utc) - timedelta(days=api_users_backup_retention_days)
-    s3 = boto3.client("s3")
-    paginator = s3.get_paginator("list_objects_v2")
-    for page in paginator.paginate(Bucket=api_users_backup_s3_bucket, Prefix=api_users_backup_s3_prefix + "/"):
-        for obj in page.get("Contents", []):
-            if obj["LastModified"] < cutoff:
-                s3.delete_object(Bucket=api_users_backup_s3_bucket, Key=obj["Key"])
-                print(f"Deleted expired api_users backup: s3://{api_users_backup_s3_bucket}/{obj['Key']}")
 
 # download daily update of GWAS Catalog
 def downloadGWASCatalog():
@@ -122,13 +63,6 @@ def downloadGWASCatalog():
     return filename
 
 def main():
-    try:
-        print("Backing up api_users collection...")
-        backupApiUsers()
-    except Exception as backup_error:
-        # Non-fatal: a failed backup shouldn't block the daily GWAS catalog update below.
-        print(f"Failed to back up api_users collection: {backup_error}")
-
     print("Downloading GWAS catalog...")
     filename = downloadGWASCatalog()
     print(filename + " downloaded.")
