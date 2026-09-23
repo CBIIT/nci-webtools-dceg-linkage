@@ -2603,19 +2603,28 @@ def ldscore_run_download_file(reference, filename):
     return _send_ldscore_run_output_file(run_doc, reference, filename)
 
 
-# Query-string variant of the route above -- some front-end WAFs/edge proxies block
-# requests whose URI *path* ends in a sensitive-looking extension such as ".log"
-# regardless of the app route behind it (observed: the plain path-based route above
-# 403s for "<reference>/22.log" at the edge, before ever reaching Flask, while every
-# other suffix -- and the "/zip" bulk download -- pass through fine). Putting the
-# filename in the query string instead avoids that class of block.
+# Index-based variant of the route above -- some front-end WAF/edge proxy in front of
+# this app blocks any request whose full URI (path OR query string) contains ".log"
+# regardless of the app route behind it (observed: both "<reference>/22.log" as a path
+# segment AND "<reference>/download?file=22.log" as a query value 403 at the edge,
+# before ever reaching Flask, while every other output filename -- and the "/zip" bulk
+# download -- pass through fine). Referencing the file by its position in this run's
+# output_files list keeps the literal filename (and its extension) out of the URL
+# entirely; the true filename is only ever set server-side as the Content-Disposition
+# download name.
 @app.route("/LDlinkRestWeb/ldscore_run_files/<reference>/download", methods=["GET"])
 def ldscore_run_download_file_query(reference):
     run_doc, error_response = _authorize_ldscore_run_for_download(reference)
     if error_response is not None:
         return error_response
-    filename = request.args.get("file", "")
-    return _send_ldscore_run_output_file(run_doc, reference, filename)
+    output_files = run_doc.get("output_files") or []
+    try:
+        file_index = int(request.args.get("index", ""))
+    except ValueError:
+        return _validation_response("Requested file is not part of this LD score run.", status_code=404)
+    if file_index < 0 or file_index >= len(output_files):
+        return _validation_response("Requested file is not part of this LD score run.", status_code=404)
+    return _send_ldscore_run_output_file(run_doc, reference, output_files[file_index])
 
 
 # Downloads the complete set of output files from a persisted LD score run as a zip.

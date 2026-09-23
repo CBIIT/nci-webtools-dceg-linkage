@@ -523,14 +523,14 @@ function LdScoreOutputFilesPanel({ reference }: { reference: string }) {
               </tr>
             </thead>
             <tbody>
-              {outputFiles.map((file) => (
+              {outputFiles.map((file, fileIndex) => (
                 <tr key={file.name}>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{file.name}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{run?.chromosomeCoverage || ''}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{formatFileSize(file.size)}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>
-                    {/* Query-string filename (not a path suffix like "...22.log") avoids edge/WAF blocks on sensitive-looking extensions -- see server/LDlink.py ldscore_run_download_file_query */}
-                    <a href={`/LDlinkRestWeb/ldscore_run_files/${reference}/download?file=${encodeURIComponent(file.name)}`} download>Download</a>
+                    {/* Index (not the literal filename) keeps ".log" etc. out of the URL entirely -- see server/LDlink.py ldscore_run_download_file_query */}
+                    <a href={`/LDlinkRestWeb/ldscore_run_files/${reference}/download?index=${fileIndex}`} download>Download</a>
                   </td>
                 </tr>
               ))}
