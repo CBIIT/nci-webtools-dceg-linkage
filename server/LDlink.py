@@ -2566,16 +2566,8 @@ def ldscore_run_detail(reference):
     return jsonify(ldscore_run_public_view(run_doc))
 
 
-# Downloads a single output file from a persisted LD score run. Deliberately NOT
-# under the /LDlinkRestWeb/ldscore_runs prefix (and not in WEB_COMPUTE_ENDPOINTS) so
-# it is reachable via plain <a href> navigation; authorized via the signed browser
-# session cookie directly instead of the internal-auth-gated JSON API headers.
-@app.route("/LDlinkRestWeb/ldscore_run_files/<reference>/<path:filename>", methods=["GET"])
-def ldscore_run_download_file(reference, filename):
-    run_doc, error_response = _authorize_ldscore_run_for_download(reference)
-    if error_response is not None:
-        return error_response
-
+# Shared by both single-file download routes below.
+def _send_ldscore_run_output_file(run_doc, reference, filename):
     safe_filename = secure_filename(filename)
     if safe_filename not in (run_doc.get("output_files") or []):
         return _validation_response("Requested file is not part of this LD score run.", status_code=404)
@@ -2597,6 +2589,33 @@ def ldscore_run_download_file(reference, filename):
         return _validation_response("The requested LD score output file is no longer available.", status_code=404)
 
     return send_file(_normalized_local_path, as_attachment=True, download_name=safe_filename)
+
+
+# Downloads a single output file from a persisted LD score run. Deliberately NOT
+# under the /LDlinkRestWeb/ldscore_runs prefix (and not in WEB_COMPUTE_ENDPOINTS) so
+# it is reachable via plain <a href> navigation; authorized via the signed browser
+# session cookie directly instead of the internal-auth-gated JSON API headers.
+@app.route("/LDlinkRestWeb/ldscore_run_files/<reference>/<path:filename>", methods=["GET"])
+def ldscore_run_download_file(reference, filename):
+    run_doc, error_response = _authorize_ldscore_run_for_download(reference)
+    if error_response is not None:
+        return error_response
+    return _send_ldscore_run_output_file(run_doc, reference, filename)
+
+
+# Query-string variant of the route above -- some front-end WAFs/edge proxies block
+# requests whose URI *path* ends in a sensitive-looking extension such as ".log"
+# regardless of the app route behind it (observed: the plain path-based route above
+# 403s for "<reference>/22.log" at the edge, before ever reaching Flask, while every
+# other suffix -- and the "/zip" bulk download -- pass through fine). Putting the
+# filename in the query string instead avoids that class of block.
+@app.route("/LDlinkRestWeb/ldscore_run_files/<reference>/download", methods=["GET"])
+def ldscore_run_download_file_query(reference):
+    run_doc, error_response = _authorize_ldscore_run_for_download(reference)
+    if error_response is not None:
+        return error_response
+    filename = request.args.get("file", "")
+    return _send_ldscore_run_output_file(run_doc, reference, filename)
 
 
 # Downloads the complete set of output files from a persisted LD score run as a zip.

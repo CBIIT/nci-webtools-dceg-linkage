@@ -529,7 +529,8 @@ function LdScoreOutputFilesPanel({ reference }: { reference: string }) {
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{run?.chromosomeCoverage || ''}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{formatFileSize(file.size)}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>
-                    <a href={`/LDlinkRestWeb/ldscore_run_files/${reference}/${encodeURIComponent(file.name)}`} download>Download</a>
+                    {/* Query-string filename (not a path suffix like "...22.log") avoids edge/WAF blocks on sensitive-looking extensions -- see server/LDlink.py ldscore_run_download_file_query */}
+                    <a href={`/LDlinkRestWeb/ldscore_run_files/${reference}/download?file=${encodeURIComponent(file.name)}`} download>Download</a>
                   </td>
                 </tr>
               ))}
