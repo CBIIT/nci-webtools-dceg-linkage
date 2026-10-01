@@ -731,13 +731,15 @@ export default function Correlation() {
                         const uploadResult = await ldScoreUpload.uploadFiles(input.files);
                         if (uploadResult) {
                           const computedRun = await ldScoreUpload.computeLdScore(uploadResult);
+                          // Guard against the mode having changed (e.g. user switched to a session run)
+                          // while this async upload/compute was still in flight.
                           if (computedRun) {
-                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
+                            setLdscoreSourceValue((prev) => (prev.mode === "customUpload" ? { ...prev, ldscoreReference: computedRun.reference } : prev));
                             setLdscoreSourceError("");
                           } else {
                             // Don't let a stale reference from an earlier successful upload silently
                             // get reused now that this attempt failed.
-                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
+                            setLdscoreSourceValue((prev) => (prev.mode === "customUpload" ? { ...prev, ldscoreReference: null } : prev));
                           }
                         }
                       }
@@ -765,13 +767,15 @@ export default function Correlation() {
                       // pick of just the missing file would otherwise leave the old error stuck.
                       if (input.files && input.files.length > 0) {
                         const importedRun = await ldScoreUpload.importPrecomputedLdScore(input.files, genome_build || "grch37");
+                        // Guard against the mode having changed (e.g. user switched to a session run)
+                        // while this async import was still in flight.
                         if (importedRun) {
-                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: importedRun.reference }));
+                          setLdscoreSourceValue((prev) => (prev.mode === "customImport" ? { ...prev, ldscoreReference: importedRun.reference } : prev));
                           setLdscoreSourceError("");
                         } else {
                           // Don't let a stale reference from an earlier successful import silently
                           // get reused now that this attempt failed.
-                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: null }));
+                          setLdscoreSourceValue((prev) => (prev.mode === "customImport" ? { ...prev, ldscoreReference: null } : prev));
                         }
                       }
                     }}

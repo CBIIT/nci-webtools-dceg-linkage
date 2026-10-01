@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useId } from "react";
 import Select from "react-select";
 import { Form } from "react-bootstrap";
 import { ldscorePopOptions, LdscorePopOption } from "./ldscore-pop-select";
@@ -47,6 +48,7 @@ export default function LdscoreSourceSelect({
   onRequestUpload?: () => void;
   onRequestImport?: () => void;
 }) {
+  const uid = useId();
   const customStyles = {
     menu: (provided: any) => ({ ...provided, zIndex: 9999 }),
     menuPortal: (provided: any) => ({ ...provided, zIndex: 9999 }),
@@ -58,13 +60,22 @@ export default function LdscoreSourceSelect({
     (run, index, all) => all.findIndex((other) => other.reference === run.reference) === index
   );
 
+  // Backfills the reference if the user selected "session" before the runs finished loading
+  // (selection at that point stores a null reference since none were available yet).
+  useEffect(() => {
+    if (value.mode === "customSession" && !value.ldscoreReference && sessionRuns.length > 0) {
+      onChange({ ...value, ldscoreReference: sessionRuns[0].reference });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.mode, value.ldscoreReference, sessionRuns.length]);
+
   return (
     <div>
       <div className="mb-2">
         <Form.Check
           type="radio"
-          id="ldscore-source-reference"
-          name="ldscore-source-mode"
+          id={`${uid}-reference`}
+          name={`${uid}-mode`}
           label="Reference population LD scores"
           checked={value.mode === "reference"}
           disabled={disabled}
@@ -72,8 +83,8 @@ export default function LdscoreSourceSelect({
         />
         <Form.Check
           type="radio"
-          id="ldscore-source-custom"
-          name="ldscore-source-mode"
+          id={`${uid}-custom`}
+          name={`${uid}-mode`}
           label="Custom LD scores"
           checked={value.mode !== "reference"}
           disabled={disabled}
@@ -90,7 +101,7 @@ export default function LdscoreSourceSelect({
 
       {value.mode === "reference" && (
         <Select
-          inputId="ldscore-source-pop"
+          inputId={`${uid}-pop`}
           options={ldscorePopOptions}
           value={value.pop}
           onChange={(pop) => onChange({ ...value, pop: pop as LdscorePopOption | null })}
@@ -121,8 +132,8 @@ export default function LdscoreSourceSelect({
             /> */}
             <Form.Check
               type="radio"
-              id="ldscore-source-session"
-              name="ldscore-source-custom-mode"
+              id={`${uid}-session`}
+              name={`${uid}-custom-mode`}
               label={`Use Score Calculation result from this session${priorRunsLoading ? "" : sessionRuns.length ? ` (${sessionRuns.length})` : ""}`}
               checked={value.mode === "customSession"}
               disabled={disabled || (!priorRunsLoading && sessionRuns.length === 0)}
@@ -131,8 +142,8 @@ export default function LdscoreSourceSelect({
             {/* Placed last so it sits directly above its own upload input, which is rendered by the parent right after this component. */}
             <Form.Check
               type="radio"
-              id="ldscore-source-import"
-              name="ldscore-source-custom-mode"
+              id={`${uid}-import`}
+              name={`${uid}-custom-mode`}
               label="Upload your own LD score reference"
               checked={value.mode === "customImport"}
               disabled={disabled}
