@@ -83,6 +83,7 @@ export default function LdscoreSourceSelect({
             // `checked` is already true as soon as mode matches, so it never gets
             // clicked by the user.
             onChange({ ...value, mode: "customImport", ldscoreReference: null });
+            onRequestImport?.();
           }}
         />
       </div>

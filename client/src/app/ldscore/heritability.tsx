@@ -626,7 +626,7 @@ export default function Heritability() {
                   ldScoreUpload.uploading ||
                   ldScoreUpload.computing ||
                   ldScoreUpload.importing ||
-                  (ldscoreSourceValue.mode !== "reference" && !!ldScoreUpload.fileError)
+                  ((ldscoreSourceValue.mode === "customUpload" || ldscoreSourceValue.mode === "customImport") && !!ldScoreUpload.fileError)
                 }
               >
                 {heritabilityLoading ? "Loading..." : "Calculate"}
