@@ -109,12 +109,50 @@ export async function fetchLdScoreCalculationResult(params: URLSearchParams): Pr
   return (await axios.get(webProxyUrl("ldscore", params.toString()))).data;
 }
 
+// Lists custom LD score runs previously computed and persisted by this browser
+// session (see server/ldscore_runs.py), for reuse in Heritability/Genetic Correlation.
+export async function fetchLdScoreRuns(): Promise<{ runs: LdScoreRunSummary[] }> {
+  return (await axios.get(webProxyUrl("ldscore_runs"))).data;
+}
+
+// Fetches the output file listing (name + size) for one persisted LD score run, for
+// display/download on the LD Score results page.
+export async function fetchLdScoreRunDetail(reference: string): Promise<LdScoreRunSummary> {
+  return (await axios.get(webProxyUrl(`ldscore_runs/${encodeURIComponent(reference)}`))).data;
+}
+
+// Registers an already-computed LD score output file (.l2.ldscore.gz), uploaded via
+// `upload()`, as a reusable custom LD score run -- skipping the bed/bim/fam upload +
+// compute step (see server/LDlink.py ldscore_runs_import).
+export async function importLdScoreRun(params: URLSearchParams): Promise<{ run: LdScoreRunSummary }> {
+  return (await axios.get(webProxyUrl("ldscore_runs/import", params.toString()))).data;
+}
+
+export interface LdScoreOutputFile {
+  name: string;
+  size: number;
+}
+
+export interface LdScoreRunSummary {
+  reference: string;
+  createdAt: string | null;
+  genomeBuild: string;
+  chromosomeCoverage: string;
+  sourceFilenames: string[];
+  windowSize?: string | null;
+  windowUnit?: string | null;
+  outputFiles?: LdScoreOutputFile[];
+  totalSizeBytes?: number;
+  backend?: string;
+  label: string;
+}
+
 export async function ldtrait(params: any): Promise<any> {
   return (await axios.post(webProxyUrl("ldtrait"), params)).data;
 }
 
-export async function validateSumstats(filename: string, reference: string): Promise<any> {
-  const query = `filename=${encodeURIComponent(filename)}&reference=${encodeURIComponent(reference)}`;
+export async function validateSumstats(filename: string, reference: string, summaryStatsFormat?: string, trait?: string): Promise<any> {
+  const query = `filename=${encodeURIComponent(filename)}&reference=${encodeURIComponent(reference)}${summaryStatsFormat ? `&summary_stats_format=${encodeURIComponent(summaryStatsFormat)}` : ""}${trait ? `&trait=${encodeURIComponent(trait)}` : ""}`;
   return (await axios.get(webProxyUrl("validate_sumstats", query))).data;
 }
 
