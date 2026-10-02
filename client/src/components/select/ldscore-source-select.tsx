@@ -1,10 +1,11 @@
 "use client";
+import { useEffect, useId } from "react";
 import Select from "react-select";
 import { Form } from "react-bootstrap";
 import { ldscorePopOptions, LdscorePopOption } from "./ldscore-pop-select";
 import { LdScoreRunSummary } from "@/services/queries";
 
-export type LdscoreSourceMode = "reference" | "customUpload" | "customImport" | "customSession" | "customPrior";
+export type LdscoreSourceMode = "reference" | "customUpload" | "customImport" | "customSession";
 
 export interface LdscoreSourceValue {
   mode: LdscoreSourceMode;
@@ -20,7 +21,10 @@ export const defaultLdscoreSourceValue: LdscoreSourceValue = {
 
 function formatRunLabel(run: LdScoreRunSummary): string {
   const when = run.createdAt ? new Date(run.createdAt).toLocaleString() : "";
-  const files = run.sourceFilenames?.length ? run.sourceFilenames.join(", ") : run.label;
+  // Just the base name of the first input file (e.g. "22.bed" -> "22"), not every
+  // matching file's full name -- the suffix is implied and clutters the dropdown.
+  const firstFilename = run.sourceFilenames?.[0] || run.label;
+  const files = firstFilename ? firstFilename.split(".")[0] : "";
   const window = run.windowSize ? `Window: ${run.windowSize}${run.windowUnit || ""}` : "";
   return [files, window, when].filter(Boolean).join(" — ");
 }
@@ -44,43 +48,60 @@ export default function LdscoreSourceSelect({
   onRequestUpload?: () => void;
   onRequestImport?: () => void;
 }) {
+  const uid = useId();
   const customStyles = {
     menu: (provided: any) => ({ ...provided, zIndex: 9999 }),
     menuPortal: (provided: any) => ({ ...provided, zIndex: 9999 }),
   };
+
+  // Both lists are already scoped to this browser session (client-side cache for instant
+  // availability, and the server's 1-hour-retained registry) -- union them into one option.
+  const sessionRuns = [...currentSessionRuns, ...priorRuns].filter(
+    (run, index, all) => all.findIndex((other) => other.reference === run.reference) === index
+  );
+
+  // Backfills the reference if the user selected "session" before the runs finished loading
+  // (selection at that point stores a null reference since none were available yet).
+  useEffect(() => {
+    if (value.mode === "customSession" && !value.ldscoreReference && sessionRuns.length > 0) {
+      onChange({ ...value, ldscoreReference: sessionRuns[0].reference });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.mode, value.ldscoreReference, sessionRuns.length]);
 
   return (
     <div>
       <div className="mb-2">
         <Form.Check
           type="radio"
-          id="ldscore-source-reference"
-          name="ldscore-source-mode"
-          label="Reference population LD score"
+          id={`${uid}-reference`}
+          name={`${uid}-mode`}
+          label="Reference population LD scores"
           checked={value.mode === "reference"}
           disabled={disabled}
           onChange={() => onChange({ ...value, mode: "reference" })}
         />
         <Form.Check
           type="radio"
-          id="ldscore-source-custom"
-          name="ldscore-source-mode"
-          label="Custom LD score"
+          id={`${uid}-custom`}
+          name={`${uid}-mode`}
+          label="Custom LD scores"
           checked={value.mode !== "reference"}
           disabled={disabled}
           onChange={() => {
-            // Default to "Upload existing LD score result" regardless of prior/session
+            // Default to "Upload your own LD score reference" regardless of prior/session
             // runs being available -- the sub-radio itself won't fire onChange here since
             // `checked` is already true as soon as mode matches, so it never gets
             // clicked by the user.
             onChange({ ...value, mode: "customImport", ldscoreReference: null });
+            onRequestImport?.();
           }}
         />
       </div>
 
       {value.mode === "reference" && (
         <Select
-          inputId="ldscore-source-pop"
+          inputId={`${uid}-pop`}
           options={ldscorePopOptions}
           value={value.pop}
           onChange={(pop) => onChange({ ...value, pop: pop as LdscorePopOption | null })}
@@ -111,9 +132,19 @@ export default function LdscoreSourceSelect({
             /> */}
             <Form.Check
               type="radio"
-              id="ldscore-source-import"
-              name="ldscore-source-custom-mode"
-              label="Upload existing LD score result (.l2.ldscore.gz)"
+              id={`${uid}-session`}
+              name={`${uid}-custom-mode`}
+              label={`Use Score Calculation result from this session${priorRunsLoading ? "" : sessionRuns.length ? ` (${sessionRuns.length})` : ""}`}
+              checked={value.mode === "customSession"}
+              disabled={disabled || (!priorRunsLoading && sessionRuns.length === 0)}
+              onChange={() => onChange({ ...value, mode: "customSession", ldscoreReference: sessionRuns[0]?.reference ?? null })}
+            />
+            {/* Placed last so it sits directly above its own upload input, which is rendered by the parent right after this component. */}
+            <Form.Check
+              type="radio"
+              id={`${uid}-import`}
+              name={`${uid}-custom-mode`}
+              label="Upload your own LD score reference"
               checked={value.mode === "customImport"}
               disabled={disabled}
               onChange={() => {
@@ -121,54 +152,24 @@ export default function LdscoreSourceSelect({
                 onRequestImport?.();
               }}
             />
-            <Form.Check
-              type="radio"
-              id="ldscore-source-session"
-              name="ldscore-source-custom-mode"
-              label={`Use a result from this session${currentSessionRuns.length ? ` (${currentSessionRuns.length})` : ""}`}
-              checked={value.mode === "customSession"}
-              disabled={disabled || currentSessionRuns.length === 0}
-              onChange={() => onChange({ ...value, mode: "customSession", ldscoreReference: currentSessionRuns[0]?.reference ?? null })}
-            />
-            <Form.Check
-              type="radio"
-              id="ldscore-source-prior"
-              name="ldscore-source-custom-mode"
-              label={`Use a prior run${priorRunsLoading ? " (loading...)" : priorRuns.length ? ` (${priorRuns.length})` : ""}`}
-              checked={value.mode === "customPrior"}
-              disabled={disabled || (!priorRunsLoading && priorRuns.length === 0)}
-              onChange={() => onChange({ ...value, mode: "customPrior", ldscoreReference: priorRuns[0]?.reference ?? null })}
-            />
           </div>
 
-          {value.mode === "customSession" && currentSessionRuns.length > 0 && (
-            <Form.Select
-              aria-label="Select an LD score run from this session"
-              value={value.ldscoreReference ?? ""}
-              disabled={disabled}
-              onChange={(e) => onChange({ ...value, ldscoreReference: e.target.value })}
-            >
-              {currentSessionRuns.map((run) => (
-                <option key={run.reference} value={run.reference}>
-                  {formatRunLabel(run)}
-                </option>
-              ))}
-            </Form.Select>
-          )}
-
-          {value.mode === "customPrior" && priorRuns.length > 0 && (
-            <Form.Select
-              aria-label="Select a prior LD score run"
-              value={value.ldscoreReference ?? ""}
-              disabled={disabled}
-              onChange={(e) => onChange({ ...value, ldscoreReference: e.target.value })}
-            >
-              {priorRuns.map((run) => (
-                <option key={run.reference} value={run.reference}>
-                  {formatRunLabel(run)}
-                </option>
-              ))}
-            </Form.Select>
+          {value.mode === "customSession" && sessionRuns.length > 0 && (
+            <>
+              <Form.Select
+                aria-label="Select an LD score run from this session"
+                value={value.ldscoreReference ?? ""}
+                disabled={disabled}
+                onChange={(e) => onChange({ ...value, ldscoreReference: e.target.value })}
+              >
+                {sessionRuns.map((run) => (
+                  <option key={run.reference} value={run.reference}>
+                    {formatRunLabel(run)}
+                  </option>
+                ))}
+              </Form.Select>
+              <div style={{ fontSize: "0.85rem" }}>Results get deleted after one hour.</div>
+            </>
           )}
         </div>
       )}

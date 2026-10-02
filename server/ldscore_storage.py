@@ -44,21 +44,25 @@ def store_run_files(reference: str, source_dir: str, filenames: List[str]) -> Di
     file_infos = []
     persist_root = get_persist_dir()
     os.makedirs(persist_root, exist_ok=True)
-    persisted_dir = os.path.normpath(os.path.join(persist_root, reference))
-    if not _is_path_confined(persisted_dir, persist_root):
+    # Resolve and check containment inline, on the exact values used by the
+    # file operations below, so the guards are visible to static analysis.
+    persist_base = os.path.realpath(persist_root)
+    persisted_dir = os.path.realpath(os.path.join(persist_base, reference))
+    if not persisted_dir.startswith(persist_base + os.sep):
         raise RuntimeError("Invalid reference parameter.")
     os.makedirs(persisted_dir, exist_ok=True)
 
+    source_base = os.path.realpath(source_dir)
     for filename in filenames:
         if not filename or os.path.basename(filename) != filename:
             continue
-        source_path = os.path.normpath(os.path.join(source_dir, filename))
-        if not _is_path_confined(source_path, source_dir):
+        source_path = os.path.realpath(os.path.join(source_base, filename))
+        if not source_path.startswith(source_base + os.sep):
             continue
         if not os.path.exists(source_path):
             continue
-        destination_path = os.path.normpath(os.path.join(persisted_dir, filename))
-        if not _is_path_confined(destination_path, persisted_dir):
+        destination_path = os.path.realpath(os.path.join(persisted_dir, filename))
+        if not destination_path.startswith(persisted_dir + os.sep):
             continue
         shutil.copyfile(source_path, destination_path)
         file_infos.append({"name": filename, "size": os.path.getsize(destination_path)})
@@ -159,15 +163,25 @@ def run_files_exist(run_doc: Dict[str, object]) -> bool:
 def get_ldsc_reference_data_dir() -> str:
     # Must match the (hardcoded) fallExampleDir in the external ldsc.ldsc_utils
     # package, which builds ld_scores_dir as f"{fallExampleDir}/{value.lower()}/".
+    # Only used for population-code reuse; custom LD score reuse uses
+    # get_ldsc_custom_reference_dir instead (see prepare_ldsc_ref_dir).
     return os.environ.get("LDSC_REFERENCE_DATA_DIR", "/data/ldscore")
+
+
+def get_ldsc_custom_reference_dir() -> str:
+    # Must match custom_ld_scores_root in the patched ldsc.ldsc_utils package,
+    # which resolves any "custom_*" ld_scores_dir name against this writable tmp
+    # root instead of the read-only /data/ldscore (see get_ldsc_reference_data_dir).
+    return os.environ.get("LDSC_CUSTOM_REFERENCE_DIR", "/data/tmp/ldscore")
 
 
 def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
     """Materializes a persisted custom LD score run into the per-chromosome-numbered
-    directory layout run_herit_command/run_correlation_command expect (e.g.
-    /data/ldscore/<name>/<chr>.l2.ldscore.gz, mirroring the built-in population
-    directories such as /data/ldscore/eur/). Returns the directory name to pass as
-    their ld_scores_dir argument in place of a population code."""
+    directory layout ldsc.py expects for --ref-ld-chr/--w-ld-chr (e.g.
+    /data/tmp/ldscore/custom_<reference>/<chr>.l2.ldscore.gz -- writable, unlike the
+    read-only /data/ldscore/<pop>/ built-in population directories). Returns the
+    directory name to pass as their ld_scores_dir argument in place of a population
+    code."""
     chromosome_numbers = run_doc.get("chromosome_numbers") or []
     if not chromosome_numbers:
         raise RuntimeError(
@@ -176,10 +190,10 @@ def prepare_ldsc_ref_dir(run_doc: Dict[str, object]) -> str:
 
     reference = run_doc.get("reference", "")
     subdir_name = f"custom_{reference}".lower()
-    ldsc_reference_root = get_ldsc_reference_data_dir()
-    os.makedirs(ldsc_reference_root, exist_ok=True)
-    target_dir = os.path.normpath(os.path.join(ldsc_reference_root, subdir_name))
-    if not _is_path_confined(target_dir, ldsc_reference_root):
+    ldsc_custom_root = get_ldsc_custom_reference_dir()
+    os.makedirs(ldsc_custom_root, exist_ok=True)
+    target_dir = os.path.normpath(os.path.join(ldsc_custom_root, subdir_name))
+    if not _is_path_confined(target_dir, ldsc_custom_root):
         raise RuntimeError("Invalid reference parameter.")
     os.makedirs(target_dir, exist_ok=True)
 

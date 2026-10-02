@@ -187,7 +187,7 @@ function renderKeyValueTable(section: string) {
   
   lines.forEach(line => {
     let found = false;
-    const colonPairs = line.matchAll(/([\w\s²\*\-0-9\^]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
+    const colonPairs = line.matchAll(/([\w\s²*^-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
     for (const pair of colonPairs) {
       const key = pair[1].trim();
       const value = pair[2].trim();
@@ -523,13 +523,14 @@ function LdScoreOutputFilesPanel({ reference }: { reference: string }) {
               </tr>
             </thead>
             <tbody>
-              {outputFiles.map((file) => (
+              {outputFiles.map((file, fileIndex) => (
                 <tr key={file.name}>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{file.name}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{run?.chromosomeCoverage || ''}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>{formatFileSize(file.size)}</td>
                   <td style={{ border: '1px solid black', padding: '4px 8px', fontSize: '0.97em' }}>
-                    <a href={`/LDlinkRestWeb/ldscore_run_files/${reference}/${encodeURIComponent(file.name)}`} download>Download</a>
+                    {/* Index (not the literal filename) keeps ".log" etc. out of the URL entirely -- see server/LDlink.py ldscore_run_download_file_query */}
+                    <a href={`/LDlinkRestWeb/ldscore_run_files/${reference}/download?index=${fileIndex}`} download>Download</a>
                   </td>
                 </tr>
               ))}
@@ -667,7 +668,7 @@ function renderLdScoreTable(section: string, opts?: { ignoreAnalysisFinished?: b
   );
 }
 
-export default function LdScoreResults({ reference, type, uploads }: { reference: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
+export default function LdScoreResults({ reference, persistedReference, type, uploads }: { reference: string, persistedReference?: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
@@ -782,7 +783,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         <h5 style={{ fontWeight: 'bold' }}>MAF/LD Score Correlation Matrix</h5>
         {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
         <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} reference={reference} />
-        <LdScoreOutputFilesPanel reference={reference} />
+        <LdScoreOutputFilesPanel reference={persistedReference || reference} />
         <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
       </Container>
     );

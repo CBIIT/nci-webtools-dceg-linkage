@@ -223,8 +223,11 @@ def _resolve_plink_a2(
     # PLINK REF/ALT are unordered w.r.t. A1, so A2 must be picked per-row rather than from a fixed column.
     if a2_column:
         return str(row.get(a2_column, "")).strip()
-    ref_value = str(row.get(ref_column, "")).strip() if ref_column else None
-    alt_value = str(row.get(alt_column, "")).strip() if alt_column else None
+    a1_value = a1_value.strip().upper()
+    # Blank cells must become None (not "") so a row with only one of REF/ALT populated
+    # falls through to the single-column branches below instead of the both-present one.
+    ref_value = str(row.get(ref_column, "")).strip().upper() or None if ref_column else None
+    alt_value = str(row.get(alt_column, "")).strip().upper() or None if alt_column else None
     if ref_value is not None and alt_value is not None:
         if a1_value == ref_value:
             return alt_value

@@ -227,16 +227,24 @@ export default function Correlation() {
     },
   });
 
-  const onGeneticSubmit = async (data: CorrelationFormData) => {
+  // Runs on every submit attempt, including when other RHF-registered fields (file,
+  // sumstatsFormat1/2, etc.) fail their own validation -- otherwise this error would
+  // never surface since RHF only calls onGeneticSubmit once all of its fields pass.
+  const validateLdscoreSource = (): boolean => {
     if (ldscoreSourceValue.mode === "reference" && !ldscoreSourceValue.pop) {
       setLdscoreSourceError("Population is required");
-      return;
+      return false;
     }
     if (ldscoreSourceValue.mode !== "reference" && !ldscoreSourceValue.ldscoreReference) {
       setLdscoreSourceError("Select an LD score run to reuse, or upload *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files");
-      return;
+      return false;
     }
     setLdscoreSourceError("");
+    return true;
+  };
+
+  const onGeneticSubmit = async (data: CorrelationFormData) => {
+    if (!validateLdscoreSource()) return;
     setGeneticCorrelationResultRef(null);
     setGeneticError("");
     setGeneticLoading(true);
@@ -324,7 +332,7 @@ export default function Correlation() {
         </div>
       )}
 
-      <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
+      <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit, validateLdscoreSource)} onReset={onGeneticReset} noValidate>
         <Row className="align-items-start">
         <Col s={12} sm={12} md={12} lg={7}>
         <Row>
@@ -346,8 +354,8 @@ export default function Correlation() {
                     setReference(newReference);
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
-                    geneticForm.setValue("sumstatsFormat1", "pre_munged");
-                    geneticForm.setValue("sumstatsFormat2", "pre_munged");
+                    geneticForm.setValue("sumstatsFormat1", "pre_munged", { shouldValidate: true });
+                    geneticForm.setValue("sumstatsFormat2", "pre_munged", { shouldValidate: true });
                     setUploadedFile1("");
                     setUploadedFile2("");
                     setValidationError1("");
@@ -696,10 +704,13 @@ export default function Correlation() {
         <Row>
            <Col s={12} sm={12} md={6} lg={7} className="ps-4">
             <Form.Group controlId="ldscoreSource" className="mb-3">
-              <Form.Label>LD Score Source</Form.Label>
+              <Form.Label>LD Score Sources</Form.Label>
               <LdscoreSourceSelect
                 value={ldscoreSourceValue}
-                onChange={setLdscoreSourceValue}
+                onChange={(v) => {
+                  setLdscoreSourceValue(v);
+                  setLdscoreSourceError("");
+                }}
                 currentSessionRuns={currentSessionLdScoreRuns}
                 priorRuns={priorLdScoreRuns}
                 priorRunsLoading={priorRunsLoading}
@@ -720,8 +731,15 @@ export default function Correlation() {
                         const uploadResult = await ldScoreUpload.uploadFiles(input.files);
                         if (uploadResult) {
                           const computedRun = await ldScoreUpload.computeLdScore(uploadResult);
+                          // Guard against the mode having changed (e.g. user switched to a session run)
+                          // while this async upload/compute was still in flight.
                           if (computedRun) {
-                            setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: computedRun.reference }));
+                            setLdscoreSourceValue((prev) => (prev.mode === "customUpload" ? { ...prev, ldscoreReference: computedRun.reference } : prev));
+                            setLdscoreSourceError("");
+                          } else {
+                            // Don't let a stale reference from an earlier successful upload silently
+                            // get reused now that this attempt failed.
+                            setLdscoreSourceValue((prev) => (prev.mode === "customUpload" ? { ...prev, ldscoreReference: null } : prev));
                           }
                         }
                       }
@@ -749,13 +767,20 @@ export default function Correlation() {
                       // pick of just the missing file would otherwise leave the old error stuck.
                       if (input.files && input.files.length > 0) {
                         const importedRun = await ldScoreUpload.importPrecomputedLdScore(input.files, genome_build || "grch37");
+                        // Guard against the mode having changed (e.g. user switched to a session run)
+                        // while this async import was still in flight.
                         if (importedRun) {
-                          setLdscoreSourceValue((prev) => ({ ...prev, ldscoreReference: importedRun.reference }));
+                          setLdscoreSourceValue((prev) => (prev.mode === "customImport" ? { ...prev, ldscoreReference: importedRun.reference } : prev));
+                          setLdscoreSourceError("");
+                        } else {
+                          // Don't let a stale reference from an earlier successful import silently
+                          // get reused now that this attempt failed.
+                          setLdscoreSourceValue((prev) => (prev.mode === "customImport" ? { ...prev, ldscoreReference: null } : prev));
                         }
                       }
                     }}
                   />
-                  <div style={{ fontSize: "0.85rem" }}>Upload matching *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files (same base name).</div>
+                  <div style={{ fontSize: "0.85rem" }}>Upload matching *.l2.ldscore.gz, *.l2.M, *.l2.M_5_50 files (same base name). The base name must contain exactly one chromosome number (1-22, or chrN).</div>
                   {ldScoreUpload.importing && <div className="mt-1">Importing LD score files...</div>}
                   {ldScoreUpload.fileError && <Form.Text className="text-danger">{ldScoreUpload.fileError}</Form.Text>}
                 </div>
@@ -768,7 +793,18 @@ export default function Correlation() {
               <Button type="reset" variant="outline-danger" className="me-1" disabled={geneticLoading}>
                 Reset
               </Button>
-              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={
+                  geneticMutation.isPending ||
+                  geneticLoading ||
+                  ldScoreUpload.uploading ||
+                  ldScoreUpload.computing ||
+                  ldScoreUpload.importing ||
+                  ((ldscoreSourceValue.mode === "customUpload" || ldscoreSourceValue.mode === "customImport") && !!ldScoreUpload.fileError)
+                }
+              >
                {geneticLoading ? "Loading..." : "Calculate"}
               </Button>
             </div>

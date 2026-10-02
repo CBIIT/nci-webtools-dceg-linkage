@@ -157,9 +157,13 @@ export function useLdScoreUpload() {
         isExample: "false",
         reference: uploadResult.reference,
       });
-      await fetchLdScoreCalculationResult(params);
+      const response = await fetchLdScoreCalculationResult(params);
+      // Server persists each calculation under its own fresh reference (distinct from
+      // the upload reference sent above, which recomputes may reuse), so look up by
+      // that returned reference instead -- the upload reference will never match.
+      const persistedReference = response?.reference || uploadResult.reference;
       const { runs } = await fetchLdScoreRuns();
-      const computedRun = runs.find((run) => run.reference === uploadResult.reference) || null;
+      const computedRun = runs.find((run) => run.reference === persistedReference) || null;
       if (!computedRun) {
         setState((prev) => ({ ...prev, fileError: "LD score was computed but could not be found for reuse. Please try again." }));
       }
