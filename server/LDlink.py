@@ -2379,18 +2379,20 @@ def ldscore():
         # Persist the computed LD score (scoped to the caller's browser session) so it
         # can be reused later for Heritability/Genetic Correlation without recomputing.
         # No-ops silently if the request has no valid session id (e.g. bare API access).
-        # Falls back to the calc reference if persistence below fails, matching prior behavior.
+        # Falls back to the calc reference if persistence below fails/no-ops -- that
+        # reference backs nothing reusable, so `reusable` below reflects the real outcome.
         persist_reference = reference
+        persisted = False
         try:
             session_id = getattr(g, "session_id", "")
             db = connectMongoDBReadOnly(False, True)
             # Persisted under its own fresh reference (distinct from the calculation's
             # upload/tmp-dir reference, which the caller may reuse across repeated
             # recalculations) so re-running Calculate never overwrites an earlier run.
-            persist_reference = generate_reference()
-            persist_ldscore_run(
+            new_reference = generate_reference()
+            persisted_doc = persist_ldscore_run(
                 db,
-                persist_reference,
+                new_reference,
                 session_id,
                 fileDir,
                 inputfilename,
@@ -2400,10 +2402,13 @@ def ldscore():
                 window_size=ldwindow,
                 window_unit=windUnit,
             )
-            # Persisted files now live under the tmp-based ldscore_runs dir (not a
-            # long-lived location), so schedule the same 1-hour deletion used for the
-            # ephemeral upload working directory.
-            schedule_tmp_cleanup_ldscore(persist_reference, app.logger, tmp_dir=get_ldscore_persist_dir())
+            if persisted_doc:
+                persist_reference = new_reference
+                persisted = True
+                # Persisted files now live under the tmp-based ldscore_runs dir (not a
+                # long-lived location), so schedule the same 1-hour deletion used for the
+                # ephemeral upload working directory.
+                schedule_tmp_cleanup_ldscore(persist_reference, app.logger, tmp_dir=get_ldscore_persist_dir())
         except Exception as persist_error:
             app.logger.error(f"Failed to persist LD score run {reference} for later reuse: {persist_error}")
 
@@ -2411,7 +2416,7 @@ def ldscore():
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             # The persisted-run reference, not the (possibly reused) calc reference, so
             # downloads/reuse always resolve to this specific computation's own copy.
-            out_json = {"result": filtered_result, "reference": persist_reference}
+            out_json = {"result": filtered_result, "reference": persist_reference, "reusable": persisted}
 
             # Write result to file for frontend to fetch, like ldpop
             if reference:
