@@ -20,6 +20,7 @@ errFilename = "ldtrait_error_snps.json"
 param_list = get_config()
 tmp_dir = param_list['tmp_dir']
 ldtrait_src = param_list['ldtrait_src']
+data_dir = param_list['data_dir']
 
 
 if not os.path.exists(tmp_dir):

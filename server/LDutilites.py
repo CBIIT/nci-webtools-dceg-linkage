@@ -75,10 +75,20 @@ def unlock_stale_tokens(db, lock_timeout = 15 * 60):
         if "locked" in user:
             locked = user["locked"]
             if locked != 0 and locked != -1:
-                if isinstance(locked, datetime.datetime):
-                    diff = present - locked
-                else:
-                    diff = present - dateutil.parser.parse(locked, ignoretz=True)
+                # A malformed/non-string, non-datetime locked value (e.g. legacy int)
+                # must not abort the whole scan and block every other user's unlock.
+                try:
+                    if isinstance(locked, datetime.datetime):
+                        diff = present - locked
+                    elif isinstance(locked, str):
+                        diff = present - dateutil.parser.parse(locked, ignoretz=True)
+                    else:
+                        raise TypeError(f"Unsupported locked value type: {type(locked).__name__}")
+                except (TypeError, ValueError, dateutil.parser.ParserError):
+                    # Treat unparseable locked values as immediately stale so they don't
+                    # stay stuck forever.
+                    unlockTokens.append(user["token"])
+                    continue
                 diffSeconds = diff.total_seconds()
                 # if token is locked for over 15 mins, unlock
                 if diffSeconds > lock_timeout:
