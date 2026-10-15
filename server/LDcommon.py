@@ -64,6 +64,51 @@ genome_build_vars = {
     }
 }
 
+def get_secure_path(base_dir, file_name):
+    # Build a path from a fixed base directory and an untrusted file name,
+    # resolving the result and verifying it stays inside the base directory.
+    base_path = os.path.realpath(base_dir)
+    full_path = os.path.realpath(os.path.join(base_path, str(file_name)))
+    if not full_path.startswith(base_path + os.sep):
+        raise ValueError("Invalid file name.")
+    return full_path
+
+def resolve_allowed_path(file_path, allowed_dirs):
+    # Resolve a path and verify it is contained in one of the allowed directories.
+    real_path = os.path.realpath(str(file_path))
+    for allowed_dir in allowed_dirs:
+        allowed_path = os.path.realpath(allowed_dir)
+        if real_path.startswith(allowed_path + os.sep):
+            return real_path
+    raise ValueError("File path is outside of the allowed directories.")
+
+# Characters that need no shell quoting (matches the set shlex.quote leaves
+# untouched). The mapping is used to rebuild values from these fixed characters.
+_SHELL_SAFE_CHAR_MAP = {character: character for character in
+                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        "0123456789_@%+=:,.-"}
+
+def sanitize_shell_arg(value):
+    # Rebuild a value from an allowlist of characters that need no shell
+    # quoting; reject it if any other character is present.
+    value = str(value)
+    if value == "":
+        raise ValueError("Empty command line argument.")
+    try:
+        return "".join([_SHELL_SAFE_CHAR_MAP[character] for character in value])
+    except KeyError:
+        raise ValueError("Unsupported characters in command line argument.")
+
+# Constant lookup used to replace externally supplied chromosome names with
+# fixed values before they are used in database queries.
+CHROMOSOME_LOOKUP = {name: name for name in
+                     [str(i) for i in range(1, 23)] + ["X", "Y"]}
+CHROMOSOME_LOOKUP.update({"x": "X", "y": "Y"})
+
+def normalize_chromosome(value):
+    # Returns the matching constant chromosome name, or None if unrecognized.
+    return CHROMOSOME_LOOKUP.get(str(value))
+
 def checkS3File(aws_info, bucket, filePath):
     try:
         boto3.client('s3').head_object(Bucket=bucket, Key=filePath)
@@ -141,7 +186,7 @@ def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, 
     vcf = [line for line in output if "END" not in line]
 
     if write_output:
-        temp_filepath = tmp_dir + "snp_no_dups_" + request + ".vcf"
+        temp_filepath = get_secure_path(tmp_dir, "snp_no_dups_" + request + ".vcf")
         with open(temp_filepath, "w") as f:
             f.write("\n".join(vcf))
             
@@ -163,9 +208,10 @@ def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,reque
     output = tabix("-fhD", query_file, *tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
     if is_output:
-        with open(tmp_dir+"snp_no_dups_"+request+".vcf", "w") as f:
+        snp_no_dups_path = get_secure_path(tmp_dir, "snp_no_dups_" + request + ".vcf")
+        with open(snp_no_dups_path, "w") as f:
             f.write("\n".join(vcf))
-        vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+        vcf = open(snp_no_dups_path).readlines()
       
     vcf,head = get_head(vcf)
     return vcf,head
@@ -174,10 +220,15 @@ def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,reque
 def get_rsnum(db, coord, genome_build):
     temp_coord = coord.strip("chr").split(":")
     if len(temp_coord)<=1:
-        return 
-    chro = temp_coord[0]
-    pos = temp_coord[1]
-    query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
+        return
+    chro = normalize_chromosome(temp_coord[0])
+    if chro is None:
+        return
+    try:
+        pos = int(temp_coord[1])
+    except ValueError:
+        return
+    query_results = db.dbsnp.find({"chromosome": chro, genome_build_vars[genome_build]['position']: str(pos)})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
@@ -209,8 +260,12 @@ def processCollapsedTranscript(genes_same_name):
     }
 
 def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTranscript):
+    filename = get_secure_path(tmp_dir, os.path.basename(str(filename)))
+    chromosome = normalize_chromosome(chromosome)
+    if chromosome is None:
+        raise ValueError("Invalid chromosome.")
     query_results = db[genome_build_vars[genome_build]['refGene']].find({
-        "chrom": "chr" + chromosome, 
+        "chrom": "chr" + chromosome,
         "$or": [
             {
                 "txStart": {"$lte": int(begin)}, 
@@ -259,6 +314,7 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
     return query_results_sanitized
 
 def getRecomb(db, filename, chromosome, begin, end, genome_build):
+    filename = get_secure_path(tmp_dir, os.path.basename(str(filename)))
     recomb_results = db.recomb.find({
 		genome_build_vars[genome_build]['chromosome']: str(chromosome), 
 		genome_build_vars[genome_build]['position']: {
@@ -294,7 +350,7 @@ def validsnp(snplst,genome_build,snp_limits):
     if snplst:
          # for ldexpress, the snplst is array, not file path
         try:
-            snps_raw = open(snplst).readlines()
+            snps_raw = open(get_secure_path(tmp_dir, os.path.basename(str(snplst)))).readlines()
         except:
             try:
                 snps_raw = snplst.split("+")
@@ -321,6 +377,10 @@ def validsnp(snplst,genome_build,snp_limits):
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
+    try:
+        rsid = str(int(rsid))
+    except ValueError:
+        return None
     query_results = db.dbsnp.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
@@ -408,12 +468,13 @@ def get_population(pop, request,output):
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             return(json.dumps(output, sort_keys=True, indent=2))
 
-    with Path(tmp_dir, "pops_" + request + ".txt").open("w") as output_file:
+    pops_filepath = get_secure_path(tmp_dir, "pops_" + request + ".txt")
+    with Path(pops_filepath).open("w") as output_file:
         for pop_dir in pop_dirs:
             with open(pop_dir) as input_file:
                 output_file.write(input_file.read())
 
-    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
+    pop_list = open(pops_filepath).readlines()
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
@@ -453,7 +514,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
         output["error"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
         #output["warning"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["warning"] if "warning" in output else "")
         if is_output:
-            Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+            Path(get_secure_path(tmp_dir, "pops_" + request + ".txt")).unlink(missing_ok=True)
             for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
                 path.unlink(missing_ok=True)
         return (None, None, queryVariantWarnings)
@@ -473,7 +534,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
             output["error"] = "Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
             #output["warning"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["warning"] if "warning" in output else "")
             if is_output:
-                Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+                Path(get_secure_path(tmp_dir, "pops_" + request + ".txt")).unlink(missing_ok=True)
                 for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
                     path.unlink(missing_ok=True)
             return (None,None, queryVariantWarnings)

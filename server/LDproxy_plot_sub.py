@@ -9,11 +9,13 @@ from pathlib import Path
 from multiprocessing.dummy import Pool
 from LDcommon import retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,ldproxy_figure
 from LDcommon import get_coords,replace_coord_rsid,get_query_variant_c,chunkWindow,get_output
+from LDcommon import get_secure_path, sanitize_shell_arg
 from LDutilites import get_config
 
 # LDproxy subprocess to export bokeh to high quality images in the background
 
 def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000, collapseTranscript=True,annotate="forge"):
+    request = sanitize_shell_arg(request)
     # Set data directories using config.yml
     param_list = get_config()
     data_dir = param_list['data_dir']
@@ -44,7 +46,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     snp_coord = get_coords(db, snp)
 
     # Get population ids from LDproxy.py tmp output files
-    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
+    pop_list = open(get_secure_path(tmp_dir, "pops_" + request + ".txt")).readlines()
     ids = []
     for i in range(len(pop_list)):
         ids.append(pop_list[i].strip())
@@ -91,7 +93,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        commands.append(["python3", "LDproxy_sub.py", "True", str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
+        commands.append(["python3", "LDproxy_sub.py", "True", sanitize_shell_arg(snp), sanitize_shell_arg(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), sanitize_shell_arg(request), sanitize_shell_arg(genome_build), str(subprocess_id)])
 
     processes = [subprocess.Popen(
         command, stdout=subprocess.PIPE) for command in commands]
@@ -162,20 +164,20 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     # Export to JPEG
     subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "proxy_plot_scaled_" + request + ".svg", tmp_dir + "proxy_plot_" + request + ".jpeg"])
     # Remove individual SVG files after they are combined
-    Path(tmp_dir, "proxy_plot_1_" + request + ".svg").unlink(missing_ok=True)
-    Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "proxy_plot_1_" + request + ".svg")).unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "gene_plot_1_" + request + ".svg")).unlink(missing_ok=True)
     # Remove scaled SVG file after it is converted to png and jpeg
-    Path(tmp_dir, "proxy_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "proxy_plot_scaled_" + request + ".svg")).unlink(missing_ok=True)
 
     #reset_output()
 
     # Remove temporary files
-    Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "pops_" + request + ".txt")).unlink(missing_ok=True)
     for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
         path.unlink(missing_ok=True)
     for path in Path(tmp_dir).glob("genes_*" + request + "*.json"):
         path.unlink(missing_ok=True)
-    Path(tmp_dir, "recomb_" + request + ".txt").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "recomb_" + request + ".txt")).unlink(missing_ok=True)
 
     # Return plot output
     return None

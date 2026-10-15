@@ -8,6 +8,7 @@ from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import connectMongoDBReadOnly, genome_build_vars, parse_vcf,get_1000g_data
 from LDcommon import check_same_chromosome
+from LDcommon import get_secure_path
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
@@ -254,7 +255,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     output["snps"] = snps_out
 
     # Create SNP File
-    snp_out = open(tmp_dir+"snps_"+request+".txt", "w")
+    snp_out = open(get_secure_path(tmp_dir, "snps_"+request+".txt"), "w")
     print("RS_Number\tPosition (" + genome_build_vars[genome_build]['title_hg'] + ")\tAllele Frequency", file=snp_out)
     for k in sorted(output["snps"].keys()):
         rs_k = output["snps"][k]["RS"]
@@ -267,7 +268,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     snp_out.close()
 
     # Create Haplotype File
-    hap_out = open(tmp_dir+"haplotypes_"+request+".txt", "w")
+    hap_out = open(get_secure_path(tmp_dir, "haplotypes_"+request+".txt"), "w")
     print("Haplotype\tCount\tFrequency", file=hap_out)
     for k in sorted(output["haplotypes"].keys()):
         hap_k = output["haplotypes"][k]["Haplotype"]

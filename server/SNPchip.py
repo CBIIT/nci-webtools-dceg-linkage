@@ -11,6 +11,7 @@ import json
 import sys
 from pymongo.errors import ConnectionFailure
 from LDcommon import genome_build_vars,connectMongoDBReadOnly,validsnp,replace_coords_rsid_list,get_coords
+from LDcommon import get_secure_path
 from LDutilites import get_config
 
 
@@ -39,10 +40,11 @@ def convert_codeToPlatforms(platform_query, web):
     platforms = []
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(web)
-    code_array = platform_query.split('+')
-    cursor = db.platforms.find({"code": {'$in': code_array}})
+    requested_codes = set(str(platform_query).split('+'))
+    cursor = db.platforms.find()
     for document in cursor:
-        platforms.append(document["platform"])
+        if document.get("code") in requested_codes:
+            platforms.append(document["platform"])
     # print(platforms)
     return platforms
 
@@ -58,7 +60,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
         os.makedirs(tmp_dir)
 
     # Create JSON output
-    out_json = open(tmp_dir+'proxy'+request+".json", "w")
+    out_json = open(get_secure_path(tmp_dir, 'proxy'+request+".json"), "w")
     output = {}
 
     snps = validsnp(snplst,genome_build,5000)
@@ -185,9 +187,9 @@ def createOutputFile(request, genome_build):
     param_list = get_config()
     tmp_dir = param_list['tmp_dir']
  
-    details_file = open(tmp_dir+'details'+request+".txt", "w")
+    details_file = open(get_secure_path(tmp_dir, 'details'+request+".txt"), "w")
 
-    with open(tmp_dir + "proxy"+request+".json") as out_json:
+    with open(get_secure_path(tmp_dir, "proxy"+request+".json")) as out_json:
         json_dict = json.load(out_json)
 
     rs_dict = dict(json_dict)

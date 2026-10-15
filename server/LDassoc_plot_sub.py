@@ -10,6 +10,7 @@ from pathlib import Path
 from multiprocessing.dummy import Pool
 from math import log10
 from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
+from LDcommon import get_secure_path, sanitize_shell_arg, resolve_allowed_path
 from LDutilites import get_config, array_split
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -48,6 +49,10 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     Returns:
         None
     """
+    request = sanitize_shell_arg(request)
+    config = get_config()
+    file = resolve_allowed_path(file, [config['tmp_dir'], config['data_dir']])
+
     # Log function entry and parameters
     logger.info(f'ldassoc_plot_sub params {{"file": "{file}", "region": "{region}", "pop": "{pop}", "request": "{request}", "genome_build": "{genome_build}", "myargsName": "{myargsName}", "myargsOrigin": "{myargsOrigin}"}}')
     logger.debug("Starting LDassoc SVG generation subprocess")
@@ -300,7 +305,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     # Get population ids from population output file from LDassoc.py
     logger.debug(f"Loading population IDs from file: {tmp_dir}pops_{request}.txt")
     try:
-        pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
+        pop_list=open(get_secure_path(tmp_dir, "pops_"+request+".txt")).readlines()
         ids=[]
         for i in range(len(pop_list)):
             ids.append(pop_list[i].strip())
@@ -349,7 +354,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        commands.append(["python3", "LDassoc_sub.py", str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
+        commands.append(["python3", "LDassoc_sub.py", sanitize_shell_arg(snp), sanitize_shell_arg(chromosome), sanitize_shell_arg("_".join(assoc_coords_subset_chunks[subprocess_id])), sanitize_shell_arg(request), sanitize_shell_arg(genome_build), str(subprocess_id)])
     
     logger.debug(f"Starting {num_subprocesses} LDassoc_sub subprocesses for LD calculations")
     subprocess_start_time = time.time()
@@ -521,7 +526,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     assoc_plot.title.align="center"
 
     # Add recombination rate from LDassoc.py output file
-    recomb_file = tmp_dir + "recomb_" + request + ".json"
+    recomb_file = get_secure_path(tmp_dir, "recomb_" + request + ".json")
     recomb_raw = open(recomb_file).readlines()
 
     recomb_x=[]
@@ -590,7 +595,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     # Gene Plot (All Transcripts)
     if myargs['transcript']==True:
         # Get genes from LDassoc.py output file
-        genes_file = tmp_dir + "genes_" + request + ".json"
+        genes_file = get_secure_path(tmp_dir, "genes_" + request + ".json")
         genes_raw = open(genes_file).readlines()
 
         genes_plot_start=[]
@@ -747,17 +752,17 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         # # Export to JPEG
         subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_scaled_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".jpeg"])
         # # Remove individual SVG files after they are combined
-        Path(tmp_dir, "assoc_plot_1_" + request + ".svg").unlink(missing_ok=True)
-        Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
+        Path(get_secure_path(tmp_dir, "assoc_plot_1_" + request + ".svg")).unlink(missing_ok=True)
+        Path(get_secure_path(tmp_dir, "gene_plot_1_" + request + ".svg")).unlink(missing_ok=True)
         # Remove scaled SVG file after it is converted to png and jpeg
-        Path(tmp_dir, "assoc_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
+        Path(get_secure_path(tmp_dir, "assoc_plot_scaled_" + request + ".svg")).unlink(missing_ok=True)
 
 
 
     # Gene Plot (Collapsed)
     else:
         # Get genes from LDassoc.py output file
-        genes_c_file = tmp_dir + "genes_c_" + request + ".json"
+        genes_c_file = get_secure_path(tmp_dir, "genes_c_" + request + ".json")
         genes_c_raw = open(genes_c_file).readlines()
 
         genes_c_plot_start=[]
@@ -911,22 +916,22 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         # Export to JPEG
         subprocess.call(["phantomjs", "./rasterize.js", tmp_dir + "assoc_plot_scaled_" + request + ".svg", tmp_dir + "assoc_plot_" + request + ".jpeg"])
         # Remove individual SVG files after they are combined
-        Path(tmp_dir, "assoc_plot_1_" + request + ".svg").unlink(missing_ok=True)
-        Path(tmp_dir, "gene_plot_1_" + request + ".svg").unlink(missing_ok=True)
+        Path(get_secure_path(tmp_dir, "assoc_plot_1_" + request + ".svg")).unlink(missing_ok=True)
+        Path(get_secure_path(tmp_dir, "gene_plot_1_" + request + ".svg")).unlink(missing_ok=True)
         # Remove scaled SVG file after it is converted to png and jpeg
-        Path(tmp_dir, "assoc_plot_scaled_" + request + ".svg").unlink(missing_ok=True)
+        Path(get_secure_path(tmp_dir, "assoc_plot_scaled_" + request + ".svg")).unlink(missing_ok=True)
 
     reset_output()
 
     # Remove temporary files
     logger.debug("Cleaning up temporary files")
-    Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "pops_" + request + ".txt")).unlink(missing_ok=True)
     for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
         path.unlink(missing_ok=True)
     for path in Path(tmp_dir).glob("genes_*" + request + "*.json"):
         path.unlink(missing_ok=True)
-    Path(tmp_dir, "recomb_" + request + ".json").unlink(missing_ok=True)
-    Path(tmp_dir, "assoc_args" + request + ".json").unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "recomb_" + request + ".json")).unlink(missing_ok=True)
+    Path(get_secure_path(tmp_dir, "assoc_args" + request + ".json")).unlink(missing_ok=True)
 
     duration = round(time.time() - start_time, 2)
     logger.debug(f"Executed LDassoc_plot_sub ({duration}s)")

@@ -1,9 +1,13 @@
 import { populations } from "@/components/select/pop-select";
-import { AxiosError } from "axios";
+import { AxiosError, isAxiosError } from "axios";
 
 export const rsChrRegex = /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/;
 
-export const rsChrMultilineRegex = /^(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*)(?:\r?\n(?:\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*))*$/;
+// Matches one entry per line (blank lines allowed). Written without overlapping
+// whitespace groups so the pattern cannot backtrack exponentially: [^\S\n]
+// matches whitespace except newlines, and every newline is consumed exactly once.
+export const rsChrMultilineRegex =
+  /^(?:[^\S\n]*\n)*[^\S\n]*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))(?:(?:[^\S\n]*\n)+[^\S\n]*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+)))*(?:[^\S\n]*\n)*[^\S\n]*$/;
 
 const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -52,6 +56,17 @@ export function parseRateLimitError(error: AxiosError): string {
     }
   }
   return "Too many requests. Please try again later.";
+}
+
+// Extracts the backend's "error" message from a failed LDscore/Heritability/Genetic
+// Correlation calculation request (e.g. LDSC failures returned as 422 JSON), falling
+// back to a generic message when the response didn't include one.
+export function parseLdScoreCalculationError(error: unknown, fallback: string): string {
+  if (isAxiosError(error)) {
+    const data = error.response?.data as { error?: string } | undefined;
+    if (data?.error) return data.error;
+  }
+  return fallback;
 }
 
 

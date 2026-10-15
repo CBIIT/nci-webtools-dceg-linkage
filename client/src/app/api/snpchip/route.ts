@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.promises.writeFile(inputFile, buffer);
   } else if (snps) {
-    await fs.promises.writeFile(inputFile, snps.trim().replace(/\n/g, '\n'));
+    await fs.promises.writeFile(inputFile, snps.trim().replace(/\r\n?/g, '\n'));
   } else {
     return NextResponse.json({ message: 'No SNPs or file provided.' }, { status: 400 });
   }

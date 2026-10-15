@@ -37,6 +37,8 @@
   },
   "overrides": {
     "serialize-javascript": ">=7.0.5",
-    "diff": ">=8.0.3"
+    "diff": ">=8.0.3",
+    "brace-expansion": "^2.1.2",
+    "js-yaml": "^4.3.1"
   }
 }

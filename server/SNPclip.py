@@ -8,6 +8,7 @@ from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
 from LDcommon import set_alleles,check_same_chromosome
 from LDutilites import get_config
 from LDcommon import get_1000g_data,parse_vcf
+from LDcommon import get_secure_path
 
 ###########
 # SNPclip #
@@ -33,7 +34,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         os.makedirs(tmp_dir)
 
     # Create JSON output
-    out_json = open(tmp_dir+"clip"+request+".json", "w")
+    out_json = open(get_secure_path(tmp_dir, "clip"+request+".json"), "w")
     output = {}
 
    # Validate genome build param
@@ -298,7 +299,7 @@ def main():
         snplst, pop, request, web, genome_build, r2_threshold, maf_threshold)
 
     # Print output
-    with open(tmp_dir+"clip"+request+".json") as f:
+    with open(get_secure_path(tmp_dir, "clip"+request+".json")) as f:
         json_dict = json.load(f)
 
     try:

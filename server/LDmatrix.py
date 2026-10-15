@@ -11,6 +11,7 @@ from LDcommon import get_coords, replace_coords_rsid_list, validsnp, get_populat
 from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import get_1000g_data, parse_vcf, check_same_chromosome, get_forgeDB
+from LDcommon import get_secure_path
 
 
 # Create LDmatrix function
@@ -33,7 +34,7 @@ def calculate_matrix(
         os.makedirs(tmp_dir)
 
     # Create JSON output
-    out_json = open(tmp_dir + "matrix" + request + ".json", "w")
+    out_json = open(get_secure_path(tmp_dir, "matrix" + request + ".json"), "w")
     output = {}
 
     if web or request_method == "GET":
@@ -371,8 +372,8 @@ def calculate_matrix(
             ld_matrix[j][i] = [snp2, snp1, allele2, allele1, corr_f, pos2, pos1, D_prime, r2]
 
     # Generate D' and R2 output matrices
-    d_out = open(tmp_dir + "d_prime_" + request + ".txt", "w")
-    r_out = open(tmp_dir + "r2_" + request + ".txt", "w")
+    d_out = open(get_secure_path(tmp_dir, "d_prime_" + request + ".txt"), "w")
+    r_out = open(get_secure_path(tmp_dir, "r2_" + request + ".txt"), "w")
 
     print("RS_number" + "\t" + "\t".join(rsnum_lst), file=d_out)
     print("RS_number" + "\t" + "\t".join(rsnum_lst), file=r_out)
@@ -843,7 +844,7 @@ def calculate_matrix(
         rug.toolbar_location = None
         if collapseTranscript == "false":
             # Gene Plot (All Transcripts)
-            genes_file = tmp_dir + "genes_" + request + ".json"
+            genes_file = get_secure_path(tmp_dir, "genes_" + request + ".json")
             genes_json = getRefGene(
                 db,
                 genes_file,
@@ -1023,7 +1024,7 @@ def calculate_matrix(
 
         # Gene Plot (Collapsed)
         else:
-            genes_c_file = tmp_dir + "genes_c_" + request + ".json"
+            genes_c_file = get_secure_path(tmp_dir, "genes_c_" + request + ".json")
             genes_c_json = getRefGene(
                 db,
                 genes_c_file,
@@ -1224,7 +1225,7 @@ def calculate_matrix(
         # save json embedding
         jsonEmbed = f"ldmatrix_plot_{request}.json"
         print("Save JSON embedding: " + jsonEmbed)
-        with open(tmp_dir + jsonEmbed, "w") as f_json:
+        with open(get_secure_path(tmp_dir, jsonEmbed), "w") as f_json:
             json.dump(json_item(out_grid), f_json)
 
     # Return output
@@ -1262,7 +1263,7 @@ def main():
     out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", genome_build, r2_d, collapseTranscript)
 
     # Print output
-    with open(tmp_dir + "matrix" + request + ".json") as f:
+    with open(get_secure_path(tmp_dir, "matrix" + request + ".json")) as f:
         json_dict = json.load(f)
 
     try:

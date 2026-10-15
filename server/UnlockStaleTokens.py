@@ -20,10 +20,18 @@ def main():
         if "locked" in user:
             locked = user["locked"]
             if locked != 0 and locked != -1:
-                if isinstance(locked, datetime.datetime):
-                    diff = present - locked
-                else:
-                    diff = present - dateutil.parser.parse(locked, ignoretz=True)
+                # A malformed/non-string, non-datetime locked value must not abort the
+                # whole scan and block every other user's unlock.
+                try:
+                    if isinstance(locked, datetime.datetime):
+                        diff = present - locked
+                    elif isinstance(locked, str):
+                        diff = present - dateutil.parser.parse(locked, ignoretz=True)
+                    else:
+                        raise TypeError(f"Unsupported locked value type: {type(locked).__name__}")
+                except (TypeError, ValueError, dateutil.parser.ParserError):
+                    unlockTokens.append(user["token"])
+                    continue
                 diffMinutes = diff.total_seconds() / 60.0
                 # if token is locked for over 15 mins, unlock
                 if diffMinutes > 15.0:

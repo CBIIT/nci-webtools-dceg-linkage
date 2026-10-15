@@ -1,10 +1,11 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { fetchLdScoreCalculationResult, upload, validateBfile } from "@/services/queries";
+import { fetchLdScoreCalculationResult, fetchLdScoreRuns, upload, validateBfile } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import HoverUnderlineLink from "@/components/HoverUnderlineLink";
-import { generateReference } from "@/services/utils";
+import { generateReference, parseLdScoreCalculationError } from "@/services/utils";
+import { useStore } from "@/store";
 import { useState } from "react";
 import LdScoreResults from "./results";
 import { map } from "@bokeh/bokehjs/build/js/lib/core/util/iterator";
@@ -16,6 +17,8 @@ interface FormData {
 }
 
 export default function LDScore() {
+  const addLdScoreRun = useStore((state) => state.addLdScoreRun);
+
   // LD calculation form state
   const form = useForm<FormData>({
     defaultValues: {
@@ -37,6 +40,10 @@ export default function LDScore() {
   const [ldscoreLoading, setLdscoreLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
+  // Server persists each calculation under its own fresh reference (distinct from the
+  // upload reference, which recomputes may reuse) -- used only for the reusable
+  // "LD Score Output Files" download panel, not the text result/raw input downloads.
+  const [ldscorePersistedRef, setLdscorePersistedRef] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [fileError, setFileError] = useState<string>("");
   const [reference, setReference] = useState<string>("");
@@ -169,10 +176,27 @@ export default function LDScore() {
     
     try {
       setLdscoreLoading(true);
-      await fetchLdScoreCalculationResult(params);
+      const response = await fetchLdScoreCalculationResult(params);
       setLdscoreResultRef(reference);
+      // Server persists each calculation under its own fresh reference (distinct from
+      // the upload reference, which recomputes may reuse) so downloads/reuse below
+      // must target that persisted reference, not the local upload `reference` state.
+      const persistedReference = response?.reference || reference;
+      setLdscorePersistedRef(persistedReference);
+
+      // Make this run instantly reusable (as a custom LD score source) in the
+      // Heritability/Genetic Correlation tabs for the rest of this page visit.
+      try {
+        const { runs } = await fetchLdScoreRuns();
+        const justComputed = runs.find((run) => run.reference === persistedReference);
+        if (justComputed) {
+          addLdScoreRun(justComputed);
+        }
+      } catch (runsError) {
+        // Non-fatal: reuse features simply won't see this run this session.
+      }
     } catch (error) {
-      setError("Failed to process LD Score calculation. Please check your input and try again.");
+      setError(parseLdScoreCalculationError(error, "Failed to process LD Score calculation. Please check your input and try again."));
     } finally {
       setLdscoreLoading(false);
     }
@@ -185,6 +209,7 @@ export default function LDScore() {
       windowUnit: "cM"
     });
     setLdscoreResultRef(null);
+    setLdscorePersistedRef(null);
     setExampleBed("");
     setExampleBim("");
     setExampleFam("");
@@ -239,6 +264,45 @@ export default function LDScore() {
       <Form id="ldscore-form-ld-calculation" onSubmit={form.handleSubmit(onSubmit)} onReset={onReset} noValidate>
         <Row>
            <Col s={12} sm={12} md={6} lg={4}>
+            <div className="d-flex align-items-center flex-wrap gap-3 mt-2 mb-3">
+              
+                <Form.Check
+                  type="switch"
+                  id="use-example-ld"
+                  label="Use example data"
+                  checked={useExampleLdscore}
+                  disabled={ldscoreLoading}
+                  onChange={(e) => {
+                    setUseExampleLdscore(e.target.checked);
+                        setLdscoreResultRef(null);
+                    if (e.target.checked) {
+                      // Generate a new reference for example data
+                          const newReference = generateReference();
+                      setReference(newReference);
+                      setExampleBed("22.bed");
+                      setExampleBim("22.bim");
+                      setExampleFam("22.fam");
+                      setUploadedBed("");
+                      setUploadedBim("");
+                      setUploadedFam("");
+                      setAllUploadedFiles([]);
+                      form.clearErrors("ldfiles");
+                      setError(""); // Clear any previous errors
+                      setFileError(""); // Clear file validation errors
+                    } else {
+                      setExampleBed("");
+                      setExampleBim("");
+                      setExampleFam("");
+                      setReference("");
+                      setError(""); // Clear any previous errors
+                      setFileError(""); // Clear file validation errors
+                    }
+                  }}
+                />
+                  <HoverUnderlineLink href="/help#LDscore">
+                  View sample format
+                </HoverUnderlineLink>
+              </div>
             <Form.Group controlId="ldfiles" className="mb-3">
               <Form.Label>
                 <div>Upload *.bed, *.bim, *.fam files</div>
@@ -304,50 +368,10 @@ export default function LDScore() {
                <div style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>Special characters will be removed automatically from the file name. Use only A-Z, 0-9, dots, hyphens, and underscores.</div>
 
                <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
-
-               <div className="mt-2">
-                <HoverUnderlineLink href="/help#LDscore">
-                  Click here for sample format
-                </HoverUnderlineLink>
-              </div>
              
             </Form.Group>
             
             <Form.Group controlId="useExLd" className="mb-3">
-              <div className="mt-2">
-                <Form.Check
-                  type="switch"
-                  id="use-example-ld"
-                  label="Use example data"
-                  checked={useExampleLdscore}
-                  disabled={ldscoreLoading}
-                  onChange={(e) => {
-                    setUseExampleLdscore(e.target.checked);
-                        setLdscoreResultRef(null);
-                    if (e.target.checked) {
-                      // Generate a new reference for example data
-                          const newReference = generateReference();
-                      setReference(newReference);
-                      setExampleBed("22.bed");
-                      setExampleBim("22.bim");
-                      setExampleFam("22.fam");
-                      setUploadedBed("");
-                      setUploadedBim("");
-                      setUploadedFam("");
-                      setAllUploadedFiles([]);
-                      form.clearErrors("ldfiles");
-                      setError(""); // Clear any previous errors
-                      setFileError(""); // Clear file validation errors
-                    } else {
-                      setExampleBed("");
-                      setExampleBim("");
-                      setExampleFam("");
-                      setReference("");
-                      setError(""); // Clear any previous errors
-                      setFileError(""); // Clear file validation errors
-                    }
-                  }}
-                />
                 {((allUploadedFiles.length > 0) || (exampleBed || exampleBim || exampleFam)) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
                     <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
@@ -416,14 +440,13 @@ export default function LDScore() {
                     )}
                   </div>
                 )}
-              </div>
             </Form.Group>
           </Col>
 
           <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="window" className="mb-3">
-              <Form.Label>Window</Form.Label>
-              <div className="d-flex">
+              <div className="d-flex align-items-center flex-wrap gap-2">
+                <Form.Label className="mb-0">Window: </Form.Label>
                 <Form.Control
                   type="number"
                   {...form.register("window", { 
@@ -438,7 +461,7 @@ export default function LDScore() {
                     }
                   })}
                   defaultValue={1}
-                  style={{ maxWidth: "120px", marginRight: "8px" }}
+                  style={{ maxWidth: "120px" }}
                   title="Please enter an integer greater than 0"
                   disabled={ldscoreLoading}
                 />
@@ -505,9 +528,10 @@ export default function LDScore() {
          <hr />
         <LdScoreResults
           reference={ldscoreResultRef}
+          persistedReference={ldscorePersistedRef || ldscoreResultRef}
           type="ldscore"
           uploads={
-            [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')
+            [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(',')
           }
         />
         </>

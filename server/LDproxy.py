@@ -14,6 +14,7 @@ from pathlib import Path
 from LDutilites import get_config
 from multiprocessing.dummy import Pool
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
+from LDcommon import get_secure_path, sanitize_shell_arg
 from LDcommon import (
     validsnp,
     get_coords,
@@ -73,7 +74,7 @@ def calculate_proxy(
         request = str(time.strftime("%I%M%S"))
 
     # Create JSON output
-    out_json = open(tmp_dir + "proxy" + request + ".json", "w")
+    out_json = open(get_secure_path(tmp_dir, "proxy" + request + ".json"), "w")
     output = {}
 
     validsnp(None, genome_build, None)
@@ -146,7 +147,7 @@ def calculate_proxy(
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print(json_output, file=out_json)
             out_json.close()
-            Path(tmp_dir, "pops_" + request + ".txt").unlink(missing_ok=True)
+            Path(get_secure_path(tmp_dir, "pops_" + request + ".txt")).unlink(missing_ok=True)
             for path in Path(tmp_dir).glob("*" + request + "*.vcf"):
                 path.unlink(missing_ok=True)
             return ("", "")
@@ -176,12 +177,12 @@ def calculate_proxy(
                 "python3",
                 "LDproxy_sub.py",
                 str(web),
-                str(snp),
-                str(snp_coord["chromosome"]),
+                sanitize_shell_arg(snp),
+                sanitize_shell_arg(snp_coord["chromosome"]),
                 str(windowChunkRanges[subprocess_id][0]),
                 str(windowChunkRanges[subprocess_id][1]),
-                str(request),
-                genome_build,
+                sanitize_shell_arg(request),
+                sanitize_shell_arg(genome_build),
                 str(subprocess_id),
             ]
         )
@@ -229,7 +230,7 @@ def calculate_proxy(
         out_ld_sort = sorted(out_dist_sort, key=operator.itemgetter(7), reverse=True)
 
     # Populate JSON and text output
-    outfile = open(tmp_dir + "proxy" + request + ".txt", "w")
+    outfile = open(get_secure_path(tmp_dir, "proxy" + request + ".txt"), "w")
     logger.debug(f"Created output file: {tmp_dir}proxy{request}.txt")
     header = [
         "RS_Number",
@@ -363,7 +364,7 @@ def calculate_proxy(
             else:
                 ucsc_track["0.0-0.2"].append(temp2)
 
-    track = open(tmp_dir + "track" + request + ".txt", "w")
+    track = open(get_secure_path(tmp_dir, "track" + request + ".txt"), "w")
     logger.debug(f"Created track file: {tmp_dir}track{request}.txt")
     print("browser position chr" + str(snp_coord["chromosome"]) + ":" + str(coord1) + "-" + str(coord2), file=track)
     print("", file=track)
@@ -557,11 +558,11 @@ def calculate_proxy(
         # save json embedding
         jsonEmbed = f"ldproxy_plot_{request}.json"
         logger.debug(f"Saving JSON embedding: {jsonEmbed}")
-        with open(tmp_dir + jsonEmbed, "w") as f_json:
+        with open(get_secure_path(tmp_dir, jsonEmbed), "w") as f_json:
             json.dump(json_item(out_grid), f_json)
 
         # Print run time statistics
-        pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
+        pop_list = open(get_secure_path(tmp_dir, "pops_" + request + ".txt")).readlines()
         logger.debug(f"Number of Individuals: {len(pop_list)}")
         logger.debug(f"SNPs in Region: {len(out_prox)}")
 
@@ -610,7 +611,7 @@ def main():
         out_script, out_div = calculate_proxy(snp, pop, request, web, "grch37", r2_d, window, collapseTranscript)
 
         # Print output
-        with open(tmp_dir + "proxy" + request + ".json") as f:
+        with open(get_secure_path(tmp_dir, "proxy" + request + ".json")) as f:
             json_dict = json.load(f)
         try:
             json_dict["error"]

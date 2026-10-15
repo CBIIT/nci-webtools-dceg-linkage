@@ -390,7 +390,7 @@ export default function LdScoreForm() {
                   )}
                   <div className="mt-2">
                     <HoverUnderlineLink href="/help#LDscore">
-                      Click here for sample format
+                      Viewsample format
                     </HoverUnderlineLink>
                   </div>
              <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
@@ -560,7 +560,7 @@ export default function LdScoreForm() {
                   )}
                   <div className="mt-2">
                     <HoverUnderlineLink href="/help#LDscore">
-                      Click here for sample format
+                      View sample format
                     </HoverUnderlineLink>
                   </div>
                   <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
