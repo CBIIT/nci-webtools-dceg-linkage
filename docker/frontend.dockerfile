@@ -25,6 +25,16 @@ RUN set -eux; \
     rm -rf /tmp/npm-tar-patch; \
     test "$(node -p "require('${npm_tar_dir}/package.json').version")" = "7.5.11"
 
+# Patch npm's bundled brace-expansion (CVE-2026-102278) the same way.
+RUN set -eux; \
+    npm_root="$(npm root -g)"; \
+    npm_be_dir="${npm_root}/npm/node_modules/brace-expansion"; \
+    npm install --prefix /tmp/npm-be-patch --install-strategy=nested --ignore-scripts --no-audit --no-fund brace-expansion@5.0.12; \
+    rm -rf "${npm_be_dir}"; \
+    cp -a /tmp/npm-be-patch/node_modules/brace-expansion "${npm_be_dir}"; \
+    rm -rf /tmp/npm-be-patch; \
+    test "$(node -p "require('${npm_be_dir}/package.json').version")" = "5.0.12"
+
 
 #RUN rm -f /usr/bin/python3.9 || true
 

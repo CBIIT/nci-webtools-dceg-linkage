@@ -23,7 +23,7 @@ WORKDIR ${LDLINK_HOME}
 
 RUN python3.13 -m pip install --no-cache-dir \
     boto3==1.42.39 \
-    pymongo==4.14.0 \
+    pymongo==4.18.3 \
     python-dateutil==2.8.2 \
     python-dotenv==1.1.1 \
     requests==2.33.1
