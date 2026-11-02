@@ -12,9 +12,6 @@ RUN dnf -y update \
    && dnf -y install nodejs24 \
    && dnf clean all
 
-       # Restrict Python 3.9 to root only (security mitigation)
-RUN chmod 700 /usr/bin/python3.9 
-
 # Patch npm's bundled tar without replacing the distro-managed npm/npx binaries.
 RUN set -eux; \
     npm_root="$(npm root -g)"; \
@@ -25,18 +22,19 @@ RUN set -eux; \
     rm -rf /tmp/npm-tar-patch; \
     test "$(node -p "require('${npm_tar_dir}/package.json').version")" = "7.5.11"
 
-# Patch npm's bundled brace-expansion (CVE-2026-102278) the same way.
+# Patch vulnerable packages bundled with the distro's npm (CVE-2026-102278, CVE-2026-118764,
+# CVE-2026-118773, CVE-2026-104844, CVE-2026-101910/101911/101912/101913).
 RUN set -eux; \
-    npm_root="$(npm root -g)"; \
-    npm_be_dir="${npm_root}/npm/node_modules/brace-expansion"; \
-    npm install --prefix /tmp/npm-be-patch --install-strategy=nested --ignore-scripts --no-audit --no-fund brace-expansion@5.0.12; \
-    rm -rf "${npm_be_dir}"; \
-    cp -a /tmp/npm-be-patch/node_modules/brace-expansion "${npm_be_dir}"; \
-    rm -rf /tmp/npm-be-patch; \
-    test "$(node -p "require('${npm_be_dir}/package.json').version")" = "5.0.12"
-
-
-#RUN rm -f /usr/bin/python3.9 || true
+    npm_modules="$(npm root -g)/npm/node_modules"; \
+    for spec in brace-expansion@5.0.12 minimatch@11.0.1 glob@14.0.2 postcss-selector-parser@7.1.6 ip-address@10.7.1; do \
+        name="${spec%@*}"; version="${spec##*@}"; \
+        npm install --prefix "/tmp/npm-patch-${name}" --install-strategy=nested --ignore-scripts --no-audit --no-fund "${spec}"; \
+        rm -rf "${npm_modules}/${name}"; \
+        cp -a "/tmp/npm-patch-${name}/node_modules/${name}" "${npm_modules}/${name}"; \
+        rm -rf "/tmp/npm-patch-${name}"; \
+        test "$(node -p "require('${npm_modules}/${name}/package.json').version")" = "${version}"; \
+    done; \
+    npm --version
 
 RUN mkdir -p /app/client
 
@@ -62,6 +60,9 @@ ARG GOOGLE_MAPS_API_KEY=none
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 
 RUN npm run build
+
+# Remove the distro Python 3.9 (CVE-2025-12781); it is only needed by dnf, which is not used past this point.
+RUN rpm -e --nodeps python3 python3-libs
 
 EXPOSE 80
 EXPOSE 443
