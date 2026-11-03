@@ -18,7 +18,7 @@
     "bootstrap-icons": "^1.13.1",
     "clsx": "^2.1.1",
     "html2canvas": "^1.4.1",
-    "next": "^16.3.5",
+    "next": "^16.4.1",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.0.0",
@@ -47,6 +47,9 @@
     "immutable": "^5.1.8",
     "js-yaml": "^4.3.1",
     "nanoid": "^3.3.18",
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.5",
+    "source-map-js": "^1.2.2",
+    "follow-redirects": "^1.16.2",
+    "minimatch": "^11.0.1"
   }
 }
