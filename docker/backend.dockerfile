@@ -56,7 +56,6 @@ RUN dnf -y update && \
 
 
 
-RUN chmod 700 /usr/bin/python3.9
 # Upgrade setuptools/wheel using Python 3.13.10
 RUN python3.13 -m pip install --upgrade pip "setuptools>=78.1.1" wheel
 
@@ -112,6 +111,10 @@ COPY server/requirements.txt .
 RUN python3.13 -m pip install --no-cache-dir --no-build-isolation pybedtools==0.12.0 pysam==0.23.3
 
 RUN python3.13 -m pip install --no-cache-dir -r requirements.txt
+
+# pip is only needed at build time: drop it (and the distro's older copy), plus the distro Python 3.9.
+RUN rpm -e --nodeps python3.13-pip python3 python3-libs \
+    && python3.13 -m pip uninstall -y pip
 
 RUN mkdir -p /var/cache/fontconfig \
     && chown -R bokeh:bokeh /var/cache/fontconfig

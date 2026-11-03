@@ -188,7 +188,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const end = parseInt(position);
         const region = `${chr}:${start}-${end}`;
         const genome = genome_build === "grch37" ? "GRCh37" : "GRCh38";
-        const url = `https://www.regulomedb.org/regulome-search?genome=${genome}&regions=${encodeURIComponent(region)}`;
+        const url = `https://regulomedb.org/summary?genome=${genome}&regions=${encodeURIComponent(region)}`;
         return (
           <a href={url} target="_blank" rel="noopener noreferrer">
             {value}
@@ -288,7 +288,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             </Col>
             <Col sm={12} className="text-center">
               <a
-                href="https://www.regulomedb.org/regulome-help/"
+                href="https://regulomedb.org/help"
                 target="LDassoc-genome-browser_RegulomeDB"
                 title="RegulomeDB scoring scheme">
                 View scoring scheme for RegulomeDB scores
