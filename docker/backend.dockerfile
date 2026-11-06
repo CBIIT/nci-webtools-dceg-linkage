@@ -44,7 +44,6 @@ RUN dnf -y update && \
     python3.13-devel \
     python3.13-pip \
     readline-devel \
-    sqlite-devel \
     tar \
     xz-devel \
     zlib-devel \
