@@ -55,7 +55,7 @@ function ldproxy_regulome_link(data: any, row: any, genomeBuild: string) {
   const mid_value = parseInt(row[2]);
   const zero_base = mid_value - 1;
   const genome = genomeBuild === "grch37" ? "GRCh37" : "GRCh38";
-  const url = `https://www.regulomedb.org/regulome-search/?genome=${genome}&regions=${chr}:${zero_base}-${mid_value}`;
+  const url = `https://regulomedb.org/summary?genome=${genome}&regions=${chr}:${zero_base}-${mid_value}`;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer">
       {data}
@@ -302,7 +302,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
             </Col>
             <Col sm={12} className="justify-content-center text-center">
               <a
-                href="https://www.regulomedb.org/regulome-help/"
+                href="https://regulomedb.org/help"
                 target="LDproxy-genome-browser_RegulomeDB"
                 title="RegulomeDB scoring scheme">
                 View scoring scheme for RegulomeDB scores
